@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pick 'Em — 2026 NFL Season Board</title>
+<meta name="description" content="Pick every game of the 2026 NFL season, get real NFL tiebreakers applied to the standings, and run your own playoff bracket.">
+<meta name="theme-color" content="#0C1A14">
+<meta name="color-scheme" content="dark">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="icon" href="icons/icon-512.png" sizes="512x512">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pick 'Em">
+<meta property="og:title" content="Pick 'Em — 2026 NFL Season Board">
+<meta property="og:description" content="Pick all 272 games, then run the bracket.">
+<meta property="og:image" content="icons/social-preview.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --turf:#0C1A14;
+  --turf-2:#12241C;
+  --turf-3:#182F25;
+  --line:#24463A;
+  --chalk:#E9F1EB;
+  --chalk-2:#9DB3A7;
+  --chalk-3:#6B8377;
+  --amber:#F5A524;
+  --amber-dim:#8A5F14;
+  --teal:#45B8A4;
+  --flag:#E05A47;
+  --radius:3px;
+  --display:'Barlow Condensed','Oswald','Arial Narrow',sans-serif;
+  --body:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--turf);
+  color:var(--chalk);
+  font-family:var(--body);
+  font-size:14px;
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+/* yard-line ruling: the one texture motif */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:repeating-linear-gradient(90deg,rgba(233,241,235,.045) 0 1px,transparent 1px 64px);
+  mask-image:linear-gradient(180deg,rgba(0,0,0,.9),rgba(0,0,0,.25) 40%,rgba(0,0,0,.1));
+  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.9),rgba(0,0,0,.25) 40%,rgba(0,0,0,.1));
+}
+.wrap{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 18px 80px}
+
+/* ---------- header ---------- */
+header{padding:26px 0 14px;border-bottom:1px solid var(--line)}
+.brandrow{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+h1{
+  font-family:var(--display);font-weight:700;font-size:clamp(28px,4.6vw,46px);
+  letter-spacing:.06em;text-transform:uppercase;margin:0;line-height:.95;
+}
+h1 .yr{color:var(--amber)}
+.tagline{font-size:12px;color:var(--chalk-3);letter-spacing:.14em;text-transform:uppercase;font-family:var(--display);font-weight:600;padding-bottom:5px}
+.headmeta{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;padding-bottom:4px}
+.btn{
+  font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:.08em;text-transform:uppercase;
+  background:transparent;color:var(--chalk-2);border:1px solid var(--line);
+  padding:6px 12px;border-radius:var(--radius);cursor:pointer;transition:.14s;
+}
+.btn:hover{color:var(--chalk);border-color:var(--chalk-3);background:var(--turf-2)}
+.btn:focus-visible,.tab:focus-visible,.notch:focus-visible,.pickbtn:focus-visible,.tiebtn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.btn.warn:hover{color:var(--flag);border-color:var(--flag)}
+
+/* ---------- progress ---------- */
+.progress{display:flex;align-items:center;gap:14px;padding:12px 0 0;flex-wrap:wrap}
+.bar{flex:1;min-width:180px;height:6px;background:var(--turf-3);border-radius:99px;overflow:hidden}
+.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--amber-dim),var(--amber));transition:width .3s}
+.pcount{font-family:var(--mono);font-size:12px;color:var(--chalk-2);white-space:nowrap}
+.pcount b{color:var(--chalk);font-weight:600}
+
+/* ---------- tabs ---------- */
+nav.tabs{display:flex;gap:2px;margin:18px 0 0;border-bottom:1px solid var(--line)}
+.tab{
+  font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:.1em;text-transform:uppercase;
+  background:none;border:none;border-bottom:2px solid transparent;color:var(--chalk-3);
+  padding:9px 16px;cursor:pointer;transition:.14s;
+}
+.tab:hover{color:var(--chalk-2)}
+.tab[aria-selected="true"]{color:var(--chalk);border-bottom-color:var(--amber)}
+.panel{display:none;padding-top:22px}
+.panel.on{display:block}
+
+/* ---------- layout ---------- */
+.split{display:grid;grid-template-columns:1fr 300px;gap:26px;align-items:start}
+@media(max-width:900px){.split{grid-template-columns:1fr}}
+
+/* ---------- week rail (signature) ---------- */
+.rail{display:flex;gap:0;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;background:var(--turf-2)}
+.notch{
+  flex:1;min-width:0;background:none;border:none;border-right:1px solid var(--line);
+  padding:8px 2px 6px;cursor:pointer;color:var(--chalk-3);position:relative;transition:.14s;
+  font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.04em;
+}
+.notch:last-child{border-right:none}
+.notch:hover{background:var(--turf-3);color:var(--chalk-2)}
+.notch .fill{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--amber-dim);transform-origin:left;transition:transform .3s}
+.notch.done{color:var(--chalk-2)}
+.notch.done .fill{background:var(--teal)}
+.notch[aria-current="true"]{background:var(--turf-3);color:var(--chalk)}
+.notch[aria-current="true"]::after{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:var(--amber)}
+
+/* ---------- week head ---------- */
+.weekhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.weekhead h2{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:.06em;text-transform:uppercase;margin:0}
+.weekhead .sub{font-size:12px;color:var(--chalk-3);font-family:var(--mono)}
+.weekhead .acts{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.byes{font-size:12px;color:var(--chalk-3);margin:-4px 0 14px;font-family:var(--mono)}
+.byes b{color:var(--chalk-2);font-weight:500}
+
+/* ---------- game rows ---------- */
+.games{display:flex;flex-direction:column;gap:6px}
+.game{
+  display:grid;grid-template-columns:1fr 72px 1fr;gap:6px;align-items:stretch;
+  background:var(--turf-2);border:1px solid var(--line);border-radius:var(--radius);padding:6px;
+}
+.game.settled{border-color:#2C5647}
+.pickbtn{
+  display:flex;align-items:center;gap:10px;text-align:left;width:100%;
+  background:var(--turf-3);border:1px solid transparent;border-radius:2px;
+  padding:9px 11px;cursor:pointer;color:var(--chalk-2);transition:.12s;min-height:52px;
+}
+.pickbtn:hover{background:#1E3A2E;color:var(--chalk)}
+.pickbtn .swatch{width:4px;align-self:stretch;border-radius:2px;flex:none}
+.pickbtn .abbr{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:.04em;min-width:44px}
+.pickbtn .nm{font-size:12px;line-height:1.2;overflow:hidden}
+.pickbtn .nm i{display:block;font-style:normal;color:var(--chalk-3);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+.pickbtn .rec{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--chalk-3);white-space:nowrap}
+.pickbtn.win{background:#1C3A2E;color:var(--chalk);border-color:var(--amber);box-shadow:inset 0 0 0 1px rgba(245,165,36,.25)}
+.pickbtn.win .rec{color:var(--amber)}
+.pickbtn.lose{opacity:.42}
+.right .pickbtn{flex-direction:row-reverse;text-align:right}
+.right .pickbtn .rec{margin-left:0;margin-right:auto}
+.mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.vs{font-family:var(--display);font-size:13px;letter-spacing:.1em;color:var(--chalk-3);text-transform:uppercase}
+.tiebtn{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;background:none;border:1px solid var(--line);
+  color:var(--chalk-3);border-radius:2px;padding:2px 6px;cursor:pointer;transition:.12s;
+}
+.tiebtn:hover{border-color:var(--chalk-3);color:var(--chalk-2)}
+.tiebtn.on{background:var(--amber);border-color:var(--amber);color:#12241C;font-weight:600}
+.site{grid-column:1/-1;font-size:10.5px;font-family:var(--mono);color:var(--chalk-3);padding:2px 4px 0;letter-spacing:.04em}
+@media(max-width:620px){
+  .game{grid-template-columns:1fr 56px 1fr;padding:5px;gap:4px}
+  .pickbtn{padding:8px;gap:7px;min-height:48px}
+  .pickbtn .nm{display:none}
+  .pickbtn .abbr{font-size:17px;min-width:38px}
+}
+
+/* ---------- seed rail ---------- */
+.seedrail{position:sticky;top:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--turf-2);overflow:hidden}
+.seedrail h3{
+  font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:.12em;text-transform:uppercase;
+  margin:0;padding:10px 12px;background:var(--turf-3);border-bottom:1px solid var(--line);color:var(--chalk-2);
+}
+.seedgrp{padding:6px 0 10px}
+.seedgrp .lbl{font-family:var(--display);font-size:13px;letter-spacing:.16em;color:var(--amber);padding:8px 12px 4px;text-transform:uppercase;font-weight:600}
+.seedrow{display:flex;align-items:center;gap:9px;padding:4px 12px;font-size:12.5px;transition:.2s}
+.seedrow .n{font-family:var(--mono);font-size:11px;color:var(--chalk-3);width:14px}
+.seedrow .sw{width:3px;height:15px;border-radius:2px;flex:none}
+.seedrow .tm{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.03em}
+.seedrow .rc{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--chalk-2)}
+.seedrow.bye .tm{color:var(--amber)}
+.seedgrp hr{border:none;border-top:1px dashed var(--line);margin:7px 12px}
+
+/* ---------- standings ---------- */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+@media(max-width:860px){.cols{grid-template-columns:1fr}}
+.conftitle{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 12px;padding-bottom:6px;border-bottom:2px solid var(--amber)}
+table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px}
+caption{
+  font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--chalk-2);text-align:left;padding:0 0 5px;
+}
+th{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--chalk-3);
+  font-weight:500;text-align:right;padding:0 6px 5px;border-bottom:1px solid var(--line);
+}
+th:first-child,th:nth-child(2){text-align:left}
+td{padding:6px;border-bottom:1px solid rgba(36,70,58,.5);font-family:var(--mono);font-size:12px;text-align:right;color:var(--chalk-2)}
+td:first-child{text-align:left;color:var(--chalk-3);width:18px}
+td.team{text-align:left;font-family:var(--display);font-weight:600;font-size:15.5px;letter-spacing:.03em;color:var(--chalk)}
+tr.lead td.team{color:var(--amber)}
+tr.lead td:first-child{color:var(--amber)}
+td.team .dot{display:inline-block;width:3px;height:12px;border-radius:2px;margin-right:7px;vertical-align:-1px}
+.tag{font-family:var(--mono);font-size:9px;letter-spacing:.08em;padding:1px 4px;border-radius:2px;margin-left:6px;vertical-align:1px}
+.tag.z{background:var(--amber);color:#12241C}
+.tag.x{background:var(--turf-3);color:var(--teal);border:1px solid var(--teal)}
+
+/* ---------- tiebreak log ---------- */
+.logbox{border:1px solid var(--line);border-radius:var(--radius);background:var(--turf-2);padding:14px 16px;margin-top:8px}
+.logbox h4{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 10px;color:var(--chalk-2)}
+.logitem{font-size:12.5px;padding:5px 0;border-bottom:1px solid rgba(36,70,58,.5);display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
+.logitem:last-child{border-bottom:none}
+.logitem .step{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--amber);text-transform:uppercase;white-space:nowrap}
+.logitem .txt{color:var(--chalk-2);flex:1;min-width:200px}
+.logitem .txt b{color:var(--chalk);font-weight:600}
+.flipbtn{font-family:var(--mono);font-size:10px;background:none;border:1px solid var(--flag);color:var(--flag);border-radius:2px;padding:1px 6px;cursor:pointer}
+.flipbtn:hover{background:var(--flag);color:var(--turf)}
+.empty{color:var(--chalk-3);font-size:12.5px;font-style:italic}
+
+/* ---------- bracket ---------- */
+.bracket{margin-bottom:34px}
+.bracket .bhead{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 12px;color:var(--chalk-2)}
+.rounds{display:grid;grid-template-columns:repeat(3,minmax(190px,1fr));gap:14px}
+@media(max-width:760px){.rounds{grid-template-columns:1fr}}
+.round h5{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--chalk-3);margin:0 0 8px;font-weight:500}
+.matchup{border:1px solid var(--line);border-radius:var(--radius);background:var(--turf-2);margin-bottom:10px;overflow:hidden}
+.mrow{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;transition:.12s;background:none;border:none;width:100%;text-align:left;color:var(--chalk-2);font-family:inherit}
+.mrow+.mrow{border-top:1px solid var(--line)}
+.mrow:hover:not(.tbd){background:var(--turf-3);color:var(--chalk)}
+.mrow .sd{font-family:var(--mono);font-size:10px;color:var(--chalk-3);width:14px;flex:none}
+.mrow .sw{width:3px;height:16px;border-radius:2px;flex:none}
+.mrow .tm{font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:.03em}
+.mrow .rc{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--chalk-3)}
+.mrow.adv{background:#1C3A2E;color:var(--chalk);box-shadow:inset 2px 0 0 var(--amber)}
+.mrow.adv .tm{color:var(--amber)}
+.mrow.out{opacity:.4}
+.mrow.tbd{cursor:default;color:var(--chalk-3);font-style:italic;font-size:12px;padding:11px 10px}
+.mnote{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--chalk-3);padding:4px 10px 6px;border-top:1px dashed var(--line);text-transform:uppercase}
+.sb{max-width:420px;margin:0 auto;border:1px solid var(--amber);border-radius:var(--radius);background:var(--turf-2);overflow:hidden}
+.sb .bhead{background:var(--amber);color:#0C1A14;margin:0;padding:8px 12px;font-size:18px}
+.champ{text-align:center;padding:22px 16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--turf-2);margin-top:18px}
+.champ .k{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--chalk-3);text-transform:uppercase}
+.champ .v{font-family:var(--display);font-weight:700;font-size:clamp(26px,6vw,44px);letter-spacing:.06em;text-transform:uppercase;color:var(--amber);line-height:1.1;margin-top:6px}
+.notice{border-left:2px solid var(--amber);background:var(--turf-2);padding:10px 14px;font-size:12.5px;color:var(--chalk-2);margin-bottom:20px;border-radius:0 var(--radius) var(--radius) 0}
+.notice b{color:var(--chalk)}
+
+/* ---------- rules ---------- */
+.rules{max-width:760px}
+.rules h3{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.1em;text-transform:uppercase;margin:26px 0 8px;color:var(--amber)}
+.rules h3:first-child{margin-top:0}
+.rules ol{padding-left:20px;margin:0 0 10px}
+.rules li{margin-bottom:3px;font-size:13px;color:var(--chalk-2)}
+.rules p{font-size:13px;color:var(--chalk-2);margin:0 0 10px}
+.rules code{font-family:var(--mono);font-size:11.5px;background:var(--turf-3);padding:1px 5px;border-radius:2px;color:var(--chalk)}
+.dead{color:var(--chalk-3)}
+
+/* ---------- brand mark ---------- */
+.mark{width:44px;height:44px;border-radius:9px;flex:none;align-self:center}
+@media(max-width:520px){.mark{width:36px;height:36px}}
+
+/* ---------- modal ---------- */
+.modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:rgba(6,14,10,.78);backdrop-filter:blur(3px)}
+.modal[hidden]{display:none}
+.sheet{background:var(--turf-2);border:1px solid var(--line);border-radius:5px;max-width:420px;width:100%;
+  padding:22px 24px 20px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.sheet h4{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px}
+.sheet p{font-size:13.5px;color:var(--chalk-2);margin:0 0 18px;line-height:1.5}
+.sheet .mact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.btn.danger{border-color:var(--flag);color:var(--flag)}
+.btn.danger:hover{background:var(--flag);color:var(--turf);border-color:var(--flag)}
+.btn.primary{border-color:var(--amber);color:var(--amber)}
+.btn.primary:hover{background:var(--amber);color:var(--turf);border-color:var(--amber)}
+
+/* ---------- toast ---------- */
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);z-index:60;
+  background:var(--turf-3);border:1px solid var(--teal);color:var(--chalk);border-radius:4px;
+  padding:10px 18px;font-size:13px;opacity:0;pointer-events:none;transition:.22s}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- share bar ---------- */
+.sharebar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.sharebar .hint{font-size:12px;color:var(--chalk-3);font-family:var(--mono)}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="brandrow">
+    <img class="mark" src="icons/icon-192.png" alt="" onerror="this.remove()">
+    <h1>Pick ’Em <span class="yr">’26</span></h1>
+    <span class="tagline">272 games · 18 weeks · one bracket</span>
+    <div class="headmeta">
+      <button class="btn primary" id="btnInstall" hidden>Install app</button>
+      <button class="btn" id="btnExport">Save file</button>
+      <button class="btn" id="btnImport">Load file</button>
+      <button class="btn warn" id="btnReset">Clear all</button>
+    </div>
+  </div>
+  <div class="progress">
+    <div class="bar"><span id="pbar" style="width:0%"></span></div>
+    <div class="pcount"><b id="pdone">0</b> / 272 games picked · <b id="pweeks">0</b>/18 weeks complete</div>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab" role="tab" data-tab="picks" aria-selected="true">Games</button>
+  <button class="tab" role="tab" data-tab="standings" aria-selected="false">Standings</button>
+  <button class="tab" role="tab" data-tab="playoffs" aria-selected="false">Playoffs</button>
+  <button class="tab" role="tab" data-tab="rules" aria-selected="false">Rules</button>
+</nav>
+
+<section class="panel on" id="panel-picks">
+  <div class="split">
+    <div>
+      <div class="rail" id="rail"></div>
+      <div class="weekhead">
+        <h2 id="wkTitle">Week 1</h2>
+        <span class="sub" id="wkSub"></span>
+        <div class="acts">
+          <button class="btn" id="btnHome">Home teams</button>
+          <button class="btn" id="btnRand">Coin flip week</button>
+          <button class="btn warn" id="btnClearWk">Clear week</button>
+        </div>
+      </div>
+      <div class="byes" id="byes"></div>
+      <div class="games" id="games"></div>
+    </div>
+    <aside class="seedrail">
+      <h3>Playoff picture</h3>
+      <div id="seeds"></div>
+    </aside>
+  </div>
+</section>
+
+<section class="panel" id="panel-standings">
+  <div class="cols" id="standings"></div>
+  <div class="logbox">
+    <h4>Tiebreakers applied</h4>
+    <div id="tblog"></div>
+  </div>
+</section>
+
+<section class="panel" id="panel-playoffs">
+  <div class="sharebar">
+    <button class="btn primary" id="btnImg">Save bracket image</button>
+    <button class="btn" id="btnShare" hidden>Share bracket</button>
+    <span class="hint">PNG · ready to post</span>
+  </div>
+  <div id="poNotice"></div>
+  <div id="poBody"></div>
+</section>
+
+<section class="panel" id="panel-rules">
+  <div class="rules">
+    <h3>How standings are decided</h3>
+    <p>Teams are ranked by winning percentage, counting a tie as half a win. Only teams with identical records go through a tiebreaker. Steps are applied in order until one separates the teams; the moment a step splits a group of three or more, the procedure restarts from step 1 for each resulting subgroup.</p>
+
+    <h3>Division ties — two clubs</h3>
+    <ol>
+      <li>Head-to-head record</li>
+      <li>Record in division games</li>
+      <li>Record in common games (minimum four)</li>
+      <li>Record in conference games</li>
+      <li>Strength of victory</li>
+      <li>Strength of schedule</li>
+      <li class="dead">Points-based steps (scoring rank, net points, net touchdowns) — not available here, since you pick winners rather than scores</li>
+      <li>Coin toss</li>
+    </ol>
+
+    <h3>Division ties — three or more clubs</h3>
+    <ol>
+      <li>Head-to-head sweep — applies only if one club beat all the others, or lost to all the others</li>
+      <li>Record in division games</li>
+      <li>Record in common games (minimum four)</li>
+      <li>Record in conference games</li>
+      <li>Strength of victory</li>
+      <li>Strength of schedule</li>
+      <li class="dead">Points-based steps</li>
+      <li>Coin toss</li>
+    </ol>
+
+    <h3>Wild card ties — clubs from different divisions</h3>
+    <p>If tied clubs are in the same division, the division procedure above runs first. Only the top remaining club from any one division competes for a wild card spot at a time; once a spot is filled, the procedure restarts for the next one.</p>
+    <ol>
+      <li>Head-to-head, if they played (or a sweep, for three or more)</li>
+      <li>Record in conference games</li>
+      <li>Record in common games (minimum four)</li>
+      <li>Strength of victory</li>
+      <li>Strength of schedule</li>
+      <li class="dead">Points-based steps</li>
+      <li>Coin toss</li>
+    </ol>
+
+    <h3>About the points-based steps</h3>
+    <p>Six of the NFL's tiebreakers compare points scored and allowed. Those need scores, and this board only records who won. When a tie survives strength of schedule, it goes to a coin toss — shown on the Standings tab with a <b>Flip</b> button so you can set the result yourself instead of taking the default.</p>
+
+    <h3>Seeding and the bracket</h3>
+    <p>The four division winners take seeds 1–4 by record; the next three clubs take seeds 5–7. The 1 seed has a bye. Wild Card weekend is <code>2v7</code>, <code>3v6</code>, <code>4v5</code>. In the Divisional round the 1 seed hosts the lowest surviving seed and the other two meet. The higher seed hosts every game through the Conference Championship. Super Bowl LXI is at a neutral site — SoFi Stadium, Feb. 14, 2027.</p>
+
+    <h3>Strength of victory and schedule</h3>
+    <p>Strength of victory is the combined winning percentage of every opponent you beat, counted once per win. Strength of schedule is the combined winning percentage of every opponent you played. Both use records from your own picks, so they shift as you fill in the board.</p>
+
+    <h3>Saving</h3>
+    <p>Picks save automatically in this browser when it allows it. <b>Save file</b> downloads a JSON copy you can reload later or move to another device — the reliable option if you're doing this in more than one sitting.</p>
+  </div>
+</section>
+
+</div>
+<input type="file" id="fileIn" accept="application/json" style="display:none">
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="sheet">
+    <h4 id="mTitle"></h4>
+    <p id="mBody"></p>
+    <div class="mact">
+      <button class="btn" id="mNo"></button>
+      <button class="btn danger" id="mYes"></button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ==========================================================
+   TEAMS
+   ========================================================== */
+const TEAMS = {
+  BUF:{c:'Buffalo',n:'Bills',cf:'AFC',dv:'AFC East',k:'#00338D'},
+  MIA:{c:'Miami',n:'Dolphins',cf:'AFC',dv:'AFC East',k:'#008E97'},
+  NE:{c:'New England',n:'Patriots',cf:'AFC',dv:'AFC East',k:'#0A2342'},
+  NYJ:{c:'New York',n:'Jets',cf:'AFC',dv:'AFC East',k:'#1C7C54'},
+  BAL:{c:'Baltimore',n:'Ravens',cf:'AFC',dv:'AFC North',k:'#5B4B9E'},
+  CIN:{c:'Cincinnati',n:'Bengals',cf:'AFC',dv:'AFC North',k:'#FB4F14'},
+  CLE:{c:'Cleveland',n:'Browns',cf:'AFC',dv:'AFC North',k:'#FF6A13'},
+  PIT:{c:'Pittsburgh',n:'Steelers',cf:'AFC',dv:'AFC North',k:'#FFB612'},
+  HOU:{c:'Houston',n:'Texans',cf:'AFC',dv:'AFC South',k:'#5A7184'},
+  IND:{c:'Indianapolis',n:'Colts',cf:'AFC',dv:'AFC South',k:'#3C7DC4'},
+  JAX:{c:'Jacksonville',n:'Jaguars',cf:'AFC',dv:'AFC South',k:'#12A19A'},
+  TEN:{c:'Tennessee',n:'Titans',cf:'AFC',dv:'AFC South',k:'#4B92DB'},
+  DEN:{c:'Denver',n:'Broncos',cf:'AFC',dv:'AFC West',k:'#FC4C02'},
+  KC:{c:'Kansas City',n:'Chiefs',cf:'AFC',dv:'AFC West',k:'#E31837'},
+  LV:{c:'Las Vegas',n:'Raiders',cf:'AFC',dv:'AFC West',k:'#B8BEC2'},
+  LAC:{c:'Los Angeles',n:'Chargers',cf:'AFC',dv:'AFC West',k:'#0080C6'},
+  DAL:{c:'Dallas',n:'Cowboys',cf:'NFC',dv:'NFC East',k:'#7A90A8'},
+  NYG:{c:'New York',n:'Giants',cf:'NFC',dv:'NFC East',k:'#2A4FA2'},
+  PHI:{c:'Philadelphia',n:'Eagles',cf:'NFC',dv:'NFC East',k:'#1B7A70'},
+  WAS:{c:'Washington',n:'Commanders',cf:'NFC',dv:'NFC East',k:'#A33A2A'},
+  CHI:{c:'Chicago',n:'Bears',cf:'NFC',dv:'NFC North',k:'#C83803'},
+  DET:{c:'Detroit',n:'Lions',cf:'NFC',dv:'NFC North',k:'#0076B6'},
+  GB:{c:'Green Bay',n:'Packers',cf:'NFC',dv:'NFC North',k:'#FFB612'},
+  MIN:{c:'Minnesota',n:'Vikings',cf:'NFC',dv:'NFC North',k:'#8A5FC7'},
+  ATL:{c:'Atlanta',n:'Falcons',cf:'NFC',dv:'NFC South',k:'#C8102E'},
+  CAR:{c:'Carolina',n:'Panthers',cf:'NFC',dv:'NFC South',k:'#0085CA'},
+  NO:{c:'New Orleans',n:'Saints',cf:'NFC',dv:'NFC South',k:'#D3BC8D'},
+  TB:{c:'Tampa Bay',n:'Buccaneers',cf:'NFC',dv:'NFC South',k:'#D50A0A'},
+  ARI:{c:'Arizona',n:'Cardinals',cf:'NFC',dv:'NFC West',k:'#C4364F'},
+  LAR:{c:'Los Angeles',n:'Rams',cf:'NFC',dv:'NFC West',k:'#FFD100'},
+  SF:{c:'San Francisco',n:'49ers',cf:'NFC',dv:'NFC West',k:'#AA0000'},
+  SEA:{c:'Seattle',n:'Seahawks',cf:'NFC',dv:'NFC West',k:'#69BE28'}
+};
+const DIVS = ['AFC East','AFC North','AFC South','AFC West','NFC East','NFC North','NFC South','NFC West'];
+const IDS = Object.keys(TEAMS);
+const divTeams = d => IDS.filter(t => TEAMS[t].dv === d);
+
+/* SCHEDULE injected here: [week, away, home, siteOrNull] */
+const SCHEDULE=[
+[1,"NE","SEA",null],
+[1,"SF","LAR","Melbourne, Australia"],
+[1,"CHI","CAR",null],
+[1,"TB","CIN",null],
+[1,"NO","DET",null],
+[1,"BUF","HOU",null],
+[1,"BAL","IND",null],
+[1,"CLE","JAX",null],
+[1,"ATL","PIT",null],
+[1,"NYJ","TEN",null],
+[1,"ARI","LAC",null],
+[1,"MIA","LV",null],
+[1,"GB","MIN",null],
+[1,"WAS","PHI",null],
+[1,"DAL","NYG",null],
+[1,"DEN","KC",null],
+[2,"DET","BUF",null],
+[2,"CAR","ATL",null],
+[2,"NO","BAL",null],
+[2,"MIN","CHI",null],
+[2,"CIN","HOU",null],
+[2,"PIT","NE",null],
+[2,"GB","NYJ",null],
+[2,"CLE","TB",null],
+[2,"PHI","TEN",null],
+[2,"JAX","DEN",null],
+[2,"LV","LAC",null],
+[2,"SEA","ARI",null],
+[2,"WAS","DAL",null],
+[2,"MIA","SF",null],
+[2,"IND","KC",null],
+[2,"NYG","LAR",null],
+[3,"ATL","GB",null],
+[3,"LAC","BUF",null],
+[3,"CAR","CLE",null],
+[3,"NYJ","DET",null],
+[3,"HOU","IND",null],
+[3,"NE","JAX",null],
+[3,"KC","MIA",null],
+[3,"TEN","NYG",null],
+[3,"CIN","PIT",null],
+[3,"SEA","WAS",null],
+[3,"ARI","SF",null],
+[3,"MIN","TB",null],
+[3,"BAL","DAL","Rio de Janeiro, Brazil"],
+[3,"LV","NO",null],
+[3,"LAR","DEN",null],
+[3,"PHI","CHI",null],
+[4,"PIT","CLE",null],
+[4,"IND","WAS","Tottenham, London"],
+[4,"TEN","BAL",null],
+[4,"NE","BUF",null],
+[4,"NYJ","CHI",null],
+[4,"JAX","CIN",null],
+[4,"DAL","HOU",null],
+[4,"ARI","NYG",null],
+[4,"LAR","PHI",null],
+[4,"GB","TB",null],
+[4,"MIA","MIN",null],
+[4,"KC","LV",null],
+[4,"LAC","SEA",null],
+[4,"DEN","SF",null],
+[4,"DET","CAR",null],
+[4,"ATL","NO",null],
+[5,"TB","DAL",null],
+[5,"PHI","JAX","Tottenham, London"],
+[5,"CIN","MIA",null],
+[5,"LV","NE",null],
+[5,"MIN","NO",null],
+[5,"CLE","NYJ",null],
+[5,"IND","PIT",null],
+[5,"HOU","TEN",null],
+[5,"NYG","WAS",null],
+[5,"DEN","LAC",null],
+[5,"DET","ARI",null],
+[5,"CHI","GB",null],
+[5,"SF","SEA",null],
+[5,"BAL","ATL",null],
+[5,"BUF","LAR",null],
+[6,"SEA","DEN",null],
+[6,"HOU","JAX","Wembley, London"],
+[6,"CHI","ATL",null],
+[6,"BAL","CLE",null],
+[6,"TEN","IND",null],
+[6,"NYJ","NE",null],
+[6,"NO","NYG",null],
+[6,"CAR","PHI",null],
+[6,"PIT","TB",null],
+[6,"ARI","LAR",null],
+[6,"LAC","KC",null],
+[6,"BUF","LV",null],
+[6,"DAL","GB",null],
+[6,"WAS","SF",null],
+[7,"NE","CHI",null],
+[7,"PIT","NO","Paris, France"],
+[7,"SF","ATL",null],
+[7,"CIN","BAL",null],
+[7,"TB","CAR",null],
+[7,"NYG","HOU",null],
+[7,"IND","MIN",null],
+[7,"MIA","NYJ",null],
+[7,"CLE","TEN",null],
+[7,"DEN","ARI",null],
+[7,"GB","DET",null],
+[7,"LAR","LV",null],
+[7,"KC","SEA",null],
+[7,"DAL","PHI",null],
+[8,"CAR","GB",null],
+[8,"BAL","BUF",null],
+[8,"TEN","CIN",null],
+[8,"ARI","DAL",null],
+[8,"MIN","DET",null],
+[8,"IND","JAX",null],
+[8,"LV","NYJ",null],
+[8,"CLE","PIT",null],
+[8,"ATL","TB",null],
+[8,"LAC","LAR",null],
+[8,"KC","DEN",null],
+[8,"NE","MIA",null],
+[8,"PHI","WAS",null],
+[8,"CHI","SEA",null],
+[9,"JAX","BAL",null],
+[9,"CIN","ATL","Madrid, Spain"],
+[9,"DEN","CAR",null],
+[9,"DAL","IND",null],
+[9,"NYJ","KC",null],
+[9,"DET","MIA",null],
+[9,"CLE","NO",null],
+[9,"NYG","PHI",null],
+[9,"LAR","WAS",null],
+[9,"HOU","LAC",null],
+[9,"LV","SF",null],
+[9,"GB","NE",null],
+[9,"ARI","SEA",null],
+[9,"TB","CHI",null],
+[9,"BUF","MIN",null],
+[10,"WAS","NYG",null],
+[10,"NE","DET","Munich, Germany"],
+[10,"KC","ATL",null],
+[10,"HOU","CLE",null],
+[10,"MIN","GB",null],
+[10,"MIA","IND",null],
+[10,"CAR","NO",null],
+[10,"BUF","NYJ",null],
+[10,"JAX","TEN",null],
+[10,"LAR","ARI",null],
+[10,"SEA","LV",null],
+[10,"SF","DAL",null],
+[10,"PIT","CIN",null],
+[10,"LAC","BAL",null],
+[11,"IND","HOU",null],
+[11,"MIA","BUF",null],
+[11,"BAL","CAR",null],
+[11,"NO","CHI",null],
+[11,"TEN","DAL",null],
+[11,"TB","DET",null],
+[11,"ARI","KC",null],
+[11,"JAX","NYG",null],
+[11,"NYJ","LAC",null],
+[11,"LV","DEN",null],
+[11,"PIT","PHI",null],
+[11,"MIN","SF","Mexico City, Mexico"],
+[11,"CIN","WAS",null],
+[12,"GB","LAR",null],
+[12,"CHI","DET",null],
+[12,"PHI","DAL",null],
+[12,"KC","BUF",null],
+[12,"DEN","PIT",null],
+[12,"NO","CIN",null],
+[12,"LV","CLE",null],
+[12,"BAL","HOU",null],
+[12,"NYG","IND",null],
+[12,"NYJ","MIA",null],
+[12,"ATL","MIN",null],
+[12,"TEN","JAX",null],
+[12,"WAS","ARI",null],
+[12,"SEA","SF",null],
+[12,"NE","LAC",null],
+[12,"CAR","TB",null],
+[13,"KC","LAR",null],
+[13,"DET","ATL",null],
+[13,"JAX","CHI",null],
+[13,"CIN","CLE",null],
+[13,"GB","NO",null],
+[13,"SF","NYG",null],
+[13,"LAC","TB",null],
+[13,"WAS","TEN",null],
+[13,"PHI","ARI",null],
+[13,"MIA","DEN",null],
+[13,"CAR","MIN",null],
+[13,"BUF","NE",null],
+[13,"HOU","PIT",null],
+[13,"DAL","SEA",null],
+[14,"MIN","NE",null],
+[14,"TB","BAL",null],
+[14,"NO","CAR",null],
+[14,"ATL","CLE",null],
+[14,"TEN","DET",null],
+[14,"CHI","MIA",null],
+[14,"DEN","NYJ",null],
+[14,"IND","PHI",null],
+[14,"HOU","WAS",null],
+[14,"LAC","LV",null],
+[14,"KC","CIN",null],
+[14,"NYG","SEA",null],
+[14,"LAR","SF",null],
+[14,"BUF","GB",null],
+[14,"PIT","JAX",null],
+[15,"SF","LAC",null],
+[15,"SEA","PHI",null],
+[15,"CHI","BUF",null],
+[15,"CIN","CAR",null],
+[15,"MIA","GB",null],
+[15,"JAX","HOU",null],
+[15,"CLE","NYG",null],
+[15,"BAL","PIT",null],
+[15,"NO","TB",null],
+[15,"IND","TEN",null],
+[15,"ATL","WAS",null],
+[15,"NYJ","ARI",null],
+[15,"DAL","LAR",null],
+[15,"DEN","LV",null],
+[15,"DET","MIN",null],
+[15,"NE","KC",null],
+[16,"HOU","PHI",null],
+[16,"GB","CHI",null],
+[16,"BUF","DEN",null],
+[16,"LAR","SEA",null],
+[16,"TB","ATL",null],
+[16,"CIN","IND",null],
+[16,"WAS","MIN",null],
+[16,"CAR","PIT",null],
+[16,"CLE","BAL",null],
+[16,"LAC","MIA",null],
+[16,"ARI","NO",null],
+[16,"NE","NYJ",null],
+[16,"TEN","LV",null],
+[16,"SF","KC",null],
+[16,"JAX","DAL",null],
+[16,"NYG","DET",null],
+[17,"BAL","CIN",null],
+[17,"WAS","JAX",null],
+[17,"KC","LAC",null],
+[17,"DEN","NE",null],
+[17,"LAR","TB",null],
+[17,"NO","ATL",null],
+[17,"SEA","CAR",null],
+[17,"IND","CLE",null],
+[17,"NYG","DAL",null],
+[17,"BUF","MIA",null],
+[17,"MIN","NYJ",null],
+[17,"PIT","TEN",null],
+[17,"LV","ARI",null],
+[17,"DET","CHI",null],
+[17,"PHI","SF",null],
+[17,"HOU","GB",null],
+[18,"SF","ARI",null],
+[18,"PIT","BAL",null],
+[18,"NYJ","BUF",null],
+[18,"ATL","CAR",null],
+[18,"CLE","CIN",null],
+[18,"LAC","DEN",null],
+[18,"DET","GB",null],
+[18,"TEN","HOU",null],
+[18,"JAX","IND",null],
+[18,"LV","KC",null],
+[18,"SEA","LAR",null],
+[18,"CHI","MIN",null],
+[18,"MIA","NE",null],
+[18,"TB","NO",null],
+[18,"PHI","NYG",null],
+[18,"DAL","WAS",null]
+];
+
+const GAMES = SCHEDULE.map((g,i)=>({i, w:g[0], a:g[1], h:g[2], site:g[3]}));
+const WEEKS = 18;
+const byWeek = {};
+for(let w=1;w<=WEEKS;w++) byWeek[w] = GAMES.filter(g=>g.w===w);
+const byeTeams = {};
+for(let w=1;w<=WEEKS;w++){
+  const playing = new Set();
+  byWeek[w].forEach(g=>{playing.add(g.a);playing.add(g.h)});
+  byeTeams[w] = IDS.filter(t=>!playing.has(t));
+}
+
+/* ==========================================================
+   STATE
+   ========================================================== */
+const KEY = 'nfl2026.board.v1';
+let S = { picks:{}, po:{}, flips:{}, week:1 };
+
+const store = {
+  read(){
+    try{ const v = localStorage.getItem(KEY); if(v) return JSON.parse(v); }catch(e){}
+    return null;
+  },
+  write(){
+    try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){}
+  }
+};
+(function load(){
+  const v = store.read();
+  if(v && v.picks){ S = Object.assign(S, v); S.flips = S.flips||{}; S.po = S.po||{}; }
+})();
+
+/* ==========================================================
+   RECORDS
+   ========================================================== */
+function pct(r){ const n = r.w + r.l + r.t; return n ? (r.w + r.t*0.5)/n : 0; }
+function addR(a,b){ return {w:a.w+b.w, l:a.l+b.l, t:a.t+b.t}; }
+const Z = () => ({w:0,l:0,t:0});
+function fmtRec(r){ return r.t ? `${r.w}-${r.l}-${r.t}` : `${r.w}-${r.l}`; }
+function fmtPct(p){ return p.toFixed(3).replace(/^0/,''); }
+
+let R = null; // computed each render
+
+function buildRecords(){
+  const rec = {};
+  IDS.forEach(t => rec[t] = {ov:Z(), gs:[]});
+  GAMES.forEach(g=>{
+    const p = S.picks[g.i];
+    if(!p) return;
+    let ra, rh;
+    if(p==='a'){ ra='W'; rh='L'; }
+    else if(p==='h'){ ra='L'; rh='W'; }
+    else { ra='T'; rh='T'; }
+    rec[g.a].gs.push({o:g.h, r:ra});
+    rec[g.h].gs.push({o:g.a, r:rh});
+  });
+  IDS.forEach(t=>{
+    const o = rec[t].ov;
+    rec[t].gs.forEach(x=>{ if(x.r==='W')o.w++; else if(x.r==='L')o.l++; else o.t++; });
+    rec[t].pct = pct(o);
+    rec[t].opps = rec[t].gs.map(x=>x.o);
+    rec[t].beat = rec[t].gs.filter(x=>x.r==='W').map(x=>x.o);
+    rec[t].played = new Set(rec[t].opps);
+  });
+  // splits + strength (needs everyone's overall first)
+  IDS.forEach(t=>{
+    const me = TEAMS[t];
+    rec[t].div = recVs(rec, t, o => TEAMS[o].dv === me.dv);
+    rec[t].conf = recVs(rec, t, o => TEAMS[o].cf === me.cf);
+    let sv = Z(), ss = Z();
+    rec[t].beat.forEach(o => sv = addR(sv, rec[o].ov));
+    rec[t].opps.forEach(o => ss = addR(ss, rec[o].ov));
+    rec[t].sov = pct(sv); rec[t].sos = pct(ss);
+    rec[t].sovR = sv; rec[t].sosR = ss;
+  });
+  return rec;
+}
+function recVs(rec, t, test){
+  const r = Z();
+  rec[t].gs.forEach(x=>{ if(test(x.o)){ if(x.r==='W')r.w++; else if(x.r==='L')r.l++; else r.t++; } });
+  return r;
+}
+function recVsSet(t, set){
+  const r = Z();
+  R[t].gs.forEach(x=>{ if(set.has(x.o)){ if(x.r==='W')r.w++; else if(x.r==='L')r.l++; else r.t++; } });
+  return r;
+}
+
+/* ==========================================================
+   TIEBREAKERS
+   ========================================================== */
+let TBLOG = [];
+
+function sameDivision(ids){ return ids.every(t => TEAMS[t].dv === TEAMS[ids[0]].dv); }
+
+function commonSet(ids){
+  let s = null;
+  ids.forEach(t=>{
+    const mine = new Set(R[t].opps.filter(o => !ids.includes(o)));
+    if(s === null) s = mine;
+    else s = new Set([...s].filter(x => mine.has(x)));
+  });
+  return s || new Set();
+}
+
+const STEPS = {
+  divTwo:['h2h','divpct','common','confpct','sov','sos'],
+  divMulti:['sweep','divpct','common','confpct','sov','sos'],
+  confTwo:['h2h','confpct','common','sov','sos'],
+  confMulti:['sweep','confpct','common','sov','sos']
+};
+const STEPNAME = {
+  h2h:'Head-to-head', sweep:'Head-to-head sweep', divpct:'Division record',
+  common:'Common games', confpct:'Conference record', sov:'Strength of victory',
+  sos:'Strength of schedule', coin:'Coin toss'
+};
+
+function stepValue(step, t, ids){
+  if(step==='h2h'){ const others = new Set(ids.filter(x=>x!==t)); const r = recVsSet(t, others); return (r.w+r.l+r.t) ? {v:pct(r), d:fmtRec(r)} : null; }
+  if(step==='divpct') return {v:pct(R[t].div), d:fmtRec(R[t].div)};
+  if(step==='confpct') return {v:pct(R[t].conf), d:fmtRec(R[t].conf)};
+  if(step==='sov') return {v:R[t].sov, d:fmtPct(R[t].sov)};
+  if(step==='sos') return {v:R[t].sos, d:fmtPct(R[t].sos)};
+  if(step==='common'){
+    const cs = commonSet(ids);
+    if(cs.size < 4) return null;
+    const r = recVsSet(t, cs);
+    if(!(r.w+r.l+r.t)) return null;
+    return {v:pct(r), d:fmtRec(r)+' vs '+cs.size+' common'};
+  }
+  return null;
+}
+
+function nm(t){ return TEAMS[t].c === 'New York' || TEAMS[t].c === 'Los Angeles' ? TEAMS[t].n : TEAMS[t].c; }
+
+function flipKey(ids){ return ids.slice().sort().join('|'); }
+function hash(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
+function coinOrder(ids){
+  const key = flipKey(ids);
+  const chosen = S.flips[key];
+  let order;
+  if(chosen && ids.includes(chosen)) order = [chosen, ...ids.filter(x=>x!==chosen)];
+  else order = ids.slice().sort((a,b)=> hash(key+'#'+a) - hash(key+'#'+b));
+  TBLOG.push({
+    kind:'coin', key, ids:ids.slice(),
+    step:'Coin toss',
+    text:`<b>${nm(order[0])}</b> over ${order.slice(1).map(nm).join(', ')} — every record-based step is level.`
+  });
+  if(order.length > 2){
+    return [order[0], ...coinOrder(order.slice(1))];
+  }
+  return order;
+}
+
+function orderGroup(ids){
+  if(ids.length <= 1) return ids.slice();
+  const sd = sameDivision(ids);
+  const two = ids.length === 2;
+  const steps = two ? (sd ? STEPS.divTwo : STEPS.confTwo) : (sd ? STEPS.divMulti : STEPS.confMulti);
+
+  for(const step of steps){
+    if(step === 'sweep'){
+      const res = sweepCheck(ids);
+      if(res) return res;
+      continue;
+    }
+    const vals = {}; let ok = true;
+    for(const t of ids){
+      const v = stepValue(step, t, ids);
+      if(v === null){ ok = false; break; }
+      vals[t] = v;
+    }
+    if(!ok) continue;
+    const max = Math.max(...ids.map(t=>vals[t].v));
+    const top = ids.filter(t => Math.abs(vals[t].v - max) < 1e-9);
+    if(top.length === ids.length) continue;
+    const rest = ids.filter(t => !top.includes(t));
+    if(two){
+      TBLOG.push({kind:'step', step:STEPNAME[step],
+        text:`<b>${nm(top[0])}</b> over ${nm(rest[0])} — ${STEPNAME[step].toLowerCase()} ${vals[top[0]].d} to ${vals[rest[0]].d}.`});
+      return [top[0], rest[0]];
+    }
+    TBLOG.push({kind:'step', step:STEPNAME[step],
+      text:`${top.map(t=>`<b>${nm(t)}</b>`).join(', ')} ahead of ${rest.map(nm).join(', ')} — ${STEPNAME[step].toLowerCase()} (${top.map(t=>vals[t].d).join(', ')} vs ${rest.map(t=>vals[t].d).join(', ')}).`});
+    return orderGroup(top).concat(orderGroup(rest));
+  }
+  return coinOrder(ids);
+}
+
+function sweepCheck(ids){
+  for(const t of ids){
+    const others = ids.filter(x=>x!==t);
+    let beatAll = true, lostAll = true;
+    for(const o of others){
+      const r = recVsSet(t, new Set([o]));
+      const n = r.w + r.l + r.t;
+      if(!n){ beatAll = false; lostAll = false; break; }
+      if(pct(r) !== 1) beatAll = false;
+      if(pct(r) !== 0) lostAll = false;
+    }
+    if(beatAll){
+      TBLOG.push({kind:'step', step:'Head-to-head sweep', text:`<b>${nm(t)}</b> ahead of ${others.map(nm).join(', ')} — beat each of them.`});
+      return [t, ...orderGroup(others)];
+    }
+    if(lostAll){
+      TBLOG.push({kind:'step', step:'Head-to-head sweep', text:`<b>${nm(t)}</b> behind ${others.map(nm).join(', ')} — lost to each of them.`});
+      return [...orderGroup(others), t];
+    }
+  }
+  return null;
+}
+
+/* rank a flat list: sort by pct, tiebreak only inside equal-record clusters */
+function rankFlat(ids){
+  const sorted = ids.slice().sort((a,b)=> R[b].pct - R[a].pct);
+  const out = [];
+  let i = 0;
+  while(i < sorted.length){
+    let j = i;
+    while(j+1 < sorted.length && Math.abs(R[sorted[j+1]].pct - R[sorted[i]].pct) < 1e-9) j++;
+    const cluster = sorted.slice(i, j+1);
+    out.push(...(cluster.length > 1 ? orderGroup(cluster) : cluster));
+    i = j+1;
+  }
+  return out;
+}
+
+/* ==========================================================
+   STANDINGS + SEEDING
+   ========================================================== */
+function computeAll(){
+  R = buildRecords();
+  TBLOG = [];
+  const divisions = {};
+  DIVS.forEach(d => divisions[d] = rankFlat(divTeams(d)));
+
+  const conf = {};
+  ['AFC','NFC'].forEach(cf=>{
+    const ds = DIVS.filter(d => d.startsWith(cf));
+    const winners = rankFlat(ds.map(d => divisions[d][0]));
+    // wild cards: only the top remaining club from each division competes
+    const pool = new Set(ds.flatMap(d => divisions[d].slice(1)));
+    const order = [];
+    while(pool.size){
+      const cands = [];
+      ds.forEach(d=>{
+        const nxt = divisions[d].find(t => pool.has(t));
+        if(nxt) cands.push(nxt);
+      });
+      const best = rankFlat(cands)[0];
+      order.push(best); pool.delete(best);
+    }
+    conf[cf] = { divisions:ds, winners, wilds:order, seeds:[...winners, ...order.slice(0,3)] };
+  });
+  return {divisions, conf};
+}
+
+/* ==========================================================
+   PLAYOFF BRACKET
+   ========================================================== */
+function buildBracket(conf){
+  const B = {};
+  ['AFC','NFC'].forEach(cf=>{
+    const sd = conf[cf].seeds;             // index 0 => seed 1
+    const seedOf = t => sd.indexOf(t)+1;
+    const wc = [ [sd[1],sd[6]], [sd[2],sd[5]], [sd[3],sd[4]] ];
+    const wcIds = wc.map((m,i)=>`${cf}-wc-${i}`);
+    const wcWin = wc.map((m,i)=> valid(wcIds[i], m));
+    let dv = null, dvIds = null, dvWin = [null,null];
+    if(wcWin.every(Boolean)){
+      const alive = [sd[0], ...wcWin].sort((a,b)=> seedOf(a)-seedOf(b));
+      dv = [ [alive[0], alive[3]], [alive[1], alive[2]] ];
+      dvIds = dv.map((m,i)=>`${cf}-dv-${i}`);
+      dvWin = dv.map((m,i)=> valid(dvIds[i], m));
+    }
+    let cc = null, ccId = `${cf}-cc`, ccWin = null;
+    if(dvWin.every(Boolean)){
+      cc = dvWin.slice().sort((a,b)=> seedOf(a)-seedOf(b));
+      ccWin = valid(ccId, cc);
+    }
+    B[cf] = {seeds:sd, seedOf, wc, wcIds, wcWin, dv, dvIds, dvWin, cc, ccId, ccWin};
+  });
+  const sbTeams = (B.AFC.ccWin && B.NFC.ccWin) ? [B.AFC.ccWin, B.NFC.ccWin] : null;
+  const sbWin = sbTeams ? valid('sb', sbTeams) : null;
+  return {...B, sb:{id:'sb', teams:sbTeams, win:sbWin}};
+
+  function valid(id, pair){
+    const p = S.po[id];
+    return (p && pair.includes(p)) ? p : null;
+  }
+}
+
+/* ==========================================================
+   RENDER
+   ========================================================== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+let VIEW = null, BR = null;
+
+function render(){
+  VIEW = computeAll();
+  BR = buildBracket(VIEW.conf);
+  renderProgress();
+  renderRail();
+  renderWeek();
+  renderSeedRail();
+  renderStandings();
+  renderPlayoffs();
+  store.write();
+}
+
+function weekDone(w){ return byWeek[w].every(g => S.picks[g.i]); }
+
+function renderProgress(){
+  const done = GAMES.filter(g => S.picks[g.i]).length;
+  $('#pbar').style.width = (done/GAMES.length*100).toFixed(1)+'%';
+  $('#pdone').textContent = done;
+  let wk = 0; for(let w=1;w<=WEEKS;w++) if(weekDone(w)) wk++;
+  $('#pweeks').textContent = wk;
+}
+
+function renderRail(){
+  $('#rail').innerHTML = Array.from({length:WEEKS},(_,i)=>{
+    const w = i+1;
+    const n = byWeek[w].length, d = byWeek[w].filter(g=>S.picks[g.i]).length;
+    return `<button class="notch${d===n?' done':''}" data-w="${w}" aria-current="${S.week===w}" title="Week ${w} — ${d}/${n} picked">
+      ${String(w).padStart(2,'0')}<span class="fill" style="transform:scaleX(${(d/n).toFixed(3)})"></span></button>`;
+  }).join('');
+}
+
+function chip(t, side, gi, picked){
+  const T = TEAMS[t], r = R[t].ov;
+  const cls = picked === side ? 'win' : (picked ? 'lose' : '');
+  return `<button class="pickbtn ${cls}" data-g="${gi}" data-p="${side}">
+    <span class="swatch" style="background:${T.k}"></span>
+    <span class="abbr">${t}</span>
+    <span class="nm">${esc(T.n)}<i>${esc(T.c)}</i></span>
+    <span class="rec">${fmtRec(r)}</span>
+  </button>`;
+}
+
+function renderWeek(){
+  const w = S.week;
+  $('#wkTitle').textContent = 'Week ' + w;
+  const n = byWeek[w].length, d = byWeek[w].filter(g=>S.picks[g.i]).length;
+  $('#wkSub').textContent = `${d}/${n} picked`;
+  const b = byeTeams[w];
+  $('#byes').innerHTML = b.length ? `Bye: <b>${b.map(t=>esc(TEAMS[t].n)).join(' · ')}</b>` : '';
+  $('#games').innerHTML = byWeek[w].map(g=>{
+    const p = S.picks[g.i];
+    return `<div class="game${p?' settled':''}">
+      ${chip(g.a,'a',g.i,p)}
+      <div class="mid">
+        <span class="vs">${g.site ? 'vs' : 'at'}</span>
+        <button class="tiebtn${p==='t'?' on':''}" data-g="${g.i}" data-p="t">TIE</button>
+      </div>
+      <div class="right" style="display:contents">${chip(g.h,'h',g.i,p)}</div>
+      ${g.site ? `<div class="site">Neutral site — ${esc(g.site)} · ${esc(TEAMS[g.h].n)} designated home</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function seedRow(t, i, label){
+  return `<div class="seedrow${i===0?' bye':''}">
+    <span class="n">${i+1}</span><span class="sw" style="background:${TEAMS[t].k}"></span>
+    <span class="tm">${t}</span><span class="rc">${fmtRec(R[t].ov)}</span></div>`;
+}
+function renderSeedRail(){
+  $('#seeds').innerHTML = ['AFC','NFC'].map(cf=>{
+    const s = VIEW.conf[cf].seeds;
+    return `<div class="seedgrp"><div class="lbl">${cf}</div>
+      ${s.slice(0,4).map((t,i)=>seedRow(t,i)).join('')}
+      <hr>
+      ${s.slice(4).map((t,i)=>seedRow(t,i+4)).join('')}
+    </div>`;
+  }).join('');
+}
+
+function renderStandings(){
+  $('#standings').innerHTML = ['AFC','NFC'].map(cf=>{
+    const C = VIEW.conf[cf];
+    const seedIdx = t => C.seeds.indexOf(t);
+    const tables = C.divisions.map(d=>{
+      const rows = VIEW.divisions[d].map((t,i)=>{
+        const r = R[t];
+        const si = seedIdx(t);
+        const tag = si === 0 ? '<span class="tag z">1</span>'
+                  : si > -1 && si < 4 ? `<span class="tag z">${si+1}</span>`
+                  : si > -1 ? `<span class="tag x">${si+1}</span>` : '';
+        return `<tr class="${i===0?'lead':''}">
+          <td>${i+1}</td>
+          <td class="team"><span class="dot" style="background:${TEAMS[t].k}"></span>${t}${tag}</td>
+          <td>${fmtRec(r.ov)}</td><td>${fmtPct(r.pct)}</td>
+          <td>${fmtRec(r.div)}</td><td>${fmtRec(r.conf)}</td>
+          <td>${fmtPct(r.sov)}</td><td>${fmtPct(r.sos)}</td>
+        </tr>`;
+      }).join('');
+      return `<table><caption>${d}</caption>
+        <thead><tr><th></th><th>Team</th><th>W-L</th><th>Pct</th><th>Div</th><th>Conf</th><th>SOV</th><th>SOS</th></tr></thead>
+        <tbody>${rows}</tbody></table>`;
+    }).join('');
+    const hunt = C.wilds.slice(3);
+    return `<div><h3 class="conftitle">${cf}</h3>${tables}
+      <table><caption>${cf} seeding</caption>
+      <thead><tr><th></th><th>Team</th><th>W-L</th><th>Pct</th><th>Conf</th><th>How</th></tr></thead><tbody>
+      ${C.seeds.map((t,i)=>`<tr class="${i<4?'lead':''}"><td>${i+1}</td>
+        <td class="team"><span class="dot" style="background:${TEAMS[t].k}"></span>${t}</td>
+        <td>${fmtRec(R[t].ov)}</td><td>${fmtPct(R[t].pct)}</td><td>${fmtRec(R[t].conf)}</td>
+        <td style="text-align:right;font-size:10px;letter-spacing:.06em">${i===0?'BYE · DIV':(i<4?'DIVISION':'WILD CARD')}</td></tr>`).join('')}
+      ${hunt.map((t,i)=>`<tr><td>${i+8}</td>
+        <td class="team" style="color:var(--chalk-3)"><span class="dot" style="background:${TEAMS[t].k};opacity:.5"></span>${t}</td>
+        <td>${fmtRec(R[t].ov)}</td><td>${fmtPct(R[t].pct)}</td><td>${fmtRec(R[t].conf)}</td>
+        <td style="text-align:right;font-size:10px;color:var(--chalk-3)">OUT</td></tr>`).join('')}
+      </tbody></table></div>`;
+  }).join('');
+
+  const log = TBLOG;
+  $('#tblog').innerHTML = log.length ? log.map(e=>`
+    <div class="logitem">
+      <span class="step">${esc(e.step)}</span>
+      <span class="txt">${e.text}</span>
+      ${e.kind==='coin' ? `<button class="flipbtn" data-flip="${esc(e.key)}">Flip</button>` : ''}
+    </div>`).join('')
+    : `<div class="empty">No ties to break yet — every group is separated on record.</div>`;
+}
+
+function mrow(t, seed, picked, disabled){
+  if(!t) return `<div class="mrow tbd">Winner to be decided</div>`;
+  const cls = picked === t ? 'adv' : (picked ? 'out' : '');
+  return `<button class="mrow ${cls}" data-po="${disabled}" data-team="${t}">
+    <span class="sd">${seed||''}</span><span class="sw" style="background:${TEAMS[t].k}"></span>
+    <span class="tm">${t}</span><span class="rc">${fmtRec(R[t].ov)}</span></button>`;
+}
+function matchup(id, pair, seedOf, note){
+  const picked = S.po[id] && pair && pair.includes(S.po[id]) ? S.po[id] : null;
+  if(!pair) return `<div class="matchup">${mrow(null)}${mrow(null)}</div>`;
+  return `<div class="matchup">
+    ${mrow(pair[0], seedOf(pair[0]), picked, id)}
+    ${mrow(pair[1], seedOf(pair[1]), picked, id)}
+    ${note ? `<div class="mnote">${esc(note)}</div>` : ''}
+  </div>`;
+}
+
+function renderPlayoffs(){
+  const done = GAMES.filter(g=>S.picks[g.i]).length;
+  $('#poNotice').innerHTML = done < GAMES.length
+    ? `<div class="notice"><b>${GAMES.length-done} games still unpicked.</b> Seeds below reflect the games you've decided so far and will keep moving until the board is full.</div>`
+    : '';
+
+  const secs = ['AFC','NFC'].map(cf=>{
+    const b = BR[cf], so = b.seedOf;
+    return `<div class="bracket">
+      <h4 class="bhead">${cf}</h4>
+      <div class="rounds">
+        <div class="round"><h5>Wild Card · Jan 16–18</h5>
+          ${b.wc.map((m,i)=>matchup(b.wcIds[i], m, so, `${so(m[0])} seed hosts`)).join('')}
+          <div class="matchup"><div class="mrow adv" style="cursor:default">
+            <span class="sd">1</span><span class="sw" style="background:${TEAMS[b.seeds[0]].k}"></span>
+            <span class="tm">${b.seeds[0]}</span><span class="rc">bye</span></div></div>
+        </div>
+        <div class="round"><h5>Divisional · Jan 23–24</h5>
+          ${b.dv ? b.dv.map((m,i)=>matchup(b.dvIds[i], m, so, `${so(m[0])} seed hosts`)).join('')
+                 : `<div class="matchup">${mrow(null)}${mrow(null)}</div><div class="matchup">${mrow(null)}${mrow(null)}</div>`}
+        </div>
+        <div class="round"><h5>${cf} Championship · Jan 31</h5>
+          ${b.cc ? matchup(b.ccId, b.cc, so, `${so(b.cc[0])} seed hosts`)
+                 : `<div class="matchup">${mrow(null)}${mrow(null)}</div>`}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const sb = BR.sb;
+  const sbHtml = `<div class="sb">
+    <h4 class="bhead">Super Bowl LXI</h4>
+    ${sb.teams
+      ? `${mrow(sb.teams[0], 'AFC', sb.win, 'sb')}${mrow(sb.teams[1], 'NFC', sb.win, 'sb')}
+         <div class="mnote">SoFi Stadium, Inglewood · Feb 14, 2027 · neutral site</div>`
+      : `${mrow(null)}${mrow(null)}<div class="mnote">Conference champions pending</div>`}
+  </div>`;
+
+  const champ = sb.win ? `<div class="champ"><div class="k">Your Super Bowl LXI champion</div>
+    <div class="v">${esc(TEAMS[sb.win].c)} ${esc(TEAMS[sb.win].n)}</div></div>` : '';
+
+  $('#poBody').innerHTML = secs + sbHtml + champ;
+}
+
+/* ==========================================================
+   EVENTS
+   ========================================================== */
+document.querySelectorAll('.tab').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected', x===b));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on', p.id==='panel-'+b.dataset.tab));
+  });
+});
+$('#rail').addEventListener('click', e=>{
+  const n = e.target.closest('.notch'); if(!n) return;
+  S.week = +n.dataset.w; renderRail(); renderWeek(); store.write();
+});
+$('#games').addEventListener('click', e=>{
+  const b = e.target.closest('[data-g]'); if(!b) return;
+  const gi = +b.dataset.g, p = b.dataset.p;
+  S.picks[gi] = (S.picks[gi] === p) ? undefined : p;
+  if(!S.picks[gi]) delete S.picks[gi];
+  render();
+});
+$('#poBody').addEventListener('click', e=>{
+  const b = e.target.closest('[data-po]'); if(!b) return;
+  const id = b.dataset.po, t = b.dataset.team;
+  if(!id || id==='undefined') return;
+  S.po[id] = (S.po[id] === t) ? undefined : t;
+  if(!S.po[id]) delete S.po[id];
+  render();
+});
+$('#tblog').addEventListener('click', e=>{
+  const b = e.target.closest('[data-flip]'); if(!b) return;
+  const key = b.dataset.flip, ids = key.split('|');
+  const cur = S.flips[key] || null;
+  const idx = cur ? ids.indexOf(cur) : -1;
+  S.flips[key] = ids[(idx+1) % ids.length];
+  render();
+});
+$('#btnHome').addEventListener('click', ()=>{ byWeek[S.week].forEach(g=>S.picks[g.i]='h'); render(); });
+$('#btnRand').addEventListener('click', ()=>{ byWeek[S.week].forEach(g=>S.picks[g.i]=Math.random()<0.5?'a':'h'); render(); });
+$('#btnClearWk').addEventListener('click', ()=>{ byWeek[S.week].forEach(g=>delete S.picks[g.i]); render(); });
+$('#btnReset').addEventListener('click', async ()=>{
+  const done = GAMES.filter(g=>S.picks[g.i]).length;
+  const ok = await ask({
+    title:'Clear the whole board?',
+    body: done
+      ? `This removes all ${done} game picks, every playoff result and any coin tosses you set. It can't be undone — save a file first if you want to keep this board.`
+      : `Nothing is picked yet, so there's nothing to lose. Clearing resets the board to Week 1.`,
+    yes:'Clear everything', no:'Keep my picks'
+  });
+  if(!ok) return;
+  S = {picks:{}, po:{}, flips:{}, week:1};
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  render();
+  toast('Board cleared — 272 games back on the table.');
+});
+$('#btnExport').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(S,null,1)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'nfl-2026-picks.json';
+  a.click(); URL.revokeObjectURL(a.href);
+});
+$('#btnImport').addEventListener('click', ()=> $('#fileIn').click());
+$('#fileIn').addEventListener('change', e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const fr = new FileReader();
+  fr.onload = ()=>{
+    try{
+      const v = JSON.parse(fr.result);
+      if(!v || typeof v.picks !== 'object') throw 0;
+      S = {picks:v.picks||{}, po:v.po||{}, flips:v.flips||{}, week:v.week||1};
+      render();
+    }catch(err){ alert("That file isn't a saved board. Pick a nfl-2026-picks.json file."); }
+  };
+  fr.readAsText(f);
+  e.target.value = '';
+});
+/* ==========================================================
+   DIALOG + TOAST
+   ========================================================== */
+let askResolve = null;
+function ask({title, body, yes, no}){
+  $('#mTitle').textContent = title;
+  $('#mBody').textContent = body;
+  $('#mYes').textContent = yes || 'Confirm';
+  $('#mNo').textContent  = no  || 'Cancel';
+  $('#modal').hidden = false;
+  $('#mNo').focus();
+  return new Promise(res => { askResolve = res; });
+}
+function closeAsk(v){
+  if(!askResolve) return;
+  $('#modal').hidden = true;
+  const r = askResolve; askResolve = null; r(v);
+}
+$('#mYes').addEventListener('click', ()=>closeAsk(true));
+$('#mNo').addEventListener('click', ()=>closeAsk(false));
+$('#modal').addEventListener('click', e=>{ if(e.target.id === 'modal') closeAsk(false); });
+
+let toastT = null;
+function toast(msg){
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>el.classList.remove('on'), 2600);
+}
+
+/* ==========================================================
+   SHAREABLE BRACKET IMAGE
+   ========================================================== */
+const IMG = {
+  W:1200, PAD:52, GAP:20,
+  bg:'#0C1A14', panel:'#12241C', panel2:'#182F25', line:'#24463A',
+  chalk:'#E9F1EB', dim:'#9DB3A7', faint:'#6B8377', amber:'#F5A524', win:'#1C3A2E'
+};
+function rr(c,x,y,w,h,r){
+  c.beginPath();
+  c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
+}
+function track(c,px){ try{ c.letterSpacing = px+'px'; }catch(e){} }
+function full(t){ return TEAMS[t].c + ' ' + TEAMS[t].n; }
+
+function imgRow(c, x, y, w, h, team, seedLabel, state){
+  if(!team){
+    c.fillStyle = IMG.panel2; rr(c,x,y,w,h,4); c.fill();
+    c.fillStyle = IMG.faint; c.font = 'italic 400 17px "IBM Plex Sans", sans-serif'; track(c,0);
+    c.textAlign = 'left'; c.fillText('To be decided', x+22, y+h/2+6);
+    return;
+  }
+  c.fillStyle = state==='win' ? IMG.win : IMG.panel2;
+  rr(c,x,y,w,h,4); c.fill();
+  if(state==='win'){ c.fillStyle = IMG.amber; c.fillRect(x,y+4,3,h-8); }
+  c.globalAlpha = state==='out' ? 0.42 : 1;
+  c.textAlign = 'left';
+  c.fillStyle = IMG.faint; c.font = '500 15px "IBM Plex Mono", monospace'; track(c,0);
+  c.fillText(String(seedLabel||''), x+16, y+h/2+5);
+  c.fillStyle = TEAMS[team].k; rr(c,x+46,y+(h-22)/2,4,22,2); c.fill();
+  c.fillStyle = state==='win' ? IMG.amber : IMG.chalk;
+  c.font = '600 27px "Barlow Condensed", sans-serif'; track(c,0.5);
+  c.fillText(TEAMS[team].n, x+60, y+h/2+9);
+  c.textAlign = 'right'; track(c,0);
+  c.fillStyle = state==='win' ? IMG.amber : IMG.dim;
+  c.font = '500 16px "IBM Plex Mono", monospace';
+  c.fillText(fmtRec(R[team].ov), x+w-16, y+h/2+6);
+  c.globalAlpha = 1; c.textAlign = 'left';
+}
+function imgCard(c, x, y, w, pair, seedOf, picked, note){
+  const rh = 46, nh = note ? 22 : 0;
+  const h = rh*2 + nh;
+  c.fillStyle = IMG.panel; rr(c,x,y,w,h,5); c.fill();
+  c.strokeStyle = IMG.line; c.lineWidth = 1; rr(c,x+.5,y+.5,w-1,h-1,5); c.stroke();
+  const st = t => !picked ? 'plain' : (picked===t ? 'win' : 'out');
+  if(pair){
+    imgRow(c,x+3,y+3,w-6,rh-4, pair[0], seedOf(pair[0]), st(pair[0]));
+    imgRow(c,x+3,y+rh+1,w-6,rh-4, pair[1], seedOf(pair[1]), st(pair[1]));
+  }else{
+    imgRow(c,x+3,y+3,w-6,rh-4, null);
+    imgRow(c,x+3,y+rh+1,w-6,rh-4, null);
+  }
+  if(note){
+    c.fillStyle = IMG.faint; c.font = '500 11px "IBM Plex Mono", monospace'; track(c,1.2);
+    c.textAlign='left'; c.fillText(note.toUpperCase(), x+16, y+h-7); track(c,0);
+  }
+  return h;
+}
+function colHead(c, x, y, w, text){
+  c.fillStyle = IMG.faint; c.font = '500 12px "IBM Plex Mono", monospace'; track(c,1.6);
+  c.textAlign='left'; c.fillText(text.toUpperCase(), x, y); track(c,0);
+}
+
+async function buildBracketImage(){
+  try{ await document.fonts.ready; }catch(e){}
+  const W = IMG.W, P = IMG.PAD, G = IMG.GAP;
+  const CW = W - P*2, col = (CW - G*2)/3;
+  const cv = document.createElement('canvas');
+  const s = 2;
+  cv.width = W*s; cv.height = 1800*s;
+  const c = cv.getContext('2d');
+  c.scale(s,s);
+  c.fillStyle = IMG.bg; c.fillRect(0,0,W,1800);
+  c.strokeStyle = 'rgba(233,241,235,.05)'; c.lineWidth = 1;
+  for(let x=0;x<W;x+=64){ c.beginPath(); c.moveTo(x+.5,0); c.lineTo(x+.5,1800); c.stroke(); }
+  c.fillStyle = IMG.amber; c.fillRect(0,0,W,4);
+
+  let y = P + 46;
+  c.textAlign='left';
+  c.fillStyle = IMG.chalk; c.font = '700 58px "Barlow Condensed", sans-serif'; track(c,3);
+  c.fillText("PICK ’EM ’26", P, y);
+  const tw = c.measureText("PICK ’EM ’26").width;
+  c.fillStyle = IMG.amber; c.fillRect(P, y+14, tw, 3);
+  c.fillStyle = IMG.dim; c.font = '500 14px "IBM Plex Mono", monospace'; track(c,2);
+  c.fillText('2026 NFL SEASON — MY BRACKET', P, y+42);
+  const done = GAMES.filter(g=>S.picks[g.i]).length;
+  c.textAlign='right'; c.fillStyle = IMG.faint;
+  c.fillText(done + '/' + GAMES.length + ' GAMES PICKED', W-P, y+42);
+  track(c,0); c.textAlign='left';
+  y += 84;
+
+  // champion band
+  const champ = BR.sb.win;
+  c.fillStyle = IMG.panel; rr(c,P,y,CW,champ?116:70,5); c.fill();
+  c.strokeStyle = champ ? IMG.amber : IMG.line; c.lineWidth = champ?2:1;
+  rr(c,P+1,y+1,CW-2,(champ?116:70)-2,5); c.stroke();
+  c.textAlign='center';
+  if(champ){
+    c.fillStyle = IMG.faint; c.font = '500 13px "IBM Plex Mono", monospace'; track(c,3.4);
+    c.fillText('SUPER BOWL LXI CHAMPION', W/2, y+34);
+    c.fillStyle = IMG.amber; c.font = '700 54px "Barlow Condensed", sans-serif'; track(c,2);
+    c.fillText(full(champ).toUpperCase(), W/2, y+90);
+    y += 116;
+  }else{
+    c.fillStyle = IMG.dim; c.font = '500 13px "IBM Plex Mono", monospace'; track(c,3);
+    c.fillText('BRACKET IN PROGRESS — ' + (GAMES.length-done) + ' GAMES LEFT TO PICK', W/2, y+42);
+    y += 70;
+  }
+  track(c,0); c.textAlign='left';
+  y += 30;
+
+  // conferences
+  for(const cf of ['AFC','NFC']){
+    const b = BR[cf], so = b.seedOf;
+    c.fillStyle = IMG.chalk; c.font = '700 32px "Barlow Condensed", sans-serif'; track(c,4);
+    c.fillText(cf, P, y+8);
+    c.fillStyle = IMG.line; c.fillRect(P+70, y-2, CW-70, 1);
+    track(c,0);
+    const top = y + 34;
+
+    // wild card
+    colHead(c, P, top, col, 'Wild Card');
+    let cy = top + 14;
+    b.wc.forEach((m,i)=>{
+      const picked = S.po[b.wcIds[i]] && m.includes(S.po[b.wcIds[i]]) ? S.po[b.wcIds[i]] : null;
+      cy += imgCard(c, P, cy, col, m, so, picked, so(m[0]) + ' seed hosts') + 12;
+    });
+    c.fillStyle = IMG.panel; rr(c,P,cy,col,50,5); c.fill();
+    c.strokeStyle = IMG.line; c.lineWidth=1; rr(c,P+.5,cy+.5,col-1,49,5); c.stroke();
+    imgRow(c, P+3, cy+3, col-6, 44, b.seeds[0], 1, 'win');
+    c.fillStyle = IMG.faint; c.font='500 11px "IBM Plex Mono", monospace'; track(c,1.2);
+    c.textAlign='right'; c.fillText('BYE', P+col-70, cy+30); track(c,0); c.textAlign='left';
+    const wcBottom = cy + 50;
+
+    // later rounds sit centred against the wild card column, so the block
+    // reads as a bracket rather than three ragged lists
+    const wcSpan = wcBottom - (top + 14);
+    const CARD = 114;
+
+    const x2 = P + col + G;
+    colHead(c, x2, top, col, 'Divisional');
+    const divSpan = CARD*2 + 12;
+    cy = top + 14 + (wcSpan - divSpan)/2;
+    for(let i=0;i<2;i++){
+      const m = b.dv ? b.dv[i] : null;
+      const picked = m && S.po[b.dvIds[i]] && m.includes(S.po[b.dvIds[i]]) ? S.po[b.dvIds[i]] : null;
+      cy += imgCard(c, x2, cy, col, m, so, picked, m ? so(m[0]) + ' seed hosts' : 'awaiting wild card round') + 12;
+    }
+
+    const x3 = P + (col + G)*2;
+    colHead(c, x3, top, col, cf + ' Championship');
+    const ccPicked = b.cc && S.po[b.ccId] && b.cc.includes(S.po[b.ccId]) ? S.po[b.ccId] : null;
+    imgCard(c, x3, top + 14 + (wcSpan - CARD)/2, col, b.cc, so, ccPicked,
+            b.cc ? so(b.cc[0]) + ' seed hosts' : 'awaiting divisional round');
+
+    y = wcBottom + 34;
+  }
+
+  // super bowl
+  c.fillStyle = IMG.amber; c.font = '700 32px "Barlow Condensed", sans-serif'; track(c,4);
+  c.fillText('SUPER BOWL LXI', P, y+8);
+  c.fillStyle = IMG.line; c.fillRect(P+236, y-2, CW-236, 1); track(c,0);
+  const sbW = 560, sbX = P + (CW - sbW)/2;
+  const sbPair = BR.sb.teams;
+  const sbSeed = t => t === (BR.AFC.ccWin) ? 'AFC' : 'NFC';
+  y += 22;
+  y += imgCard(c, sbX, y, sbW, sbPair, sbSeed, BR.sb.win, 'SoFi Stadium · Feb 14, 2027 · neutral site');
+
+  // footer
+  y += 30;
+  c.fillStyle = IMG.line; c.fillRect(P, y, CW, 1);
+  y += 24;
+  c.fillStyle = IMG.faint; c.font = '500 12px "IBM Plex Mono", monospace'; track(c,1.4);
+  c.textAlign='left';  c.fillText("PICK ’EM — NFL TIEBREAKERS APPLIED", P, y);
+  c.textAlign='right'; c.fillText(new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}).toUpperCase(), W-P, y);
+  track(c,0); c.textAlign='left';
+  y += P - 20;
+
+  // crop to content
+  const outC = document.createElement('canvas');
+  outC.width = W*s; outC.height = Math.round(y*s);
+  outC.getContext('2d').drawImage(cv, 0, 0);
+  return outC;
+}
+
+function canvasBlob(cv){
+  return new Promise(res => cv.toBlob(res, 'image/png'));
+}
+$('#btnImg').addEventListener('click', async ()=>{
+  const cv = await buildBracketImage();
+  const blob = await canvasBlob(cv);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'my-2026-nfl-bracket.png';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  toast('Bracket image saved.');
+});
+if(navigator.canShare){
+  const probe = new File([new Blob([''],{type:'image/png'})], 'x.png', {type:'image/png'});
+  if(navigator.canShare({files:[probe]})){
+    $('#btnShare').hidden = false;
+    $('#btnShare').addEventListener('click', async ()=>{
+      try{
+        const cv = await buildBracketImage();
+        const blob = await canvasBlob(cv);
+        const f = new File([blob], 'my-2026-nfl-bracket.png', {type:'image/png'});
+        await navigator.share({files:[f], title:"My 2026 NFL bracket"});
+      }catch(e){ if(e && e.name !== 'AbortError') toast('Sharing was blocked — use Save bracket image instead.'); }
+    });
+  }
+}
+
+/* ==========================================================
+   PWA
+   ========================================================== */
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  window.addEventListener('load', ()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault(); installEvt = e; $('#btnInstall').hidden = false;
+});
+$('#btnInstall').addEventListener('click', async ()=>{
+  if(!installEvt) return;
+  installEvt.prompt();
+  await installEvt.userChoice;
+  installEvt = null; $('#btnInstall').hidden = true;
+});
+window.addEventListener('appinstalled', ()=>{ $('#btnInstall').hidden = true; toast('Installed. Look for Pick \u2019Em on your home screen.'); });
+
+document.addEventListener('keydown', e=>{
+  // Escape first, so it works from anywhere including a focused field
+  if(e.key === 'Escape' && !$('#modal').hidden){ closeAsk(false); return; }
+  if(!$('#modal').hidden) return;
+  const t = e.target;
+  if(t && typeof t.matches === 'function' && t.matches('input,textarea,select')) return;
+  if(e.key === 'ArrowRight' && S.week < WEEKS){ S.week++; renderRail(); renderWeek(); }
+  if(e.key === 'ArrowLeft' && S.week > 1){ S.week--; renderRail(); renderWeek(); }
+});
+
+render();
+</script>
+</body>
+</html>

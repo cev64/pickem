@@ -1,0 +1,26 @@
+{
+  "name": "Pick 'Em — 2026 NFL Season Board",
+  "short_name": "Pick 'Em",
+  "description": "Pick every game of the 2026 NFL season, get the real NFL tiebreakers applied to the standings, and run your own playoff bracket.",
+  "id": "/pick-em-2026/",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#0C1A14",
+  "theme_color": "#0C1A14",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["sports", "entertainment", "utilities"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Playoff bracket", "short_name": "Bracket", "url": "./#playoffs",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
