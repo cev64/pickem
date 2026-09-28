@@ -361,7 +361,8 @@ tr.out .logo{opacity:.5}
 .sbhead{position:absolute;left:0;right:0;bottom:calc(50% + 54px);text-align:center}
 .sbhead b{display:block;white-space:nowrap;font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:.03em;text-transform:uppercase;line-height:1}
 .sbhead span{font-size:11.5px;color:var(--ink-3)}
-.champ{position:absolute;left:-10px;right:-10px;top:calc(50% + 62px);text-align:center;padding:14px 8px;border-radius:var(--radius);background:var(--surface)}
+.sbfoot{position:absolute;left:-10px;right:-10px;top:calc(50% + 62px);display:flex;flex-direction:column;align-items:center;gap:10px}
+.champ{width:100%;text-align:center;padding:14px 8px;border-radius:var(--radius);background:var(--surface)}
 .champ .logo{width:56px;height:56px;object-fit:contain}
 .champ .k{font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--ink-3);text-transform:uppercase;margin-top:4px}
 .champ .v{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:.03em;text-transform:uppercase;line-height:1.1;margin-top:2px}
@@ -379,8 +380,8 @@ tr.out .logo{opacity:.5}
   .sbcol{padding-top:0;max-width:340px;width:100%;margin:0 auto}
   .sbcol .colbody{height:auto}
   .sbslot{flex-direction:column;gap:12px}
-  .sbhead,.champ{position:static}
-  .champ{width:100%}
+  .sbhead,.sbfoot{position:static}
+  .sbfoot{width:100%}
 }
 @media(max-width:620px){
   .cols3{gap:14px;height:470px}
@@ -596,6 +597,7 @@ body.noads .adrail,body.noads .adinline{display:none!important}
   <div class="weekhead pohead">
     <h2>Playoff Bracket</h2>
     <div class="acts">
+      <button class="btn ghost" id="btnClearPo" title="Clear your bracket picks" hidden>Clear</button>
       <button class="btn ghost share" id="btnSharePo" title="Share an image of your bracket">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
         <span>Share</span></button>
@@ -1759,8 +1761,14 @@ function renderPlayoffs(){
   const sbCol = `<div class="colbody"><div class="sbslot">
       <div class="sbhead"><b>Super Bowl LXI</b></div>
       ${matchup('sb', sb.teams, sbSeed)}
-      ${champ}
+      <div class="sbfoot">
+        ${champ}
+        <button class="btn ghost share" data-share-bracket title="Share an image of your bracket">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+          <span>Share</span></button>
+      </div>
     </div></div>`;
+  $('#btnClearPo').hidden = !Object.keys(S.po).length;
 
   // only the three bracket blocks re-render; the ad between them stays put
   $('#bkAFC').innerHTML = confBracket('AFC');
@@ -1801,7 +1809,13 @@ const onGameClick = e=>{
 $('#games').addEventListener('click', onGameClick);
 $('#games2').addEventListener('click', onGameClick);
 $('#games3').addEventListener('click', onGameClick);
+async function shareBracket(btn){
+  btn.disabled = true;
+  try{ await shareOrSave(await buildBracketImage(), 'bracketeer-bracket-2026.png', 'My 2026 playoff bracket'); }
+  finally{ btn.disabled = false; }
+}
 $('#poBody').addEventListener('click', e=>{
+  const sh = e.target.closest('[data-share-bracket]'); if(sh){ shareBracket(sh); return; }
   const b = e.target.closest('[data-po]'); if(!b) return;
   const id = b.dataset.po, t = b.dataset.team;
   if(!id || id==='undefined') return;
@@ -1840,7 +1854,14 @@ $('#teamPick').addEventListener('click', e=>{
   const b = e.target.closest('[data-team]'); if(!b) return;
   S.team = b.dataset.team; renderWeek(); store.write();
 });
-$('#btnClearWk').addEventListener('click', ()=>{ openGames().forEach(g=>delete S.picks[g.i]); render(); });
+// clearing regular-season picks reshuffles the seeds, so the bracket is cleared with them
+$('#btnClearWk').addEventListener('click', ()=>{
+  const hadBracket = Object.keys(S.po).length > 0;
+  openGames().forEach(g=>delete S.picks[g.i]);
+  S.po = {};
+  render();
+  if(hadBracket) toast('Picks and bracket cleared.');
+});
 // close the Board menu after choosing, or when clicking elsewhere
 document.addEventListener('click', e=>{
   const m = $('#menu');
@@ -2271,11 +2292,8 @@ async function shareOrSave(cv, filename, title){
   toast('Image saved.');
 }
 
-$('#btnSharePo').addEventListener('click', async ()=>{
-  const b = $('#btnSharePo'); b.disabled = true;
-  try{ await shareOrSave(await buildBracketImage(), 'bracketeer-bracket-2026.png', 'My 2026 playoff bracket'); }
-  finally{ b.disabled = false; }
-});
+$('#btnSharePo').addEventListener('click', ()=> shareBracket($('#btnSharePo')));
+$('#btnClearPo').addEventListener('click', ()=>{ S.po = {}; render(); toast('Bracket cleared.'); });
 $('#btnShareWk').addEventListener('click', async ()=>{
   const b = $('#btnShareWk'); b.disabled = true;
   try{
@@ -2362,7 +2380,7 @@ document.addEventListener('keydown', e=>{
 const ADSENSE = {
   client: '',                        // e.g. 'ca-pub-1234567890123456'
   slots: { rail: '', inline: '' },   // ad unit IDs, e.g. '1234567890'
-  placeholders: false                // true shows dashed boxes where ads will go
+  placeholders: true                 // dashed boxes where ads will go; false hides them
 };
 const AD_SIZE = { rail:[160,600], inline:[300,250] };
 

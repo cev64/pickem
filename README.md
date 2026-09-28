@@ -120,8 +120,10 @@ go out in your bracket, ties broken by strength of schedule.
 
 **Playoffs** — a full bracket: AFC on the left, NFC on the right, Super Bowl in
 the middle. Nothing is picked until you click a team to advance it. **Share**
-makes an image of the bracket and opens the phone's share sheet (it downloads
-the image where sharing files isn't supported).
+(top right, and again under the champion) makes an image of the bracket and
+opens the phone's share sheet (it downloads the image where sharing files isn't
+supported). **Clear** resets just the bracket; *Clear* on the Games tab also
+resets the bracket, since changing picks reshuffles the seeds.
 
 **Rules** — the tiebreaker ladder as implemented.
 
@@ -185,9 +187,8 @@ Ad slots are placed so they can't slow the app down or get in the way:
   tap), and only loads once the page is idle and the slot is about to scroll
   into view. An empty fill folds away.
 
-Until AdSense is configured the slots are hidden entirely, so the site launches
-clean. Set `ADSENSE.placeholders: true` to see dashed boxes where ads will go.
-To switch real ads on:
+Until AdSense is configured the slots show dashed placeholders
+(`ADSENSE.placeholders: false` hides them). To switch real ads on:
 
 1. Put the site on a domain you own (AdSense won't approve a `github.io`
    address) — GitHub Pages supports custom domains.
