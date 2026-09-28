@@ -206,9 +206,12 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .wk-ind.ready{transition:transform .6s var(--spring),box-shadow .3s var(--ease)}
 .wkbar.mag .wk-ind.ready{transition:transform .18s var(--ease)}
 .wkbar.lens.scrolling .wk-ind.ready{transition:transform .42s var(--spring)}
-/* touch wheel */
+/* touch wheel. The end padding lets the first and last weeks reach the centre
+   line. It's set in px (--edge, from layoutRail): a % padding counts as zero
+   when Safari and Firefox size the max-content track, so the track came out
+   too narrow and week 18 could never be centred there. */
 .wkbar.lens .rail{scroll-snap-type:x mandatory}
-.wkbar.lens .rail-track{--ring:42px;--padT:16px;padding-inline:calc(50% - 29px)}
+.wkbar.lens .rail-track{--ring:42px;--padT:16px;padding-inline:var(--edge, calc(50% - 29px))}
 .wkbar.lens.stuck .rail-track{--ring:32px;--padT:12px;--padB:18px}
 .wkbar.lens .wk{flex:0 0 58px}
 .wkbar.lens .wk-in{transition:none}
@@ -1842,8 +1845,14 @@ function placeWkInd(){
   ind.style.transform = `translate(${c.offsetLeft + c.offsetWidth/2}px, ${(sc - 1) * -12}px) scale(${sc})`;
   if(!ind.classList.contains('ready')) requestAnimationFrame(()=>requestAnimationFrame(()=>ind.classList.add('ready')));
 }
+function setRailEdge(){
+  if(rail.clientWidth) rail.style.setProperty('--edge', (rail.clientWidth / 2 - 29) + 'px');
+}
+// also when the rail first gets a size (e.g. the page opened on another tab)
+if('ResizeObserver' in window) new ResizeObserver(setRailEdge).observe(rail);
 function layoutRail(){
   wkbar.classList.toggle('lens', !FINE.matches);
+  setRailEdge();
   railEdges();
 }
 function railEdges(){
