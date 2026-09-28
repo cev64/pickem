@@ -157,7 +157,8 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
   border-color:rgba(8,32,79,.07);box-shadow:0 10px 30px rgba(8,32,79,.12),0 1px 3px rgba(8,32,79,.06)}
 .pickhead.stuck.team .phcap{padding-bottom:8px}
 .pickhead.measuring,.pickhead.measuring *{transition:none!important}
-.wkbar{position:relative;margin:-2px 0 -6px}
+.wkbar{position:relative;margin:-2px 0 -6px;transition:margin .5s var(--spring)}
+.pickhead.stuck .wkbar{margin-top:6px}
 .wkcap{position:relative}
 .rail{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;
   --fl:0px;--fr:0px;
@@ -168,7 +169,7 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .rail-track{--ring:38px;--padT:14px;--padB:14px;--dot:5px;position:relative;display:flex;min-width:100%;
   padding:var(--padT) 8px var(--padB);
   transition:--ring .55s var(--spring),--padT .55s var(--spring),--padB .55s var(--spring),--dot .3s var(--ease)}
-.wkbar.stuck .rail-track{--ring:30px;--padT:8px;--padB:9px;--dot:0px}
+.wkbar.stuck .rail-track{--ring:30px;--padT:8px;--padB:17px;--dot:0px}
 .wk{--s:1;flex:1 0 46px;display:flex;flex-direction:column;align-items:center;gap:calc(var(--dot) * 1.2);background:none;border:none;
   padding:0;cursor:pointer;position:relative;z-index:1;color:var(--ink-2);scroll-snap-align:center;opacity:var(--o,1)}
 .wk-in{position:relative;width:var(--ring);height:var(--ring);display:grid;place-items:center;
@@ -205,7 +206,7 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 /* touch wheel */
 .wkbar.lens .rail{scroll-snap-type:x mandatory}
 .wkbar.lens .rail-track{--ring:42px;--padT:16px;padding-inline:calc(50% - 29px)}
-.wkbar.lens.stuck .rail-track{--ring:32px;--padT:12px;--padB:10px}
+.wkbar.lens.stuck .rail-track{--ring:32px;--padT:12px;--padB:18px}
 .wkbar.lens .wk{flex:0 0 58px}
 .wkbar.lens .wk-in{transition:none}
 /* arrows: mouse users, only when the weeks don't all fit */
@@ -303,7 +304,7 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .logo{width:34px;height:34px;object-fit:contain;flex:none}
 /* text scales with whatever size the badge is drawn at */
 .badge{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;letter-spacing:-.03em;line-height:1;
-  box-shadow:inset 0 0 0 2px var(--ring);container-type:size}
+  box-shadow:inset 0 0 0 2px var(--team2);container-type:size}
 .badge>span{font-size:27cqw}
 .badge>span.s2{font-size:33cqw}
 .badge{vertical-align:middle}
@@ -644,14 +645,32 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 .teampick.enter .tp-ind{animation:fadeIn .4s var(--ease) both;animation-delay:.35s}
 .teampick.enter .dl{animation:fadeIn .4s var(--ease) both}
 /* week / team title roll */
-#wkTitle{position:relative;display:inline-block}
-#wkTitle>span{display:inline-block}
-#wkTitle .r-out{position:absolute;left:0;top:0;white-space:nowrap;pointer-events:none}
-#wkTitle .r-in.up{animation:rollInUp .5s var(--ease) both}
-#wkTitle .r-out.up{animation:rollOutUp .38s var(--ease) both}
-#wkTitle .r-in.down{animation:rollInDown .5s var(--ease) both}
-#wkTitle .r-out.down{animation:rollOutDown .38s var(--ease) both}
-#wkLogo.swap .logo{animation:ckPop .55s var(--spring) both}
+.roller{position:relative;display:inline-block}
+.roller>span{display:inline-block}
+.roller .r-out{position:absolute;left:0;top:0;white-space:nowrap;pointer-events:none}
+.roller .r-in.up{animation:rollInUp .5s var(--ease) both}
+.roller .r-out.up{animation:rollOutUp .38s var(--ease) both}
+.roller .r-in.down{animation:rollInDown .5s var(--ease) both}
+.roller .r-out.down{animation:rollOutDown .38s var(--ease) both}
+#wkLogo.swap .logo,.phlogo.swap .logo{animation:ckPop .55s var(--spring) both}
+/* By team, pinned: the team rides along in the card */
+.phteam{display:flex;align-items:center;gap:8px;min-width:0;font-weight:700;font-size:15px;color:var(--ink);white-space:nowrap;
+  pointer-events:none;opacity:0;transform:translateY(8px) scale(.94);filter:blur(4px);
+  transition:opacity .25s var(--ease),transform .45s var(--spring),filter .3s var(--ease)}
+.pickhead.stuck.team .phteam{opacity:1;transform:none;filter:none;
+  transition:opacity .35s var(--ease) .08s,transform .55s var(--spring) .08s,filter .4s var(--ease) .08s}
+.phteam .logo{width:24px;height:24px}
+.phteam .phname{overflow:hidden;text-overflow:ellipsis}
+.phteam.ph-mid{flex:1;justify-content:center;overflow:hidden}
+.phteam-below{display:none}
+@media(max-width:620px){
+  .phteam.ph-mid{display:none}
+  /* the card grows down to make room, then the team eases in */
+  .phteam-below{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--spring)}
+  .phteam-below>div{overflow:hidden;min-height:0}
+  .pickhead.stuck.team .phteam-below{grid-template-rows:1fr}
+  .phteam.ph-below{padding:10px 10px 2px;justify-content:center}
+}
 #wkMeta.swap,#wkPill.swap{animation:fadeIn .45s var(--ease) both}
 
 /* first paint and every tab change: content fades up into place */
@@ -725,6 +744,7 @@ body.noads .adrail,body.noads .adinline{display:none!important}
             <button data-mode="week" aria-pressed="true"><span class="l-lg">By week</span><span class="l-sm">Week</span></button>
             <button data-mode="team" aria-pressed="false"><span class="l-lg">By team</span><span class="l-sm">Team</span></button>
           </div>
+          <div class="phteam ph-mid" aria-hidden="true"><span class="phlogo"></span><span class="phname roller"></span></div>
           <div class="acts" id="pickActs">
             <button class="btn ghost" id="btnHome"></button>
             <button class="btn ghost" id="btnRand"></button>
@@ -736,6 +756,9 @@ body.noads .adrail,body.noads .adinline{display:none!important}
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
           </div>
         </div>
+        <div class="phteam-below" aria-hidden="true"><div>
+          <div class="phteam ph-below"><span class="phlogo"></span><span class="phname roller"></span></div>
+        </div></div>
         <div class="wkbar" id="wkbar"><div class="wkcap">
           <button class="wk-arrow l" type="button" aria-label="Earlier weeks" tabindex="-1">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
@@ -747,7 +770,7 @@ body.noads .adrail,body.noads .adinline{display:none!important}
       <div class="teampick" id="teamPick" hidden></div>
       <div class="weekhead">
         <span id="wkLogo"></span>
-        <h2 id="wkTitle"></h2>
+        <h2 id="wkTitle" class="roller"></h2>
         <span class="pill" id="wkPill"></span>
       </div>
       <p class="wkmeta" id="wkMeta"></p>
@@ -947,7 +970,7 @@ function inkOn(hex){    // white or near-black text, whichever has more contrast
 }
 const logo = (t, cls='logo') => USE_LOGOS
   ? `<img class="${cls}" src="${logoSrc(t)}" alt="" loading="lazy" decoding="async">`
-  : `<span class="${cls} badge" style="background:${TEAMS[t].k};color:${inkOn(TEAMS[t].k)};--ring:${TEAMS[t].k2}" aria-hidden="true"><span${t.length < 3 ? ' class="s2"' : ''}>${t}</span></span>`;
+  : `<span class="${cls} badge" style="background:${TEAMS[t].k};color:${inkOn(TEAMS[t].k)};--team2:${TEAMS[t].k2}" aria-hidden="true"><span${t.length < 3 ? ' class="s2"' : ''}>${t}</span></span>`;
 
 /* SCHEDULE injected here: [week, away, home, siteOrNull] */
 const SCHEDULE=[
@@ -1987,8 +2010,10 @@ function renderTeam(){
   if(t !== lastTeam){
     $('#wkLogo').innerHTML = logo(t);
     if(lastMode !== null) refresh($('#wkLogo'));
+    document.querySelectorAll('.phteam .phlogo').forEach(el => { el.innerHTML = logo(t); if(lastTeam) refresh(el); });
   }
   rollText($('#wkTitle'), T.c + ' ' + T.n, dir);
+  document.querySelectorAll('.phteam .phname').forEach(el => rollText(el, T.c + ' ' + T.n, dir));
   lastTeam = t; lastWeek = null;
   const gs = GAMES.filter(g => g.a === t || g.h === t);
   const pill = $('#wkPill');
