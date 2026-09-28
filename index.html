@@ -402,28 +402,49 @@ tr.out .logo{opacity:.5}
 .sharebar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
 .sharebar .hint{font-size:12px;color:var(--ink-3)}
 
-/* ---------- ad rails ----------
-   Fixed in the side margins, outside the page flow, with their size reserved
-   up front: an ad loading (or failing) can't push content around. Hidden below
-   1660px, where there is no margin to put them in. */
+/* ---------- ads ----------
+   Every slot sits outside the parts of the page that re-render on a pick,
+   has its size reserved before anything loads (no content jumping), and
+   is kept well clear of tap targets.
+
+   Wide screens (1660px+): side rails in the empty margins. Up to three
+   units per side, each in its own ~1150px stretch of page and pinned while
+   that stretch scrolls by — so each is actually on screen for a while.
+   Short pages simply clip the lower ones, which then never load.
+
+   Everything narrower (phones, tablets, laptops): at most one in-feed
+   300x250 per tab, at a natural break — after the first five games,
+   between the standings and the draft order, below the bracket. */
+.page{position:relative}
 .adrail{display:none}
 @media(min-width:1660px){
-  .adrail{display:block;position:fixed;top:84px;width:160px;height:600px;z-index:1}
-  .adrail.l{left:calc(50% - 620px - 190px)}
-  .adrail.r{right:calc(50% - 620px - 190px)}
+  .adrail{display:flex;flex-direction:column;position:absolute;top:24px;bottom:24px;width:160px;overflow:clip;z-index:1}
+  .adrail.l{left:calc(50% - 810px)}
+  .adrail.r{right:calc(50% - 810px)}
+  .adseg{flex:none;height:1150px}
+  .adseg .adslot{position:sticky;top:74px}
+  .adinline{display:none!important}
 }
-.adslot{width:160px;height:600px;contain:strict;overflow:hidden;border-radius:8px;
-  display:flex;align-items:center;justify-content:center;border:1px dashed var(--line-2);background:var(--surface)}
+.adslot{contain:strict;overflow:hidden;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  border:1px dashed var(--line-2);background:var(--surface)}
+.adslot.rail{width:160px;height:600px}
+.adslot.box{width:300px;height:250px}
 .adslot span{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
 .adslot.live{border:none;background:none}
+.adinline{margin:26px 0;padding:10px 0 14px;display:flex;flex-direction:column;align-items:center;gap:6px;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.adinline .adlabel{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+/* if AdSense has nothing to show, fold the slot away rather than leave a hole */
+.adinline:has(ins[data-ad-status="unfilled"]){display:none}
+.adrail .adslot:has(ins[data-ad-status="unfilled"]){visibility:hidden}
+/* the second half of the game list continues straight on */
+#games2:empty{display:none}
+body.noads .adrail,body.noads .adinline{display:none!important}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
-<!-- Ad rails: only shown on screens wide enough to have empty margins (see ADSENSE below) -->
-<aside class="adrail l" aria-label="Advertisement"><div class="adslot" data-pos="left"><span>Advertisement</span></div></aside>
-<aside class="adrail r" aria-label="Advertisement"><div class="adslot" data-pos="right"><span>Advertisement</span></div></aside>
 
 <header class="topbar">
   <div class="in">
@@ -450,6 +471,19 @@ tr.out .logo{opacity:.5}
   </div>
 </header>
 
+<div class="page">
+<!-- Side ad rails (wide screens only). Stacked units, each pinned while its
+     stretch of the page scrolls past, so every one gets seen. See ADSENSE. -->
+<aside class="adrail l" aria-label="Advertisement">
+  <div class="adseg"><div class="adslot rail" data-kind="rail"><span>Advertisement</span></div></div>
+  <div class="adseg"><div class="adslot rail" data-kind="rail"><span>Advertisement</span></div></div>
+  <div class="adseg"><div class="adslot rail" data-kind="rail"><span>Advertisement</span></div></div>
+</aside>
+<aside class="adrail r" aria-label="Advertisement">
+  <div class="adseg"><div class="adslot rail" data-kind="rail"><span>Advertisement</span></div></div>
+  <div class="adseg"><div class="adslot rail" data-kind="rail"><span>Advertisement</span></div></div>
+  <div class="adseg"><div class="adslot rail" data-kind="rail"><span>Advertisement</span></div></div>
+</aside>
 <div class="wrap">
 
 <div class="summary">
@@ -485,6 +519,8 @@ tr.out .logo{opacity:.5}
       </div>
       <p class="wkmeta" id="wkMeta"></p>
       <div class="games" id="games"></div>
+      <div class="adinline" id="adPicks"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
+      <div class="games" id="games2"></div>
     </div>
     <aside class="seedrail">
       <h3>Playoff picture <span>· if the season ended now</span></h3>
@@ -495,6 +531,7 @@ tr.out .logo{opacity:.5}
 
 <section class="panel" id="panel-standings">
   <div class="cols" id="standings"></div>
+  <div class="adinline" id="adStandings"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
   <section class="draft" id="draft"></section>
   <div class="logbox">
     <h4>Tiebreakers applied</h4>
@@ -510,6 +547,7 @@ tr.out .logo{opacity:.5}
   </div>
   <div id="poNotice"></div>
   <div id="poBody"></div>
+  <div class="adinline" id="adPlayoffs"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
 </section>
 
 <section class="panel" id="panel-rules">
@@ -570,6 +608,7 @@ tr.out .logo{opacity:.5}
   </div>
 </section>
 
+</div>
 </div>
 <input type="file" id="fileIn" accept="application/json" style="display:none">
 
@@ -1401,6 +1440,22 @@ function gameCard(g, withWeek){
   </div>`;
 }
 
+/* The list is split in two around an ad slot that never re-renders.
+   cards: [{html, day}] in display order. */
+const AD_AFTER = 5;
+function putGames(cards){
+  let a = '', b = '', last = '';
+  cards.forEach((c, i) => {
+    let h = '';
+    if(c.day && (c.day !== last || i === AD_AFTER)) h += `<div class="dayhead">${c.day}</div>`;
+    last = c.day || '';
+    h += c.html;
+    if(i < AD_AFTER) a += h; else b += h;
+  });
+  $('#games').innerHTML = a;
+  $('#games2').innerHTML = b;
+}
+
 function renderWeek(){
   const team = S.mode === 'team';
   document.querySelectorAll('#modeSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === S.mode));
@@ -1439,15 +1494,9 @@ function renderWeek(){
   // group by kickoff day when we know the times
   if(kicks.length === gs.length){
     gs.sort((x,y) => kickOf(x) - kickOf(y) || x.i - y.i);
-    let day = '', html = '';
-    gs.forEach(g=>{
-      const d = fmtDay(kickOf(g));
-      if(d !== day){ html += `<div class="dayhead">${d}</div>`; day = d; }
-      html += gameCard(g);
-    });
-    $('#games').innerHTML = html;
+    putGames(gs.map(g => ({html: gameCard(g), day: fmtDay(kickOf(g))})));
   }else{
-    $('#games').innerHTML = gs.map(gameCard).join('');
+    putGames(gs.map(g => ({html: gameCard(g)})));
   }
 }
 
@@ -1479,12 +1528,12 @@ function renderTeam(){
     bye ? `Bye: week ${bye}` : ''
   ].filter(Boolean).join(' · ');
 
-  let html = '';
+  const cards = [];
   for(let w=1; w<=WEEKS; w++){
     const g = gs.find(x => x.w === w);
-    html += g ? gameCard(g, true) : `<div class="byecard"><b>Week ${w}</b> · Bye</div>`;
+    cards.push({html: g ? gameCard(g, true) : `<div class="byecard"><b>Week ${w}</b> · Bye</div>`});
   }
-  $('#games').innerHTML = html;
+  putGames(cards);
 }
 
 function seedRow(t, i){
@@ -1670,14 +1719,16 @@ $('#rail').addEventListener('click', e=>{
   const n = e.target.closest('.notch'); if(!n) return;
   goWeek(+n.dataset.w);
 });
-$('#games').addEventListener('click', e=>{
+const onGameClick = e=>{
   const b = e.target.closest('[data-g]'); if(!b) return;
   const gi = +b.dataset.g, p = b.dataset.p;
   if(isFinal(gi)) return;   // real result, locked
   S.picks[gi] = (S.picks[gi] === p) ? undefined : p;
   if(!S.picks[gi]) delete S.picks[gi];
   render();
-});
+};
+$('#games').addEventListener('click', onGameClick);
+$('#games2').addEventListener('click', onGameClick);
 $('#poBody').addEventListener('click', e=>{
   const b = e.target.closest('[data-po]'); if(!b) return;
   const id = b.dataset.po, t = b.dataset.team;
@@ -2052,32 +2103,60 @@ document.addEventListener('keydown', e=>{
 
 /* ==========================================================
    ADSENSE
-   Fill in your publisher ID and two 160x600 display ad unit IDs from
-   AdSense to switch the placeholders to real ads. The script only loads
-   on wide screens, after the page has finished loading and gone idle,
-   so it never competes with the app for startup time.
+   Fill in your publisher ID and two ad unit IDs to switch the placeholders
+   to real ads:  rail = a fixed 160x600 display unit (side margins),
+                 inline = a fixed 300x250 display unit (in-feed).
+   Nothing ad-related runs until the page has loaded and gone idle, and each
+   slot only fills when it's about to scroll into view, so ads never compete
+   with the app for startup time or data.
    ========================================================== */
 const ADSENSE = {
-  client: '',              // e.g. 'ca-pub-1234567890123456'
-  slots: { left: '', right: '' }   // ad unit IDs, e.g. '1234567890'
+  client: '',                        // e.g. 'ca-pub-1234567890123456'
+  slots: { rail: '', inline: '' },   // ad unit IDs, e.g. '1234567890'
+  placeholders: true                 // show dashed boxes while not configured
 };
+const AD_SIZE = { rail:[160,600], inline:[300,250] };
+
 function loadAds(){
-  if(!ADSENSE.client || !matchMedia('(min-width:1660px)').matches) return;
-  const go = ()=>{
-    const units = [...document.querySelectorAll('.adslot')].filter(el => ADSENSE.slots[el.dataset.pos]);
-    if(!units.length) return;
-    units.forEach(el=>{
-      el.classList.add('live');
-      el.innerHTML = `<ins class="adsbygoogle" style="display:inline-block;width:160px;height:600px"
-        data-ad-client="${ADSENSE.client}" data-ad-slot="${ADSENSE.slots[el.dataset.pos]}"></ins>`;
-    });
-    const sc = document.createElement('script');
-    sc.async = true; sc.crossOrigin = 'anonymous';
-    sc.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(ADSENSE.client);
-    document.head.appendChild(sc);
-    units.forEach(()=> (window.adsbygoogle = window.adsbygoogle || []).push({}));
+  if(!ADSENSE.client){
+    if(!ADSENSE.placeholders) document.body.classList.add('noads');
+    return;
+  }
+  let scriptIn = false;
+  const fill = el => {
+    const kind = el.dataset.kind, id = ADSENSE.slots[kind];
+    if(!id || el.dataset.filled) return;
+    el.dataset.filled = '1';
+    if(!scriptIn){
+      scriptIn = true;
+      const sc = document.createElement('script');
+      sc.async = true; sc.crossOrigin = 'anonymous';
+      sc.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(ADSENSE.client);
+      document.head.appendChild(sc);
+    }
+    const [w, h] = AD_SIZE[kind];
+    el.classList.add('live');
+    el.innerHTML = `<ins class="adsbygoogle" style="display:inline-block;width:${w}px;height:${h}px"
+      data-ad-client="${ADSENSE.client}" data-ad-slot="${id}"></ins>`;
+    (window.adsbygoogle = window.adsbygoogle || []).push({});
   };
-  const idle = ()=> 'requestIdleCallback' in window ? requestIdleCallback(go, {timeout:5000}) : setTimeout(go, 3000);
+  // a rail unit counts only if its stretch of the rail is inside the page
+  const inPage = el => {
+    const rail = el.closest('.adrail');
+    return !rail || el.parentElement.offsetTop + 200 < rail.clientHeight;
+  };
+  const start = ()=>{
+    const io = new IntersectionObserver(entries => entries.forEach(en => {
+      const el = en.target;
+      if(en.isIntersecting && el.offsetParent !== null && inPage(el)){ fill(el); io.unobserve(el); }
+    }), {rootMargin: '400px 0px'});
+    document.querySelectorAll('.adslot').forEach(el => io.observe(el));
+    // switching tabs changes the page height; re-check rail units that were clipped
+    document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', ()=>{
+      document.querySelectorAll('.adslot:not([data-filled])').forEach(el => { io.unobserve(el); io.observe(el); });
+    }));
+  };
+  const idle = ()=> 'requestIdleCallback' in window ? requestIdleCallback(start, {timeout:5000}) : setTimeout(start, 3000);
   if(document.readyState === 'complete') idle(); else window.addEventListener('load', idle);
 }
 

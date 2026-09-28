@@ -105,18 +105,29 @@ this app needs.
 
 ## Ads (Google AdSense)
 
-Two 160×600 ad slots sit in the side margins, fixed in place and outside the
-page layout, so they can't shift or slow the app. They only appear on screens
-at least 1660px wide, where there is empty margin; phones and laptops never
-load the ad script. Until configured they show a dashed placeholder.
+Ad slots are placed so they can't slow the app down or get in the way:
 
-To switch them on:
+- **Wide screens (1660px+):** side rails in the empty margins, up to three
+  160×600 units per side. Each sits in its own ~1150px stretch of the page and
+  stays pinned while that stretch scrolls by, so each one is actually seen.
+  Short pages (like Playoffs) just show one; the rest never load.
+- **Phones, tablets, laptops:** at most one 300×250 per tab, at a natural
+  break — after the first five games, between the standings and the draft
+  order, and below the bracket. Never above the fold, never sticky, never a
+  pop-up, and kept clear of the pick buttons to avoid accidental taps.
+- Every slot has its size reserved up front (nothing jumps), sits outside the
+  parts of the page that re-render when you pick (an ad is never reloaded by a
+  tap), and only loads once the page is idle and the slot is about to scroll
+  into view. An empty fill folds away.
+
+Until configured they show dashed placeholders (`ADSENSE.placeholders: false`
+hides them). To switch them on:
 
 1. Put the site on a domain you own (AdSense won't approve a `github.io`
    address) — GitHub Pages supports custom domains.
-2. Get approved in AdSense, then create two *Display* ad units, fixed size
-   160×600.
+2. Get approved in AdSense, then create two *Display* ad units with fixed
+   sizes: 160×600 (rail) and 300×250 (inline).
 3. In `index.html`, fill in `ADSENSE.client` (`ca-pub-…`) and the two slot IDs.
 4. Add an `ads.txt` file at the site root with the line AdSense gives you.
 5. Leave AdSense **Auto ads off** — they inject ads into the content and cause
-   the jank the fixed rails are there to avoid.
+   the jank this layout is designed to avoid.
