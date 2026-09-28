@@ -11,24 +11,42 @@ index.html              the whole app — markup, styles, schedule, engine
 manifest.webmanifest    PWA metadata (name, icons, colours, start URL)
 sw.js                   service worker: offline cache for the app shell
 icons/                  app icons, including maskable versions for Android
-logos/                  team logos, one PNG per team abbreviation
+logos/                  team logos (off by default — see Team logos)
 data/results.json       real scores and finals, refreshed automatically
-scripts/update_results.py   pulls results from ESPN's free public scoreboard
+scripts/update_results.py   pulls scores and spreads from the nflverse data set
 .github/workflows/update-results.yml   runs that script on a schedule
 ```
 
-## Live results
+## Results
 
-`scripts/update_results.py` reads ESPN's public scoreboard feed (no API key,
-standard library only) and writes `data/results.json`. The **Update game
+`scripts/update_results.py` reads the schedules file from
+[nflverse](https://github.com/nflverse/nflverse-data) — a free, public,
+documented NFL data set published under **CC BY 4.0**, so it can be used on a
+commercial site as long as it's credited (the page footer and the bracket
+image both do). No API key, standard library only; one CSV covers the whole
+season. It writes `data/results.json`.
+
+There is no free *official* NFL API — the league's own feeds are licensed to
+partners only — so nflverse is the most established openly licensed source.
+It isn't live: finals land after games end (and an in-progress game shows as
+*In progress* with no score), which suits a board built around picking the
+games that haven't been played. The **Update game
 results** GitHub Action runs it every 20 minutes during game windows and every
 two hours otherwise, and commits only when a score actually changed. Pages
 redeploys on each commit.
 
 In the app, finished games are filled in and locked, standings start from the
-real season, and you pick the rest. Picks you made before a game are graded
-(**picks correct**). The site opens on the current week: the first week with
+real season, and you pick the rest. The site opens on the current week: the first week with
 games still to play, rolling over Tuesday morning after Monday night football.
+
+### Point spreads
+
+The same script saves the point spread and over/under for upcoming games from
+the same nflverse file, which carries lines for the current and next week. Lines are refreshed on the Tuesday run
+(`--odds`), once the new week's numbers are posted; other runs keep the saved
+line. Game cards show them, and **Favorites** picks the favoured side of every
+game left in a week. Run *Update game results* by hand from the Actions tab to
+refresh lines any time.
 
 Scheduled workflows only run from the default branch, so the Action starts once
 this is merged to `main`. Run it by hand from the Actions tab (*Run workflow*),
@@ -63,7 +81,7 @@ The old caches get deleted on the next visit and the new files load.
 ## Using it
 
 **Games** — click a team to pick it. *Tie* sets a drawn game. Arrow keys move
-between weeks. *Home teams* and *Random* fill the unplayed games of a week in
+between weeks. *Favorites* and *Random* fill the unplayed games of a week in
 one go. Finished games show the final score and can't be changed.
 
 **Games → By team** — pick one team's whole season at once, with *Win out* /
@@ -103,6 +121,18 @@ the nine international games and every bye week. Week 16, 17 and 18 kickoff
 times were still TBD at release; the matchups themselves are final, which is all
 this app needs.
 
+## Team logos and colours
+
+Logos are **off** by default (`USE_LOGOS = false` in `index.html`): the team
+logos in `logos/` are NFL trademarks. Instead every team shows as a round
+badge filled with its official primary colour and ringed in its official
+secondary colour (`k` and `k2` in `TEAMS`, taken from each club's brand
+palette), with the abbreviation in white or near-black, whichever has more
+contrast. Small badges that sit next to the team's name drop the text.
+
+Setting `USE_LOGOS = true` switches the page and the shared bracket image to
+the logo images, no other changes needed.
+
 ## Ads (Google AdSense)
 
 Ad slots are placed so they can't slow the app down or get in the way:
@@ -111,9 +141,13 @@ Ad slots are placed so they can't slow the app down or get in the way:
   160×600 units per side. Each sits in its own ~1150px stretch of the page and
   stays pinned while that stretch scrolls by, so each one is actually seen.
   Short pages (like Playoffs) just show one; the rest never load.
-- **Phones, tablets, laptops:** at most one 300×250 per tab, at a natural
-  break — after the first five games, between the standings and the draft
-  order, and below the bracket. Never above the fold, never sticky, never a
+- **Tablets and laptops:** one 300×250 per tab at a natural break.
+- **Phones (≤880px):** in-feed 300×250s sized to the page: two in a week's
+  games (after games 5 and 11), three on the long Standings page (between
+  AFC and NFC, before the draft order, before the tiebreakers), one below the
+  bracket and one mid-way through Rules. That keeps ads at roughly 10–16% of
+  each page's height, under the 30% mobile ad-density ceiling Google enforces
+  via the Better Ads Standards. Never above the fold, never sticky, never a
   pop-up, and kept clear of the pick buttons to avoid accidental taps.
 - Every slot has its size reserved up front (nothing jumps), sits outside the
   parts of the page that re-render when you pick (an ad is never reloaded by a

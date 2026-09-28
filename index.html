@@ -174,10 +174,10 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .game .meta .st{font-weight:600;color:var(--ink-2)}
 .game .meta .st.live{color:var(--live)}
 .game .meta .st.live::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--live);margin-right:5px;vertical-align:1px;animation:pulse 1.6s infinite}
-.game .meta .res{margin-left:auto;font-weight:600;font-size:11.5px;padding:2px 8px;border-radius:99px}
-.res.ok{background:#ECFDF3;color:var(--good)}
-.res.no{background:#FEF2F2;color:var(--bad)}
-.res.none{background:var(--surface-2);color:var(--ink-3)}
+.game .meta .line{margin-left:auto;font-weight:600;font-size:11.5px;padding:2px 8px;border-radius:99px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.game .meta .line i{font-style:normal;font-weight:500;color:var(--ink-3)}
+.wkmeta .bye{white-space:nowrap}
+.wkmeta .logo{width:18px;height:18px;vertical-align:-4px;margin-right:3px}
 .row{display:grid;grid-template-columns:minmax(0,1fr) 54px minmax(0,1fr);gap:8px;align-items:stretch}
 .pickbtn{
   display:flex;align-items:center;gap:10px;text-align:left;width:100%;min-width:0;
@@ -186,6 +186,15 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 }
 .pickbtn:hover{background:var(--surface-2)}
 .logo{width:34px;height:34px;object-fit:contain;flex:none}
+/* text scales with whatever size the badge is drawn at */
+.badge{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;letter-spacing:-.03em;line-height:1;
+  box-shadow:inset 0 0 0 2px var(--ring);container-type:size}
+.badge>span{font-size:27cqw}
+.badge>span.s2{font-size:33cqw}
+.badge{vertical-align:middle}
+/* small badges always sit next to the team's name, so they're just the colours */
+@container (max-width:25px){.badge>span{display:none}}
+td.team .logo.badge{vertical-align:middle;margin-top:-2px}
 .pickbtn .who{display:flex;flex-direction:column;min-width:0;line-height:1.2}
 .pickbtn .who b{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pickbtn .who span{font-size:12px;color:var(--ink-3)}
@@ -342,7 +351,7 @@ tr.out .logo{opacity:.5}
 .sbhead b{display:block;white-space:nowrap;font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:.03em;text-transform:uppercase;line-height:1}
 .sbhead span{font-size:11.5px;color:var(--ink-3)}
 .champ{position:absolute;left:-10px;right:-10px;top:calc(50% + 62px);text-align:center;padding:14px 8px;border-radius:var(--radius);background:var(--surface)}
-.champ img{width:56px;height:56px;object-fit:contain}
+.champ .logo{width:56px;height:56px;object-fit:contain}
 .champ .k{font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--ink-3);text-transform:uppercase;margin-top:4px}
 .champ .v{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:.03em;text-transform:uppercase;line-height:1.1;margin-top:2px}
 .champ.wait .v{font-size:15px;color:var(--ink-3);font-family:var(--body);font-weight:500;text-transform:none;letter-spacing:0}
@@ -384,6 +393,10 @@ tr.out .logo{opacity:.5}
 .rules p{font-size:14px;color:var(--ink-2);margin:0 0 10px}
 .rules code{font-size:12.5px;background:var(--surface-2);padding:1px 5px;border-radius:4px;color:var(--ink)}
 .dead{color:var(--ink-3)}
+
+/* ---------- footer ---------- */
+.credits{margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-3);line-height:1.6}
+.credits a{color:var(--ink-2)}
 
 /* ---------- modal ---------- */
 .modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(16,24,40,.45);backdrop-filter:blur(2px)}
@@ -437,8 +450,12 @@ tr.out .logo{opacity:.5}
 /* if AdSense has nothing to show, fold the slot away rather than leave a hole */
 .adinline:has(ins[data-ad-status="unfilled"]){display:none}
 .adrail .adslot:has(ins[data-ad-status="unfilled"]){visibility:hidden}
-/* the second half of the game list continues straight on */
-#games2:empty{display:none}
+/* the later parts of the game list continue straight on */
+#games2:empty,#games3:empty{display:none}
+#games2,#games3{margin-top:10px}
+/* extra slots for phones only, where one ad per long page would leave most
+   of the scroll unmonetised; the slot after them folds away if the list ran out */
+@media(min-width:881px){.adinline.m-only{display:none!important}}
 body.noads .adrail,body.noads .adinline{display:none!important}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -490,7 +507,6 @@ body.noads .adrail,body.noads .adinline{display:none!important}
   <div class="stat"><b id="sFinal">0</b><span>games final</span></div>
   <div class="stat acc"><b id="sPicked">0</b><span>your picks</span></div>
   <div class="stat"><b id="sLeft">272</b><span>left to pick</span></div>
-  <div class="stat" id="sAccWrap" hidden><b id="sAcc">–</b><span>picks correct</span></div>
   <div class="bar" title="Final · Picked · Left"><i class="f" id="barF"></i><i class="p" id="barP"></i></div>
   <div class="updated" id="updated"></div>
 </div>
@@ -512,7 +528,7 @@ body.noads .adrail,body.noads .adinline{display:none!important}
         <h2 id="wkTitle">Week 1</h2>
         <span class="pill" id="wkPill"></span>
         <div class="acts">
-          <button class="btn ghost" id="btnHome" title="Pick every home team for the games left this week">Home teams</button>
+          <button class="btn ghost" id="btnHome" title="Pick the favourite in every game left this week">Favorites</button>
           <button class="btn ghost" id="btnRand" title="Coin flip every game left this week">Random</button>
           <button class="btn ghost" id="btnClearWk" title="Clear your picks for unplayed games this week">Clear</button>
         </div>
@@ -521,6 +537,8 @@ body.noads .adrail,body.noads .adinline{display:none!important}
       <div class="games" id="games"></div>
       <div class="adinline" id="adPicks"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
       <div class="games" id="games2"></div>
+      <div class="adinline m-only" id="adPicks2"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
+      <div class="games" id="games3"></div>
     </div>
     <aside class="seedrail">
       <h3>Playoff picture <span>· if the season ended now</span></h3>
@@ -530,9 +548,14 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 </section>
 
 <section class="panel" id="panel-standings">
-  <div class="cols" id="standings"></div>
+  <div class="cols" id="standings">
+    <div id="stAFC"></div>
+    <div class="adinline m-only" id="adStandings0"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
+    <div id="stNFC"></div>
+  </div>
   <div class="adinline" id="adStandings"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
   <section class="draft" id="draft"></section>
+  <div class="adinline m-only" id="adStandings2"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
   <div class="logbox">
     <h4>Tiebreakers applied</h4>
     <div id="tblog"></div>
@@ -579,6 +602,8 @@ body.noads .adrail,body.noads .adinline{display:none!important}
       <li>Coin toss</li>
     </ol>
 
+    <div class="adinline m-only" id="adRules"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
+
     <h3>Wild card ties — clubs from different divisions</h3>
     <p>If tied clubs are in the same division, the division procedure above runs first. Only the top remaining club from any one division competes for a wild card spot at a time; once a spot is filled, the procedure restarts for the next one.</p>
     <ol>
@@ -601,12 +626,21 @@ body.noads .adrail,body.noads .adinline{display:none!important}
     <p>Strength of victory is the combined winning percentage of every opponent you beat, counted once per win. Strength of schedule is the combined winning percentage of every opponent you played. Both use records from your own picks, so they shift as you fill in the board.</p>
 
     <h3>Real results</h3>
-    <p>Games that have been played are filled in automatically with the final score and locked, so the standings and seeds always start from the real season. You pick whatever's left. If you picked a game before it was played, it's marked right or wrong and counted in <b>picks correct</b>. Results refresh every few minutes on game days.</p>
+    <p>Games that have been played are filled in automatically with the final score and locked, so the standings and seeds always start from the real season. You pick whatever's left. Results refresh every few minutes on game days.</p>
+
+    <h3>Point spreads</h3>
+    <p>Upcoming games show the betting point spread and over/under (from nflverse), updated every Tuesday when the new week's lines come out — a quick read on who's favoured. <b>Favorites</b> picks the favoured side of every game left in the week (home team when the line is a pick ’em). Lines are for reference only.</p>
 
     <h3>Saving</h3>
     <p>Picks save automatically in this browser when it allows it. <b>Board ▾ → Save picks to file</b> downloads a JSON copy you can reload later or move to another device — the reliable option if you're doing this in more than one sitting.</p>
   </div>
 </section>
+
+<footer class="credits">
+  Schedule, scores and point spreads from <a href="https://github.com/nflverse/nflverse-data" target="_blank" rel="noopener">nflverse</a>
+  (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>).
+  Not affiliated with or endorsed by the NFL or any team. Lines are for reference only.
+</footer>
 
 </div>
 </div>
@@ -628,45 +662,62 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 /* ==========================================================
    TEAMS
    ========================================================== */
+/* k / k2: each club's official primary and secondary colours, as listed in
+   its brand palette (via teamcolorcodes.com). */
 const TEAMS = {
-  BUF:{c:'Buffalo',n:'Bills',cf:'AFC',dv:'AFC East',k:'#00338D'},
-  MIA:{c:'Miami',n:'Dolphins',cf:'AFC',dv:'AFC East',k:'#008E97'},
-  NE:{c:'New England',n:'Patriots',cf:'AFC',dv:'AFC East',k:'#0A2342'},
-  NYJ:{c:'New York',n:'Jets',cf:'AFC',dv:'AFC East',k:'#1C7C54'},
-  BAL:{c:'Baltimore',n:'Ravens',cf:'AFC',dv:'AFC North',k:'#5B4B9E'},
-  CIN:{c:'Cincinnati',n:'Bengals',cf:'AFC',dv:'AFC North',k:'#FB4F14'},
-  CLE:{c:'Cleveland',n:'Browns',cf:'AFC',dv:'AFC North',k:'#FF6A13'},
-  PIT:{c:'Pittsburgh',n:'Steelers',cf:'AFC',dv:'AFC North',k:'#FFB612'},
-  HOU:{c:'Houston',n:'Texans',cf:'AFC',dv:'AFC South',k:'#5A7184'},
-  IND:{c:'Indianapolis',n:'Colts',cf:'AFC',dv:'AFC South',k:'#3C7DC4'},
-  JAX:{c:'Jacksonville',n:'Jaguars',cf:'AFC',dv:'AFC South',k:'#12A19A'},
-  TEN:{c:'Tennessee',n:'Titans',cf:'AFC',dv:'AFC South',k:'#4B92DB'},
-  DEN:{c:'Denver',n:'Broncos',cf:'AFC',dv:'AFC West',k:'#FC4C02'},
-  KC:{c:'Kansas City',n:'Chiefs',cf:'AFC',dv:'AFC West',k:'#E31837'},
-  LV:{c:'Las Vegas',n:'Raiders',cf:'AFC',dv:'AFC West',k:'#B8BEC2'},
-  LAC:{c:'Los Angeles',n:'Chargers',cf:'AFC',dv:'AFC West',k:'#0080C6'},
-  DAL:{c:'Dallas',n:'Cowboys',cf:'NFC',dv:'NFC East',k:'#7A90A8'},
-  NYG:{c:'New York',n:'Giants',cf:'NFC',dv:'NFC East',k:'#2A4FA2'},
-  PHI:{c:'Philadelphia',n:'Eagles',cf:'NFC',dv:'NFC East',k:'#1B7A70'},
-  WAS:{c:'Washington',n:'Commanders',cf:'NFC',dv:'NFC East',k:'#A33A2A'},
-  CHI:{c:'Chicago',n:'Bears',cf:'NFC',dv:'NFC North',k:'#C83803'},
-  DET:{c:'Detroit',n:'Lions',cf:'NFC',dv:'NFC North',k:'#0076B6'},
-  GB:{c:'Green Bay',n:'Packers',cf:'NFC',dv:'NFC North',k:'#FFB612'},
-  MIN:{c:'Minnesota',n:'Vikings',cf:'NFC',dv:'NFC North',k:'#8A5FC7'},
-  ATL:{c:'Atlanta',n:'Falcons',cf:'NFC',dv:'NFC South',k:'#C8102E'},
-  CAR:{c:'Carolina',n:'Panthers',cf:'NFC',dv:'NFC South',k:'#0085CA'},
-  NO:{c:'New Orleans',n:'Saints',cf:'NFC',dv:'NFC South',k:'#D3BC8D'},
-  TB:{c:'Tampa Bay',n:'Buccaneers',cf:'NFC',dv:'NFC South',k:'#D50A0A'},
-  ARI:{c:'Arizona',n:'Cardinals',cf:'NFC',dv:'NFC West',k:'#C4364F'},
-  LAR:{c:'Los Angeles',n:'Rams',cf:'NFC',dv:'NFC West',k:'#FFD100'},
-  SF:{c:'San Francisco',n:'49ers',cf:'NFC',dv:'NFC West',k:'#AA0000'},
-  SEA:{c:'Seattle',n:'Seahawks',cf:'NFC',dv:'NFC West',k:'#69BE28'}
+  BUF:{c:'Buffalo',n:'Bills',cf:'AFC',dv:'AFC East',k:'#00338D',k2:'#C60C30'},
+  MIA:{c:'Miami',n:'Dolphins',cf:'AFC',dv:'AFC East',k:'#008E97',k2:'#FC4C02'},
+  NE:{c:'New England',n:'Patriots',cf:'AFC',dv:'AFC East',k:'#002244',k2:'#C60C30'},
+  NYJ:{c:'New York',n:'Jets',cf:'AFC',dv:'AFC East',k:'#125740',k2:'#000000'},
+  BAL:{c:'Baltimore',n:'Ravens',cf:'AFC',dv:'AFC North',k:'#241773',k2:'#000000'},
+  CIN:{c:'Cincinnati',n:'Bengals',cf:'AFC',dv:'AFC North',k:'#FB4F14',k2:'#000000'},
+  CLE:{c:'Cleveland',n:'Browns',cf:'AFC',dv:'AFC North',k:'#311D00',k2:'#FF3C00'},
+  PIT:{c:'Pittsburgh',n:'Steelers',cf:'AFC',dv:'AFC North',k:'#FFB612',k2:'#101820'},
+  HOU:{c:'Houston',n:'Texans',cf:'AFC',dv:'AFC South',k:'#03202F',k2:'#A71930'},
+  IND:{c:'Indianapolis',n:'Colts',cf:'AFC',dv:'AFC South',k:'#002C5F',k2:'#A2AAAD'},
+  JAX:{c:'Jacksonville',n:'Jaguars',cf:'AFC',dv:'AFC South',k:'#006778',k2:'#D7A22A'},
+  TEN:{c:'Tennessee',n:'Titans',cf:'AFC',dv:'AFC South',k:'#0C2340',k2:'#4B92DB'},
+  DEN:{c:'Denver',n:'Broncos',cf:'AFC',dv:'AFC West',k:'#FB4F14',k2:'#002244'},
+  KC:{c:'Kansas City',n:'Chiefs',cf:'AFC',dv:'AFC West',k:'#E31837',k2:'#FFB81C'},
+  LV:{c:'Las Vegas',n:'Raiders',cf:'AFC',dv:'AFC West',k:'#000000',k2:'#A5ACAF'},
+  LAC:{c:'Los Angeles',n:'Chargers',cf:'AFC',dv:'AFC West',k:'#0080C6',k2:'#FFC20E'},
+  DAL:{c:'Dallas',n:'Cowboys',cf:'NFC',dv:'NFC East',k:'#869397',k2:'#041E42'},
+  NYG:{c:'New York',n:'Giants',cf:'NFC',dv:'NFC East',k:'#0B2265',k2:'#A71930'},
+  PHI:{c:'Philadelphia',n:'Eagles',cf:'NFC',dv:'NFC East',k:'#004C54',k2:'#A5ACAF'},
+  WAS:{c:'Washington',n:'Commanders',cf:'NFC',dv:'NFC East',k:'#5A1414',k2:'#FFB612'},
+  CHI:{c:'Chicago',n:'Bears',cf:'NFC',dv:'NFC North',k:'#0B162A',k2:'#C83803'},
+  DET:{c:'Detroit',n:'Lions',cf:'NFC',dv:'NFC North',k:'#0076B6',k2:'#B0B7BC'},
+  GB:{c:'Green Bay',n:'Packers',cf:'NFC',dv:'NFC North',k:'#203731',k2:'#FFB612'},
+  MIN:{c:'Minnesota',n:'Vikings',cf:'NFC',dv:'NFC North',k:'#4F2683',k2:'#FFC62F'},
+  ATL:{c:'Atlanta',n:'Falcons',cf:'NFC',dv:'NFC South',k:'#A71930',k2:'#000000'},
+  CAR:{c:'Carolina',n:'Panthers',cf:'NFC',dv:'NFC South',k:'#0085CA',k2:'#101820'},
+  NO:{c:'New Orleans',n:'Saints',cf:'NFC',dv:'NFC South',k:'#D3BC8D',k2:'#101820'},
+  TB:{c:'Tampa Bay',n:'Buccaneers',cf:'NFC',dv:'NFC South',k:'#D50A0A',k2:'#FF7900'},
+  ARI:{c:'Arizona',n:'Cardinals',cf:'NFC',dv:'NFC West',k:'#97233F',k2:'#000000'},
+  LAR:{c:'Los Angeles',n:'Rams',cf:'NFC',dv:'NFC West',k:'#003594',k2:'#FFA300'},
+  SF:{c:'San Francisco',n:'49ers',cf:'NFC',dv:'NFC West',k:'#AA0000',k2:'#B3995D'},
+  SEA:{c:'Seattle',n:'Seahawks',cf:'NFC',dv:'NFC West',k:'#002244',k2:'#69BE28'}
 };
 const DIVS = ['AFC East','AFC North','AFC South','AFC West','NFC East','NFC North','NFC South','NFC West'];
 const IDS = Object.keys(TEAMS);
 const divTeams = d => IDS.filter(t => TEAMS[t].dv === d);
+/* Team logos are NFL trademarks, so they're off: every team shows as a badge
+   in its official primary colour, ringed in its secondary. Set USE_LOGOS to
+   true to use the images in logos/ instead (page and shared bracket image). */
+const USE_LOGOS = false;
 const logoSrc = t => `logos/${t}.png`;
-const logo = (t, cls='logo') => `<img class="${cls}" src="${logoSrc(t)}" alt="" loading="lazy" decoding="async">`;
+function lum(hex){      // WCAG relative luminance
+  const n = parseInt(hex.slice(1), 16);
+  const f = v => (v /= 255) <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4;
+  return .2126 * f(n >> 16) + .7152 * f(n >> 8 & 255) + .0722 * f(n & 255);
+}
+function inkOn(hex){    // white or near-black text, whichever has more contrast
+  const L = lum(hex);
+  return (1.05) / (L + .05) >= (L + .05) / (lum('#101828') + .05) ? '#FFFFFF' : '#101828';
+}
+const logo = (t, cls='logo') => USE_LOGOS
+  ? `<img class="${cls}" src="${logoSrc(t)}" alt="" loading="lazy" decoding="async">`
+  : `<span class="${cls} badge" style="background:${TEAMS[t].k};color:${inkOn(TEAMS[t].k)};--ring:${TEAMS[t].k2}" aria-hidden="true"><span${t.length < 3 ? ' class="s2"' : ''}>${t}</span></span>`;
 
 /* SCHEDULE injected here: [week, away, home, siteOrNull] */
 const SCHEDULE=[
@@ -1339,11 +1390,6 @@ function renderSummary(){
   $('#barF').style.width = (fin / GAMES.length * 100).toFixed(2) + '%';
   $('#barP').style.width = (picked / GAMES.length * 100).toFixed(2) + '%';
 
-  const graded = GAMES.filter(g => isFinal(g.i) && S.picks[g.i]);
-  const right = graded.filter(g => S.picks[g.i] === RES[g.i].win).length;
-  $('#sAccWrap').hidden = !graded.length;
-  $('#sAcc').textContent = `${right}/${graded.length}`;
-
   const live = GAMES.some(g => isLive(g.i));
   $('#updated').innerHTML = RES_UPDATED
     ? `${live ? '<span class="livedot"></span>Games in progress · ' : ''}Results updated ${ago(RES_UPDATED)}`
@@ -1408,7 +1454,7 @@ function gameCard(g, withWeek){
 
   let st = '';
   if(fin) st = `<span class="st">Final${res.ot ? '/OT' : ''}</span>`;
-  else if(live) st = `<span class="st live">Live${res.clock ? ' · ' + esc(res.clock) : ''}</span>`;
+  else if(live) st = `<span class="st live">In progress</span>`;
   else if(k) st = `<span class="st">${withWeek ? fmtWhen(k) : fmtTime(k)}</span>`;
   if(withWeek){
     const wk = `<span class="st">Week ${g.w}</span>`;
@@ -1416,13 +1462,13 @@ function gameCard(g, withWeek){
     if(fin && k) st += `<span>·</span><span>${fmtShort(k)}</span>`;
   }
 
+  // point spread (sportsbook line, refreshed Tuesdays) for games still to be played
   let badge = '';
-  if(fin){
-    const mine = S.picks[g.i];
-    const pickName = x => x === 't' ? 'a tie' : TEAMS[x === 'a' ? g.a : g.h].n;
-    if(mine) badge = mine === res.win
-      ? `<span class="res ok">✓ You picked ${esc(pickName(mine))}</span>`
-      : `<span class="res no">✗ You picked ${esc(pickName(mine))}</span>`;
+  const ln = !fin && !live && res && res.line;
+  if(ln){
+    const fav = ln.fav ? (ln.fav === 'a' ? g.a : g.h) : null;
+    const sp = fav ? `${fav} −${ln.sp}` : 'Pick ’em';
+    badge = `<span class="line" title="Point spread${ln.ou ? ' and over/under' : ''}">${sp}${ln.ou ? ` <i>· O/U ${ln.ou}</i>` : ''}</span>`;
   }
   const site = g.site ? `<span>${esc(g.site)}</span>` : '';
 
@@ -1440,20 +1486,23 @@ function gameCard(g, withWeek){
   </div>`;
 }
 
-/* The list is split in two around an ad slot that never re-renders.
+/* The list is split into parts around ad slots that never re-render
+   (after card 5 everywhere; after card 11 on phones only).
    cards: [{html, day}] in display order. */
-const AD_AFTER = 5;
+const AD_BREAKS = [5, 11];
 function putGames(cards){
-  let a = '', b = '', last = '';
+  const parts = ['', '', ''];
+  let last = '';
   cards.forEach((c, i) => {
+    const k = AD_BREAKS.filter(n => i >= n).length;
     let h = '';
-    if(c.day && (c.day !== last || i === AD_AFTER)) h += `<div class="dayhead">${c.day}</div>`;
+    if(c.day && (c.day !== last || AD_BREAKS.includes(i))) h += `<div class="dayhead">${c.day}</div>`;
     last = c.day || '';
-    h += c.html;
-    if(i < AD_AFTER) a += h; else b += h;
+    parts[k] += h + c.html;
   });
-  $('#games').innerHTML = a;
-  $('#games2').innerHTML = b;
+  $('#games').innerHTML = parts[0];
+  $('#games2').innerHTML = parts[1];
+  $('#games3').innerHTML = parts[2];
 }
 
 function renderWeek(){
@@ -1461,9 +1510,9 @@ function renderWeek(){
   document.querySelectorAll('#modeSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === S.mode));
   $('#rail').hidden = team;
   $('#teamPick').hidden = !team;
-  $('#btnHome').textContent = team ? 'Win out' : 'Home teams';
+  $('#btnHome').textContent = team ? 'Win out' : 'Favorites';
   $('#btnRand').textContent = team ? 'Lose out' : 'Random';
-  $('#btnHome').title = team ? 'Pick this team to win every game left' : 'Pick every home team for the games left this week';
+  $('#btnHome').title = team ? 'Pick this team to win every game left' : 'Pick the favourite in every game left this week (home team if no line)';
   $('#btnRand').title = team ? 'Pick this team to lose every game left' : 'Coin flip every game left this week';
   $('#modeHint').textContent = team ? 'Pick one team’s whole season at a time' : '';
   if(team) return renderTeam();
@@ -1488,7 +1537,7 @@ function renderWeek(){
   if(kicks.length) parts.push(`${fmtShort(kicks[0])} – ${fmtShort(kicks[kicks.length-1])}`);
   parts.push(allFinal ? 'All games final' : `<b>${left}</b> of ${gs.length} left to pick`);
   const b = byeTeams[w];
-  if(b.length) parts.push(`Bye: ${b.map(t=>esc(TEAMS[t].n)).join(', ')}`);
+  if(b.length) parts.push(`Bye: ${b.map(t=>`<span class="bye" title="${esc(TEAMS[t].c + ' ' + TEAMS[t].n)}">${logo(t)}${esc(TEAMS[t].n)}</span>`).join(', ')}`);
   $('#wkMeta').innerHTML = parts.join(' · ');
 
   // group by kickoff day when we know the times
@@ -1595,7 +1644,7 @@ function renderDraft(){
 
 function renderStandings(){
   renderDraft();
-  $('#standings').innerHTML = ['AFC','NFC'].map(cf=>{
+  ['AFC','NFC'].forEach(cf=>{ $('#st'+cf).innerHTML = (()=>{
     const C = VIEW.conf[cf];
     const seedIdx = t => C.seeds.indexOf(t);
     const tables = C.divisions.map(d=>{
@@ -1629,7 +1678,7 @@ function renderStandings(){
         <td>${fmtRec(R[t].ov)}</td><td>${fmtPct(R[t].pct)}</td><td>${fmtRec(R[t].conf)}</td>
         <td class="how">Out</td></tr>`).join('')}
       </tbody></table></div></div>`;
-  }).join('');
+  })(); });
 
   const log = TBLOG;
   $('#tblog').innerHTML = log.length ? log.map(e=>`
@@ -1689,7 +1738,7 @@ function renderPlayoffs(){
   const sb = BR.sb;
   const sbSeed = t => BR.AFC.seeds.includes(t) ? BR.AFC.seedOf(t) : BR.NFC.seedOf(t);
   const champ = sb.win
-    ? `<div class="champ"><img src="${logoSrc(sb.win)}" alt=""><div class="k">Your champion</div>
+    ? `<div class="champ">${logo(sb.win, 'logo big')}<div class="k">Your champion</div>
          <div class="v">${esc(TEAMS[sb.win].c)} ${esc(TEAMS[sb.win].n)}</div></div>`
     : `<div class="champ wait"><div class="k">Champion</div><div class="v">${sb.teams ? 'Pick the Super Bowl winner' : 'Pick the conference champions'}</div></div>`;
   const sbCol = `<div class="sbcol"><div class="colbody"><div class="sbslot">
@@ -1729,6 +1778,7 @@ const onGameClick = e=>{
 };
 $('#games').addEventListener('click', onGameClick);
 $('#games2').addEventListener('click', onGameClick);
+$('#games3').addEventListener('click', onGameClick);
 $('#poBody').addEventListener('click', e=>{
   const b = e.target.closest('[data-po]'); if(!b) return;
   const id = b.dataset.po, t = b.dataset.team;
@@ -1751,7 +1801,8 @@ const openGames = () => (S.mode === 'team'
   : byWeek[S.week]).filter(g => !isFinal(g.i));
 const sideOf = (g, t) => g.a === t ? 'a' : 'h';
 $('#btnHome').addEventListener('click', ()=>{
-  openGames().forEach(g => S.picks[g.i] = S.mode === 'team' ? sideOf(g, S.team) : 'h'); render();
+  const favOf = g => (RES[g.i] && RES[g.i].line && RES[g.i].line.fav) || 'h';
+  openGames().forEach(g => S.picks[g.i] = S.mode === 'team' ? sideOf(g, S.team) : favOf(g)); render();
 });
 $('#btnRand').addEventListener('click', ()=>{
   openGames().forEach(g => S.picks[g.i] = S.mode === 'team'
@@ -1845,12 +1896,13 @@ function toast(msg){
    SHAREABLE BRACKET IMAGE
    ========================================================== */
 const IMG = {
-  W:1200, PAD:52, GAP:20,
-  bg:'#FFFFFF', panel:'#FFFFFF', panel2:'#F7F8FA', line:'#E4E7EC',
-  chalk:'#101828', dim:'#475467', faint:'#8A94A6', amber:'#1D4ED8', win:'#EFF4FF'
+  W:1600, P:48, CW:176, G:28, SBW:280, H:600, ROW:34,
+  bg:'#FFFFFF', line:'#E4E7EC', line2:'#D5DAE1', surface:'#F7F8FA',
+  ink:'#101828', dim:'#475467', faint:'#8A94A6', accent:'#1D4ED8', accentInk:'#1E40AF', soft:'#EFF4FF'
 };
 const LOGO_IMG = {};
 function loadLogos(){
+  if(!USE_LOGOS) return Promise.resolve();
   return Promise.all(IDS.map(t => LOGO_IMG[t] ? Promise.resolve() : new Promise(res=>{
     const im = new Image();
     im.onload = ()=>{ LOGO_IMG[t] = im; res(); };
@@ -1860,7 +1912,17 @@ function loadLogos(){
 }
 function drawLogo(c, t, cx, cy, size){
   const im = LOGO_IMG[t];
-  if(!im){ c.fillStyle = TEAMS[t].k; rr(c,cx-2,cy-size/2,4,size,2); c.fill(); return; }
+  if(!im){   // colour badge, same as the page when logos are off
+    c.save();
+    c.fillStyle = TEAMS[t].k; c.beginPath(); c.arc(cx, cy, size/2, 0, Math.PI*2); c.fill();
+    const rw = Math.max(1.5, size * 0.07);
+    c.strokeStyle = TEAMS[t].k2; c.lineWidth = rw;
+    c.beginPath(); c.arc(cx, cy, size/2 - rw/2, 0, Math.PI*2); c.stroke();
+    c.fillStyle = inkOn(TEAMS[t].k); c.font = `700 ${Math.round(size * (t.length < 3 ? 0.36 : 0.29))}px Inter, sans-serif`;
+    track(c, 0); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(t, cx, cy + 1);
+    c.restore();
+    return;
+  }
   const k = Math.min(size/im.naturalWidth, size/im.naturalHeight);
   const w = im.naturalWidth*k, h = im.naturalHeight*k;
   c.drawImage(im, cx - w/2, cy - h/2, w, h);
@@ -1872,176 +1934,184 @@ function rr(c,x,y,w,h,r){
 }
 function track(c,px){ try{ c.letterSpacing = px+'px'; }catch(e){} }
 function full(t){ return TEAMS[t].c + ' ' + TEAMS[t].n; }
+function fitText(c, text, max){
+  if(c.measureText(text).width <= max) return text;
+  while(text.length > 1 && c.measureText(text + '…').width > max) text = text.slice(0, -1);
+  return text + '…';
+}
 
-function imgRow(c, x, y, w, h, team, seedLabel, state){
+/* one team line inside a matchup card */
+function imgRow(c, x, y, w, h, team, seed, state){
+  c.textAlign = 'left'; track(c, 0);
   if(!team){
-    c.fillStyle = IMG.panel2; rr(c,x,y,w,h,4); c.fill();
-    c.fillStyle = IMG.faint; c.font = 'italic 400 17px Inter, sans-serif'; track(c,0);
-    c.textAlign = 'left'; c.fillText('To be decided', x+22, y+h/2+6);
+    c.fillStyle = IMG.faint; c.font = '500 14px Inter, sans-serif';
+    c.fillText('TBD', x + 34, y + h/2 + 5);
     return;
   }
-  c.fillStyle = state==='win' ? IMG.win : IMG.panel2;
-  rr(c,x,y,w,h,4); c.fill();
-  if(state==='win'){ c.fillStyle = IMG.amber; c.fillRect(x,y+4,3,h-8); }
-  c.globalAlpha = state==='out' ? 0.42 : 1;
+  if(state === 'win'){
+    c.fillStyle = IMG.soft; c.fillRect(x, y, w, h);
+    c.fillStyle = IMG.accent; c.fillRect(x, y, 3, h);
+  }
+  c.globalAlpha = state === 'out' ? 0.4 : 1;
+  c.fillStyle = IMG.faint; c.font = '500 12px Inter, sans-serif'; c.textAlign = 'right';
+  c.fillText(String(seed || ''), x + 20, y + h/2 + 4);
+  drawLogo(c, team, x + 37, y + h/2, 22);
+  const rec = fmtRec(R[team].ov);
+  c.font = '500 12px Inter, sans-serif';
+  const recW = c.measureText(rec).width;
+  c.fillStyle = state === 'win' ? IMG.accentInk : IMG.faint;
+  c.textAlign = 'right';
+  c.fillText(rec, x + w - 10, y + h/2 + 4);
   c.textAlign = 'left';
-  c.fillStyle = IMG.faint; c.font = '500 15px Inter, sans-serif'; track(c,0);
-  c.fillText(String(seedLabel||''), x+16, y+h/2+5);
-  drawLogo(c, team, x+58, y+h/2, 28);
-  c.fillStyle = state==='win' ? IMG.amber : IMG.chalk;
-  c.font = '600 27px "Barlow Condensed", sans-serif'; track(c,0.5);
-  c.fillText(TEAMS[team].n, x+82, y+h/2+9);
-  c.textAlign = 'right'; track(c,0);
-  c.fillStyle = state==='win' ? IMG.amber : IMG.dim;
-  c.font = '500 16px Inter, sans-serif';
-  c.fillText(fmtRec(R[team].ov), x+w-16, y+h/2+6);
-  c.globalAlpha = 1; c.textAlign = 'left';
+  c.fillStyle = state === 'win' ? IMG.accentInk : IMG.ink;
+  c.font = '600 19px "Barlow Condensed", sans-serif'; track(c, 0.3);
+  c.fillText(fitText(c, TEAMS[team].n, w - 54 - recW - 14), x + 54, y + h/2 + 7);
+  track(c, 0); c.globalAlpha = 1;
 }
-function imgCard(c, x, y, w, pair, seedOf, picked, note){
-  const rh = 46, nh = note ? 22 : 0;
-  const h = rh*2 + nh;
-  c.fillStyle = IMG.panel; rr(c,x,y,w,h,5); c.fill();
-  c.strokeStyle = IMG.line; c.lineWidth = 1; rr(c,x+.5,y+.5,w-1,h-1,5); c.stroke();
-  const st = t => !picked ? 'plain' : (picked===t ? 'win' : 'out');
-  if(pair){
-    imgRow(c,x+3,y+3,w-6,rh-4, pair[0], seedOf(pair[0]), st(pair[0]));
-    imgRow(c,x+3,y+rh+1,w-6,rh-4, pair[1], seedOf(pair[1]), st(pair[1]));
-  }else{
-    imgRow(c,x+3,y+3,w-6,rh-4, null);
-    imgRow(c,x+3,y+rh+1,w-6,rh-4, null);
-  }
-  if(note){
-    c.fillStyle = IMG.faint; c.font = '500 11px Inter, sans-serif'; track(c,1.2);
-    c.textAlign='left'; c.fillText(note.toUpperCase(), x+16, y+h-7); track(c,0);
-  }
-  return h;
+/* matchup card centred on cy; returns nothing. pair null = TBD vs TBD */
+function imgCard(c, x, cy, w, pair, seedOf, picked, rowH = IMG.ROW){
+  const h = rowH * 2, y = Math.round(cy - h/2);
+  c.save();
+  rr(c, x, y, w, h, 8); c.fillStyle = '#fff'; c.fill();
+  c.clip();
+  const st = t => !picked ? 'plain' : (picked === t ? 'win' : 'out');
+  imgRow(c, x, y, w, rowH, pair && pair[0], pair && seedOf(pair[0]), pair ? st(pair[0]) : null);
+  imgRow(c, x, y + rowH, w, rowH, pair && pair[1], pair && seedOf(pair[1]), pair ? st(pair[1]) : null);
+  c.restore();
+  c.strokeStyle = IMG.line; c.lineWidth = 1;
+  c.beginPath(); c.moveTo(x, y + rowH + .5); c.lineTo(x + w, y + rowH + .5); c.stroke();
+  rr(c, x + .5, y + .5, w - 1, h - 1, 8); c.stroke();
 }
-function colHead(c, x, y, w, text){
-  c.fillStyle = IMG.faint; c.font = '500 12px Inter, sans-serif'; track(c,1.6);
-  c.textAlign='left'; c.fillText(text.toUpperCase(), x, y); track(c,0);
+function imgBye(c, x, cy, w, team){
+  const rh = IMG.ROW, nh = 20, h = rh + nh, y = Math.round(cy - h/2);
+  c.save(); rr(c, x, y, w, h, 8); c.fillStyle = '#fff'; c.fill(); c.clip();
+  imgRow(c, x, y, w, rh, team, 1, 'plain');
+  c.fillStyle = IMG.surface; c.fillRect(x, y + rh, w, nh);
+  c.fillStyle = IMG.faint; c.font = '500 11px Inter, sans-serif'; c.textAlign = 'left';
+  c.fillText('First-round bye', x + 10, y + rh + 14);
+  c.restore();
+  c.strokeStyle = IMG.line; c.lineWidth = 1;
+  c.beginPath(); c.moveTo(x, y + rh + .5); c.lineTo(x + w, y + rh + .5); c.stroke();
+  rr(c, x + .5, y + .5, w - 1, h - 1, 8); c.stroke();
+}
+/* bracket connector: two games at y1/y2 whose edge is at x, feeding a game at the
+   next column; dir = +1 (AFC, flows right) or -1 (NFC, flows left) */
+function joinPair(c, x, y1, y2, dir){
+  const m = x + dir * IMG.G/2, n = x + dir * IMG.G;
+  c.strokeStyle = IMG.line2; c.lineWidth = 1.5;
+  c.beginPath();
+  c.moveTo(x, y1); c.lineTo(m, y1); c.lineTo(m, y2); c.lineTo(x, y2);
+  c.moveTo(m, (y1+y2)/2); c.lineTo(n, (y1+y2)/2);
+  c.stroke();
 }
 
 async function buildBracketImage(){
   try{ await document.fonts.ready; }catch(e){}
   await loadLogos();
-  const W = IMG.W, P = IMG.PAD, G = IMG.GAP;
-  const CW = W - P*2, col = (CW - G*2)/3;
+  const {W, P, CW, G, SBW, H} = IMG;
+  const s = 2, HT = 880;
   const cv = document.createElement('canvas');
-  const s = 2;
-  cv.width = W*s; cv.height = 1800*s;
+  cv.width = W*s; cv.height = HT*s;
   const c = cv.getContext('2d');
-  c.scale(s,s);
-  c.fillStyle = IMG.bg; c.fillRect(0,0,W,1800);
-  c.fillStyle = IMG.amber; c.fillRect(0,0,W,4);
+  c.scale(s, s);
+  c.fillStyle = IMG.bg; c.fillRect(0, 0, W, HT);
+  c.fillStyle = IMG.accent; c.fillRect(0, 0, W, 6);
 
-  let y = P + 46;
-  c.textAlign='left';
-  c.fillStyle = IMG.chalk; c.font = '700 58px "Barlow Condensed", sans-serif'; track(c,3);
-  c.fillText("PICK ’EM ’26", P, y);
-  const tw = c.measureText("PICK ’EM ’26").width;
-  c.fillStyle = IMG.amber; c.fillRect(P, y+14, tw, 3);
-  c.fillStyle = IMG.dim; c.font = '500 14px Inter, sans-serif'; track(c,2);
-  c.fillText('2026 NFL SEASON — MY BRACKET', P, y+42);
-  const left = leftToPick();
-  c.textAlign='right'; c.fillStyle = IMG.faint;
-  c.fillText(left ? left + ' GAMES LEFT TO PICK' : 'FULL SEASON PICKED', W-P, y+42);
-  track(c,0); c.textAlign='left';
-  y += 84;
+  // header
+  c.textAlign = 'left'; c.fillStyle = IMG.ink;
+  c.font = '700 46px "Barlow Condensed", sans-serif'; track(c, 1.5);
+  c.fillText('PICK ’EM ’26', P, 72);
+  const tw = c.measureText('PICK ’EM ’26').width;
+  track(c, 2.2); c.fillStyle = IMG.dim; c.font = '600 14px Inter, sans-serif';
+  c.fillText('MY 2026 NFL PLAYOFF BRACKET', P + tw + 20, 66);
+  c.textAlign = 'right'; c.fillStyle = IMG.faint; c.font = '500 13px Inter, sans-serif'; track(c, 1.4);
+  c.fillText(new Date().toLocaleDateString(undefined, {year:'numeric', month:'short', day:'numeric'}).toUpperCase(), W - P, 66);
+  track(c, 0);
 
-  // champion band
-  const champ = BR.sb.win;
-  c.fillStyle = IMG.panel; rr(c,P,y,CW,champ?116:70,5); c.fill();
-  c.strokeStyle = champ ? IMG.amber : IMG.line; c.lineWidth = champ?2:1;
-  rr(c,P+1,y+1,CW-2,(champ?116:70)-2,5); c.stroke();
-  c.textAlign='center';
-  if(champ){
-    c.fillStyle = IMG.faint; c.font = '500 13px Inter, sans-serif'; track(c,3.4);
-    c.fillText('SUPER BOWL LXI CHAMPION', W/2, y+34);
-    drawLogo(c, champ, P+70, y+58, 72);
-    drawLogo(c, champ, W-P-70, y+58, 72);
-    c.fillStyle = IMG.amber; c.font = '700 54px "Barlow Condensed", sans-serif'; track(c,2);
-    c.fillText(full(champ).toUpperCase(), W/2, y+90);
-    y += 116;
-  }else{
-    c.fillStyle = IMG.dim; c.font = '500 13px Inter, sans-serif'; track(c,3);
-    c.fillText('BRACKET IN PROGRESS — ' + left + ' GAMES LEFT TO PICK', W/2, y+42);
-    y += 70;
-  }
-  track(c,0); c.textAlign='left';
-  y += 30;
+  // columns, left to right: AFC WC, DV, CC | SB | NFC CC, DV, WC
+  const X = [];
+  for(let i = 0; i < 3; i++) X.push(P + i*(CW + G));
+  const xSB = P + 3*(CW + G);
+  for(let i = 0; i < 3; i++) X.push(xSB + SBW + G + i*(CW + G));
+  const top = 170, mid = top + H/2;
+  const at = (n, k) => top + H * (2*k + 1) / (2*n);   // centre of slot k of n
 
-  // conferences
-  for(const cf of ['AFC','NFC']){
+  c.font = '700 34px "Barlow Condensed", sans-serif'; track(c, 2); c.fillStyle = IMG.ink;
+  c.textAlign = 'left';  c.fillText('AFC', P, 128);
+  c.textAlign = 'right'; c.fillText('NFC', W - P, 128);
+  track(c, 1.2); c.font = '700 11px Inter, sans-serif'; c.fillStyle = IMG.faint;
+  const heads = ['WILD CARD', 'DIVISIONAL', 'AFC FINAL', null, 'NFC FINAL', 'DIVISIONAL', 'WILD CARD'];
+  const cols = [X[0], X[1], X[2], null, X[3], X[4], X[5]];
+  heads.forEach((h, i) => {
+    if(!h) return;
+    c.textAlign = i < 3 ? 'left' : 'right';
+    c.fillText(h, i < 3 ? cols[i] : cols[i] + CW, 152);
+  });
+  track(c, 0);
+
+  const pickOf = (id, pair) => pair && S.po[id] && pair.includes(S.po[id]) ? S.po[id] : null;
+  const drawConf = (cf, xs, dir) => {
     const b = BR[cf], so = b.seedOf;
-    c.fillStyle = IMG.chalk; c.font = '700 32px "Barlow Condensed", sans-serif'; track(c,4);
-    c.fillText(cf, P, y+8);
-    c.fillStyle = IMG.line; c.fillRect(P+70, y-2, CW-70, 1);
-    track(c,0);
-    const top = y + 34;
-
-    // wild card
-    colHead(c, P, top, col, 'Wild Card');
-    let cy = top + 14;
-    b.wc.forEach((m,i)=>{
-      const picked = S.po[b.wcIds[i]] && m.includes(S.po[b.wcIds[i]]) ? S.po[b.wcIds[i]] : null;
-      cy += imgCard(c, P, cy, col, m, so, picked, so(m[0]) + ' seed hosts') + 12;
-    });
-    c.fillStyle = IMG.panel; rr(c,P,cy,col,50,5); c.fill();
-    c.strokeStyle = IMG.line; c.lineWidth=1; rr(c,P+.5,cy+.5,col-1,49,5); c.stroke();
-    imgRow(c, P+3, cy+3, col-6, 44, b.seeds[0], 1, 'plain');
-    c.fillStyle = IMG.faint; c.font='500 11px Inter, sans-serif'; track(c,1.2);
-    c.textAlign='right'; c.fillText('BYE', P+col-70, cy+30); track(c,0); c.textAlign='left';
-    const wcBottom = cy + 50;
-
-    // later rounds sit centred against the wild card column, so the block
-    // reads as a bracket rather than three ragged lists
-    const wcSpan = wcBottom - (top + 14);
-    const CARD = 114;
-
-    const x2 = P + col + G;
-    colHead(c, x2, top, col, 'Divisional');
-    const divSpan = CARD*2 + 12;
-    cy = top + 14 + (wcSpan - divSpan)/2;
-    for(let i=0;i<2;i++){
+    const [xw, xd, xc] = xs;
+    const edge = x => dir > 0 ? x + CW : x;
+    // wild card: bye, 4v5, 3v6, 2v7
+    imgBye(c, xw, at(4, 0), CW, b.seeds[0]);
+    [[2, 1], [1, 2], [0, 3]].forEach(([i, k]) => imgCard(c, xw, at(4, k), CW, b.wc[i], so, pickOf(b.wcIds[i], b.wc[i])));
+    joinPair(c, edge(xw), at(4, 0), at(4, 1), dir);
+    joinPair(c, edge(xw), at(4, 2), at(4, 3), dir);
+    // divisional
+    for(let i = 0; i < 2; i++){
       const m = b.dv ? b.dv[i] : null;
-      const picked = m && S.po[b.dvIds[i]] && m.includes(S.po[b.dvIds[i]]) ? S.po[b.dvIds[i]] : null;
-      cy += imgCard(c, x2, cy, col, m, so, picked, m ? so(m[0]) + ' seed hosts' : 'awaiting wild card round') + 12;
+      imgCard(c, xd, at(2, i), CW, m, so, m && pickOf(b.dvIds[i], m));
     }
-
-    const x3 = P + (col + G)*2;
-    colHead(c, x3, top, col, cf + ' Championship');
-    const ccPicked = b.cc && S.po[b.ccId] && b.cc.includes(S.po[b.ccId]) ? S.po[b.ccId] : null;
-    imgCard(c, x3, top + 14 + (wcSpan - CARD)/2, col, b.cc, so, ccPicked,
-            b.cc ? so(b.cc[0]) + ' seed hosts' : 'awaiting divisional round');
-
-    y = wcBottom + 34;
-  }
+    joinPair(c, edge(xd), at(2, 0), at(2, 1), dir);
+    // conference final, then a stub into the Super Bowl
+    imgCard(c, xc, mid, CW, b.cc, so, pickOf(b.ccId, b.cc));
+    c.strokeStyle = IMG.line2; c.lineWidth = 1.5;
+    c.beginPath(); c.moveTo(edge(xc), mid); c.lineTo(edge(xc) + dir*G, mid); c.stroke();
+  };
+  drawConf('AFC', [X[0], X[1], X[2]], 1);
+  drawConf('NFC', [X[5], X[4], X[3]], -1);
 
   // super bowl
-  c.fillStyle = IMG.amber; c.font = '700 32px "Barlow Condensed", sans-serif'; track(c,4);
-  c.fillText('SUPER BOWL LXI', P, y+8);
-  c.fillStyle = IMG.line; c.fillRect(P+236, y-2, CW-236, 1); track(c,0);
-  const sbW = 560, sbX = P + (CW - sbW)/2;
-  const sbPair = BR.sb.teams;
-  const sbSeed = t => t === (BR.AFC.ccWin) ? 'AFC' : 'NFC';
-  y += 22;
-  y += imgCard(c, sbX, y, sbW, sbPair, sbSeed, BR.sb.win, 'SoFi Stadium · Feb 14, 2027 · neutral site');
+  const sb = BR.sb, cx = xSB + SBW/2;
+  c.textAlign = 'center'; c.fillStyle = IMG.ink;
+  c.font = '700 32px "Barlow Condensed", sans-serif'; track(c, 1.5);
+  c.fillText('SUPER BOWL LXI', cx, mid - 70);
+  track(c, 0); c.fillStyle = IMG.faint; c.font = '500 12px Inter, sans-serif';
+  c.fillText('SoFi Stadium · Feb 14, 2027', cx, mid - 50);
+  const sbSeed = t => BR.AFC.seeds.includes(t) ? BR.AFC.seedOf(t) : BR.NFC.seedOf(t);
+  imgCard(c, xSB, mid, SBW, sb.teams, sbSeed, sb.win, 40);
+  c.strokeStyle = IMG.ink; c.lineWidth = 1.5; rr(c, xSB + .75, mid - 40 + .75, SBW - 1.5, 80 - 1.5, 8); c.stroke();
+
+  const cy = mid + 70;
+  rr(c, xSB, cy, SBW, 150, 12); c.fillStyle = sb.win ? IMG.soft : IMG.surface; c.fill();
+  c.textAlign = 'center';
+  if(sb.win){
+    drawLogo(c, sb.win, cx, cy + 40, 54);
+    c.textAlign = 'center';
+    c.fillStyle = IMG.faint; c.font = '700 11px Inter, sans-serif'; track(c, 1.6);
+    c.fillText('MY CHAMPION · ' + TEAMS[sb.win].c.toUpperCase(), cx, cy + 90);
+    c.fillStyle = IMG.ink; c.font = '700 34px "Barlow Condensed", sans-serif'; track(c, 1);
+    c.fillText(fitText(c, TEAMS[sb.win].n.toUpperCase(), SBW - 20), cx, cy + 126);
+  }else{
+    c.fillStyle = IMG.faint; c.font = '700 11px Inter, sans-serif'; track(c, 1.6);
+    c.fillText('CHAMPION', cx, cy + 66);
+    track(c, 0); c.font = '500 15px Inter, sans-serif';
+    c.fillText('To be decided', cx, cy + 90);
+  }
+  track(c, 0);
 
   // footer
-  y += 30;
-  c.fillStyle = IMG.line; c.fillRect(P, y, CW, 1);
-  y += 24;
-  c.fillStyle = IMG.faint; c.font = '500 12px Inter, sans-serif'; track(c,1.4);
-  c.textAlign='left';  c.fillText("PICK ’EM — NFL TIEBREAKERS APPLIED", P, y);
-  c.textAlign='right'; c.fillText(new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}).toUpperCase(), W-P, y);
-  track(c,0); c.textAlign='left';
-  y += P - 20;
-
-  // crop to content
-  const outC = document.createElement('canvas');
-  outC.width = W*s; outC.height = Math.round(y*s);
-  outC.getContext('2d').drawImage(cv, 0, 0);
-  return outC;
+  const fy = top + H + 60;
+  c.fillStyle = IMG.line; c.fillRect(P, fy - 24, W - 2*P, 1);
+  c.font = '500 12px Inter, sans-serif'; c.fillStyle = IMG.faint; track(c, 1.3);
+  c.textAlign = 'left'; c.fillText('PICK ’EM ’26 · REAL NFL TIEBREAKERS · DATA: NFLVERSE (CC BY 4.0)', P, fy);
+  const left = leftToPick();
+  c.textAlign = 'right';
+  c.fillText(left ? `${left} REGULAR-SEASON GAMES STILL TO PICK` : 'FULL SEASON PICKED', W - P, fy);
+  track(c, 0); c.textAlign = 'left';
+  return cv;
 }
 
 function canvasBlob(cv){
