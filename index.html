@@ -157,7 +157,8 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
   border-color:rgba(8,32,79,.07);box-shadow:0 10px 30px rgba(8,32,79,.12),0 1px 3px rgba(8,32,79,.06)}
 .pickhead.stuck.team .phcap{padding-bottom:8px}
 .pickhead.measuring,.pickhead.measuring *{transition:none!important}
-.wkbar{position:relative;margin:-2px 0 -6px}
+.wkbar{position:relative;margin:-2px 0 -6px;transition:margin .5s var(--spring)}
+.pickhead.stuck .wkbar{margin-top:6px}
 .wkcap{position:relative}
 .rail{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;
   --fl:0px;--fr:0px;
