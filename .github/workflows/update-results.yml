@@ -1,15 +1,19 @@
 name: Update game results
 
+# Once a day at 8:00 AM Eastern: finalizes every game played since the last
+# run (Thursday through Monday nights) and refreshes the betting lines.
+#
+# GitHub's scheduler only speaks UTC and ignores daylight saving, so both
+# possible UTC times are scheduled and the job keeps only the one that is
+# 8 AM in New York today:
+#   EDT (Mar–Nov, UTC-4) -> 12:00 UTC
+#   EST (Nov–Mar, UTC-5) -> 13:00 UTC
+# The choice uses New York's current UTC offset, not the clock, so a run that
+# GitHub starts late still counts.
 on:
   schedule:
-    # Game windows (UTC): Sunday afternoon + Saturday late season,
-    # then Thursday/Sunday/Monday night games which finish after midnight UTC.
-    - cron: "*/20 16-23 * * 0,6"
-    - cron: "*/20 0-5 * * 0,1,2,5"
-    # Everything else: every two hours, to catch stat corrections and schedule flexes
-    - cron: "17 */2 * * *"
-    # Tuesday 11:05am ET: new week's point spreads are posted
-    - cron: "5 15 * * 2"
+    - cron: "0 12 * * *"
+    - cron: "0 13 * * *"
   workflow_dispatch:
     inputs:
       odds:
@@ -29,15 +33,35 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Is it 8 AM Eastern?
+        id: gate
+        env:
+          EVENT: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          if [ "$EVENT" != "schedule" ]; then
+            echo "Manual run."; echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          offset=$(TZ=America/New_York date +%z)      # -0400 in EDT, -0500 in EST
+          if [ "$offset" = "-0400" ]; then want="0 12 * * *"; else want="0 13 * * *"; fi
+          if [ "$SCHEDULE" = "$want" ]; then
+            echo "8 AM Eastern run (New York is UTC$offset)."; echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Not the 8 AM Eastern trigger today (New York is UTC$offset) - skipping."; echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.gate.outputs.run == 'true'
 
       - uses: actions/setup-python@v5
+        if: steps.gate.outputs.run == 'true'
         with:
           python-version: "3.12"
 
-      - name: Fetch results
+      - name: Fetch results and lines
+        if: steps.gate.outputs.run == 'true'
         env:
-          ODDS: ${{ github.event.schedule == '5 15 * * 2' || inputs.odds == true }}
+          ODDS: ${{ github.event_name == 'schedule' || inputs.odds == true }}
         run: |
           if [ "$ODDS" = "true" ]; then
             python scripts/update_results.py --odds
@@ -46,6 +70,7 @@ jobs:
           fi
 
       - name: Commit if changed
+        if: steps.gate.outputs.run == 'true'
         run: |
           if git diff --quiet -- data/results.json && git ls-files --error-unmatch data/results.json >/dev/null 2>&1; then
             echo "No result changes."

@@ -880,10 +880,10 @@ body.noads .adrail,body.noads .adinline{display:none!important}
     <p>Strength of victory is the combined winning percentage of every opponent you beat, counted once per win. Strength of schedule is the combined winning percentage of every opponent you played. Both use records from your own picks, so they shift as you fill in the board.</p>
 
     <h3>Real results</h3>
-    <p>Games that have been played are filled in automatically with the final score and locked, so the standings and seeds always start from the real season. You pick whatever's left. Results refresh every few minutes on game days.</p>
+    <p>Games that have been played are filled in automatically with the final score and locked, so the standings and seeds always start from the real season. You pick whatever's left. Results update every morning at 8 AM Eastern, so games from the day before are locked in by the time you check.</p>
 
     <h3>Point spreads</h3>
-    <p>Upcoming games show the betting point spread and over/under (from nflverse), updated every Tuesday when the new week's lines come out — a quick read on who's favoured. <b>Favorites</b> picks the favoured side of every game left in the week (the home team when a line is a pick ’em). Weeks whose lines aren’t out yet show <b>Home teams</b> instead. Lines are for reference only.</p>
+    <p>Upcoming games show the betting point spread and over/under (from nflverse), refreshed every morning at 8 AM Eastern — a quick read on who's favoured. <b>Favorites</b> picks the favoured side of every game left in the week (the home team when a line is a pick ’em). Weeks whose lines aren’t out yet show <b>Home teams</b> instead. Lines are for reference only.</p>
 
     <h3>Saving</h3>
     <p>Your picks save automatically in this browser, so they’re here when you come back on the same device.</p>
@@ -1851,7 +1851,7 @@ function gameCard(g, withWeek){
     if(fin && k) st += `<span>·</span><span>${fmtShort(k)}</span>`;
   }
 
-  // point spread (sportsbook line, refreshed Tuesdays) for games still to be played
+  // point spread (refreshed each morning at 8 AM ET) for games still to be played
   let badge = '';
   const ln = !fin && !live && res && res.line;
   if(ln){

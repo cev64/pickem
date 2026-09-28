@@ -12,8 +12,9 @@ Runs from the GitHub Action in .github/workflows/update-results.yml, or by hand:
     python scripts/update_results.py              # scores
     python scripts/update_results.py --odds       # scores + refresh spreads
 
-Spreads are only refreshed with --odds (the Action passes it on Tuesdays,
-once the new week's lines are up). Other runs keep the last saved line, so a
+The Action runs this once a day at 8 AM Eastern with --odds: it finalizes
+every game played since the previous morning and refreshes the lines for games
+still to be played. Without --odds the saved lines are kept; either way a
 finished game keeps the line it was last listed at.
 
 The file is only rewritten when a game actually changed, so the Action
