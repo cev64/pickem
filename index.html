@@ -169,7 +169,7 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .rail-track{--ring:38px;--padT:14px;--padB:14px;--dot:5px;position:relative;display:flex;min-width:100%;
   padding:var(--padT) 8px var(--padB);
   transition:--ring .55s var(--spring),--padT .55s var(--spring),--padB .55s var(--spring),--dot .3s var(--ease)}
-.wkbar.stuck .rail-track{--ring:30px;--padT:8px;--padB:9px;--dot:0px}
+.wkbar.stuck .rail-track{--ring:30px;--padT:8px;--padB:17px;--dot:0px}
 .wk{--s:1;flex:1 0 46px;display:flex;flex-direction:column;align-items:center;gap:calc(var(--dot) * 1.2);background:none;border:none;
   padding:0;cursor:pointer;position:relative;z-index:1;color:var(--ink-2);scroll-snap-align:center;opacity:var(--o,1)}
 .wk-in{position:relative;width:var(--ring);height:var(--ring);display:grid;place-items:center;
@@ -206,7 +206,7 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 /* touch wheel */
 .wkbar.lens .rail{scroll-snap-type:x mandatory}
 .wkbar.lens .rail-track{--ring:42px;--padT:16px;padding-inline:calc(50% - 29px)}
-.wkbar.lens.stuck .rail-track{--ring:32px;--padT:12px;--padB:10px}
+.wkbar.lens.stuck .rail-track{--ring:32px;--padT:12px;--padB:18px}
 .wkbar.lens .wk{flex:0 0 58px}
 .wkbar.lens .wk-in{transition:none}
 /* arrows: mouse users, only when the weeks don't all fit */
