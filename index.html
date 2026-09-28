@@ -39,6 +39,7 @@
   --bad:#DC2626;
   --live:#DC2626;
   --radius:12px;
+  --wrap:1240px;          /* page width; narrower on laptops to make room for the ad rails */
   --radius-sm:8px;
   --shadow:0 1px 2px rgba(16,24,40,.05);
   --shadow-lg:0 12px 32px rgba(16,24,40,.14);
@@ -64,13 +65,13 @@ body{
   -webkit-font-smoothing:antialiased;min-height:100vh;font-variant-numeric:tabular-nums;
 }
 button{font-family:inherit}
-.wrap{max-width:1240px;margin:0 auto;padding:0 max(16px, env(safe-area-inset-right)) calc(80px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 max(16px, env(safe-area-inset-right)) calc(80px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))}
 
 /* ---------- header ---------- */
 .topbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:saturate(1.4) blur(8px);border-bottom:1px solid var(--line)}
 .topbar{padding-top:env(safe-area-inset-top);transition:box-shadow .3s var(--ease),border-color .3s var(--ease)}
 .topbar.scrolled{box-shadow:0 8px 24px rgba(8,32,79,.07);border-bottom-color:transparent}
-.topbar .in{max-width:1240px;margin:0 auto;padding:10px max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));display:flex;align-items:center;gap:12px}
+.topbar .in{max-width:var(--wrap);margin:0 auto;padding:10px max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));display:flex;align-items:center;gap:12px}
 .mark{width:34px;height:34px;border-radius:8px;flex:none}
 h1{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:.03em;text-transform:uppercase;margin:0;line-height:1}
 h1 .yr{color:var(--accent)}
@@ -558,12 +559,14 @@ tr.out .logo{opacity:.5}
 .pohead .acts{margin-left:auto!important;width:auto!important;flex:none}
 @media(max-width:620px){.pohead h2{font-size:26px}}
 
+@media(min-width:1440px) and (max-width:1659px){:root:not(:has(body.noads)){--wrap:1040px}}
 /* ---------- ads ----------
    Every slot sits outside the parts of the page that re-render on a pick,
    has its size reserved before anything loads (no content jumping), and
    is kept well clear of tap targets.
 
-   Wide screens (1660px+): side rails in the empty margins. Up to three
+   Wide screens (1440px+): side rails in the empty margins. From 1440 to
+   1659px the page narrows to 1040px so the rails fit beside it. Up to three
    units per side, each in its own ~1150px stretch of page and pinned while
    that stretch scrolls by — so each is actually on screen for a while.
    Short pages simply clip the lower ones, which then never load.
@@ -573,10 +576,11 @@ tr.out .logo{opacity:.5}
    between the standings and the draft order, below the bracket. */
 .page{position:relative}
 .adrail{display:none}
-@media(min-width:1660px){
+@media(min-width:1440px){
   .adrail{display:flex;flex-direction:column;position:absolute;top:24px;bottom:24px;width:160px;overflow:clip;z-index:1}
-  .adrail.l{left:calc(50% - 810px)}
-  .adrail.r{right:calc(50% - 810px)}
+  /* half the page, a 16px gap (32px from the content, with the page's padding), the 160px rail */
+  .adrail.l{left:calc(50% - var(--wrap) / 2 - 176px)}
+  .adrail.r{right:calc(50% - var(--wrap) / 2 - 176px)}
   .adseg{flex:none;height:1150px}
   .adseg .adslot{position:sticky;top:74px}
   .adinline{display:none!important}
@@ -603,7 +607,7 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 /* laptop sidebar slot under the playoff picture: only where the sidebar exists,
    the side rails don't, and the screen is tall enough to show card + ad together */
 .adinline.side-ad{display:none;margin:14px 0 0;padding:0;border:none}
-@media(min-width:941px) and (max-width:1659px) and (min-height:900px){.adinline.side-ad{display:flex}}
+@media(min-width:941px) and (max-width:1439px) and (min-height:900px){.adinline.side-ad{display:flex}}
 /* bracket slot sits between the AFC and NFC brackets once they stack */
 .bk .bk-ad{grid-area:ad}
 .bk .adinline.bk-ad{margin:0}
