@@ -304,7 +304,7 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .logo{width:34px;height:34px;object-fit:contain;flex:none}
 /* text scales with whatever size the badge is drawn at */
 .badge{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;letter-spacing:-.03em;line-height:1;
-  box-shadow:inset 0 0 0 2px var(--ring);container-type:size}
+  box-shadow:inset 0 0 0 2px var(--team2);container-type:size}
 .badge>span{font-size:27cqw}
 .badge>span.s2{font-size:33cqw}
 .badge{vertical-align:middle}
@@ -669,7 +669,7 @@ body.noads .adrail,body.noads .adinline{display:none!important}
   .phteam-below{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--spring)}
   .phteam-below>div{overflow:hidden;min-height:0}
   .pickhead.stuck.team .phteam-below{grid-template-rows:1fr}
-  .phteam.ph-below{padding:10px 10px 2px}
+  .phteam.ph-below{padding:10px 10px 2px;justify-content:center}
 }
 #wkMeta.swap,#wkPill.swap{animation:fadeIn .45s var(--ease) both}
 
@@ -970,7 +970,7 @@ function inkOn(hex){    // white or near-black text, whichever has more contrast
 }
 const logo = (t, cls='logo') => USE_LOGOS
   ? `<img class="${cls}" src="${logoSrc(t)}" alt="" loading="lazy" decoding="async">`
-  : `<span class="${cls} badge" style="background:${TEAMS[t].k};color:${inkOn(TEAMS[t].k)};--ring:${TEAMS[t].k2}" aria-hidden="true"><span${t.length < 3 ? ' class="s2"' : ''}>${t}</span></span>`;
+  : `<span class="${cls} badge" style="background:${TEAMS[t].k};color:${inkOn(TEAMS[t].k)};--team2:${TEAMS[t].k2}" aria-hidden="true"><span${t.length < 3 ? ' class="s2"' : ''}>${t}</span></span>`;
 
 /* SCHEDULE injected here: [week, away, home, siteOrNull] */
 const SCHEDULE=[
