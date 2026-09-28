@@ -205,10 +205,14 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .wkbar.stuck .wk-ind{box-shadow:0 2px 6px rgba(8,32,79,.22)}
 .wk-ind.ready{transition:transform .6s var(--spring),box-shadow .3s var(--ease)}
 .wkbar.mag .wk-ind.ready{transition:transform .18s var(--ease)}
-.wkbar.lens.scrolling .wk-ind.ready{transition:transform .42s var(--spring)}
-/* touch wheel */
+/* while the wheel moves the disc keeps up with the centre line; the spring is for taps */
+.wkbar.lens.scrolling .wk-ind.ready{transition:transform .22s var(--ease)}
+/* touch wheel. The end padding lets the first and last weeks reach the centre
+   line. It's set in px (--edge, from layoutRail): a % padding counts as zero
+   when Safari and Firefox size the max-content track, so the track came out
+   too narrow and week 18 could never be centred there. */
 .wkbar.lens .rail{scroll-snap-type:x mandatory}
-.wkbar.lens .rail-track{--ring:42px;--padT:16px;padding-inline:calc(50% - 29px)}
+.wkbar.lens .rail-track{--ring:42px;--padT:16px;padding-inline:var(--edge, calc(50% - 29px))}
 .wkbar.lens.stuck .rail-track{--ring:32px;--padT:12px;--padB:18px}
 .wkbar.lens .wk{flex:0 0 58px}
 .wkbar.lens .wk-in{transition:none}
@@ -1842,8 +1846,14 @@ function placeWkInd(){
   ind.style.transform = `translate(${c.offsetLeft + c.offsetWidth/2}px, ${(sc - 1) * -12}px) scale(${sc})`;
   if(!ind.classList.contains('ready')) requestAnimationFrame(()=>requestAnimationFrame(()=>ind.classList.add('ready')));
 }
+function setRailEdge(){
+  if(rail.clientWidth) rail.style.setProperty('--edge', (rail.clientWidth / 2 - 29) + 'px');
+}
+// also when the rail first gets a size (e.g. the page opened on another tab)
+if('ResizeObserver' in window) new ResizeObserver(setRailEdge).observe(rail);
 function layoutRail(){
   wkbar.classList.toggle('lens', !FINE.matches);
+  setRailEdge();
   railEdges();
 }
 function railEdges(){
@@ -2443,7 +2453,22 @@ let userScroll = false, touching = false, swiping = false, lastCentre = null, sr
 const HAS_SCROLLEND = 'onscrollend' in window;
 rail.addEventListener('touchstart', ()=>{ userScroll = true; touching = true; clearTimeout(settleT); }, {passive:true});
 rail.addEventListener('touchmove', ()=>{ if(wkbar.classList.contains('lens')) swiping = true; }, {passive:true});
-const touchUp = () => { touching = false; if(!HAS_SCROLLEND){ clearTimeout(settleT); settleT = setTimeout(railSettle, 260); } };
+/* Safari doesn't always fire scrollend, and iOS momentum + snapping can pause
+   for a moment mid-glide, so a plain timer could settle too early and leave
+   the disc behind. The fallback only settles once the rail has actually
+   stopped moving; it runs everywhere, since settling twice is harmless. */
+function settleWhenStill(n = 0){
+  clearTimeout(settleT);
+  settleT = setTimeout(()=>{
+    const x = rail.scrollLeft;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      if(touching) return;
+      if(Math.abs(rail.scrollLeft - x) > .5 && n < 20) settleWhenStill(n + 1);
+      else railSettle();
+    }));
+  }, n ? 80 : 180);
+}
+const touchUp = () => { touching = false; settleWhenStill(); };
 rail.addEventListener('touchend', touchUp, {passive:true});
 rail.addEventListener('touchcancel', touchUp, {passive:true});
 rail.addEventListener('pointerdown', ()=>{ userScroll = true; }, {passive:true});
@@ -2451,25 +2476,29 @@ function railSettle(){
   clearTimeout(settleT);
   if(touching) return;
   wkbar.classList.remove('scrolling');
-  if(!userScroll || !wkbar.classList.contains('lens')){ swiping = false; return; }
-  userScroll = false;
-  const c = lensUpdate();
-  swiping = false;
-  if(c && +c.dataset.w !== S.week){ railWeek = +c.dataset.w; haptic('tap'); goWeek(+c.dataset.w); }
-  else setVis(S.week);
+  const was = userScroll;
+  userScroll = false; swiping = false;
+  if(!wkbar.classList.contains('lens')) return;
+  const c = lensUpdate(); if(!c) return;
+  const w = +c.dataset.w;
+  if(was && w !== S.week){ railWeek = w; haptic('tap'); goWeek(w); return; }
+  // otherwise the disc and the centre line must agree: bring the selected week back
+  setVis(S.week);
+  if(w !== S.week) centerWeek(S.week, 'smooth');
 }
 rail.addEventListener('scroll', ()=>{
   wkbar.classList.add('scrolling');
   if(!sraf) sraf = requestAnimationFrame(()=>{
     sraf = 0; railEdges();
     const c = lensUpdate();
+    if(c && userScroll && wkbar.classList.contains('lens')) swiping = true;
     if(c && swiping) setVis(+c.dataset.w); else placeWkInd();
     if(c && c !== lastCentre){
       if(lastCentre && swiping) haptic('tick');
       lastCentre = c;
     }
   });
-  if(!HAS_SCROLLEND){ clearTimeout(settleT); settleT = setTimeout(railSettle, 260); }
+  if(!touching) settleWhenStill();
 }, {passive:true});
 if(HAS_SCROLLEND) rail.addEventListener('scrollend', railSettle);
 /* mouse wheel scrolls the row sideways when the weeks overflow */
