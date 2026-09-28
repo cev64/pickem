@@ -95,13 +95,13 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
   transition:background-color .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease),transform .18s var(--ease),opacity .2s;
 }
 @media(hover:hover){.btn:hover{color:var(--ink);background:var(--surface)}}
-.btn:active,.notch:active,.pickbtn:active,.mrow:active,.teampick button:active{transform:scale(.97)}
+.btn:active,.wk:active,.pickbtn:active,.mrow:active,.teampick button:active{transform:scale(.97)}
 .tab:active,.seg button:active{transform:scale(.96)}
 .btn:disabled{opacity:.55}
 .btn.share{display:inline-flex;align-items:center;gap:6px}
 /* keep taps from leaving a focus ring behind; keyboard focus still shows */
 :focus:not(:focus-visible){outline:none}
-.btn:focus-visible,.tab:focus-visible,.notch:focus-visible,.pickbtn:focus-visible,.tiebtn:focus-visible,.mrow:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:focus-visible,.tab:focus-visible,.pickbtn:focus-visible,.tiebtn:focus-visible,.mrow:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 @media(hover:hover){.btn.primary:hover{background:var(--accent-ink)}}
 .btn.danger{color:var(--bad);border-color:#F3C1C1}
@@ -132,24 +132,66 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .split{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}
 @media(max-width:940px){.split{grid-template-columns:minmax(0,1fr)}}
 
-/* ---------- week rail ---------- */
-.rail{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 10px;margin:0 -2px 8px;scrollbar-width:thin;scroll-snap-type:x proximity}
-.notch{
-  flex:1 0 44px;min-width:44px;background:#fff;border:1px solid var(--line);border-radius:10px;
-  padding:6px 0 8px;cursor:pointer;color:var(--ink-2);position:relative;scroll-snap-align:center;
-  transition:background-color .3s var(--ease),border-color .3s var(--ease),color .3s var(--ease),transform .18s var(--ease);
-  display:flex;flex-direction:column;align-items:center;gap:1px;overflow:hidden;
-}
-.notch .l{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
-.notch .n{font-size:15px;font-weight:700}
-@media(hover:hover){.notch:hover{border-color:var(--line-2);background:var(--surface)}}
-.notch .fill{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--line);}
-.notch .fill i{display:block;height:100%;background:var(--accent);transform-origin:left;transition:transform .6s var(--ease),background-color .3s}
-.notch.final .fill i{background:var(--ink)}
-.notch.now::before{content:'';position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
-.notch[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
-.notch[aria-current="true"] .l{color:rgba(255,255,255,.65)}
-.notch[aria-current="true"].now::before{background:#fff}
+/* ---------- week picker ----------
+   Each week is a progress ring (your picks fill it; all-final weeks are solid
+   navy). A navy disc glides to the selected week.
+   Mouse: all weeks on one row with macOS-Dock-style magnification on hover.
+   Touch: an iOS-picker-style wheel — the week under the centre line is
+   magnified, snaps into place and is selected when the swipe settles. */
+.wkbar{position:relative;margin:0 0 6px}
+.rail{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;
+  --fl:0px;--fr:0px;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--fl),#000 calc(100% - var(--fr)),transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 var(--fl),#000 calc(100% - var(--fr)),transparent 100%)}
+.rail::-webkit-scrollbar{display:none}
+.rail-track{--ring:38px;position:relative;display:flex;min-width:100%;padding:10px 0 4px}
+.wk{--s:1;flex:1 0 46px;display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:none;
+  padding:0;cursor:pointer;position:relative;z-index:1;color:var(--ink-2);scroll-snap-align:center;opacity:var(--o,1)}
+.wk-in{position:relative;width:var(--ring);height:var(--ring);display:grid;place-items:center;
+  transform:translateY(calc((var(--s) - 1) * -12px)) scale(var(--s));transition:transform .5s var(--spring)}
+.wkbar.mag .wk-in{transition:transform .18s var(--ease)}
+.ring{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.ring circle{fill:none;stroke-width:3}
+.ring .trk{stroke:var(--line);transition:stroke .3s var(--ease)}
+.ring .prg{stroke:var(--accent);stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;
+  transition:stroke-dashoffset .8s var(--ease),stroke .3s var(--ease),opacity .3s}
+.wk.zero .ring .prg{opacity:0}
+.wk.final .ring .prg{stroke:var(--ink)}
+.num{position:relative;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;transition:color .3s var(--ease)}
+.wk.done .num{color:var(--accent-ink)}
+.wk.final .num{color:var(--ink)}
+.wk .dot{width:5px;height:5px;border-radius:50%;background:transparent;transition:background-color .3s,transform .5s var(--spring)}
+.wk.now .dot{background:var(--accent)}
+.wk[aria-current="true"] .num{color:#fff}
+.wk[aria-current="true"] .ring .trk{stroke:rgba(255,255,255,.18)}
+.wk[aria-current="true"] .ring .prg{stroke:#fff}
+.wk[aria-current="true"] .dot{transform:scale(1.2)}
+@media(hover:hover){.wk:not([aria-current="true"]):hover .num{color:var(--ink)}}
+.wk:focus-visible{outline:none}
+.wk:focus-visible .wk-in{border-radius:50%;box-shadow:0 0 0 2px #fff,0 0 0 4px var(--accent)}
+/* the gliding selection disc */
+.wk-ind{position:absolute;top:10px;left:0;width:var(--ring);height:var(--ring);border-radius:50%;background:var(--ink);
+  box-shadow:0 6px 16px rgba(8,32,79,.28);z-index:0;pointer-events:none;will-change:transform}
+.wk-ind.ready{transition:transform .6s var(--spring)}
+.wkbar.mag .wk-ind.ready{transition:transform .18s var(--ease)}
+/* touch wheel */
+.wkbar.lens .rail{scroll-snap-type:x mandatory}
+.wkbar.lens .rail-track{--ring:42px;padding-inline:calc(50% - 29px)}
+.wkbar.lens .wk{flex:0 0 58px}
+.wkbar.lens .wk-in{transition:none}
+.wkbar.lens.scrolling .wk-ind.ready{transition:transform .08s linear}
+/* arrows: mouse users, only when the weeks don't all fit */
+.wk-arrow{position:absolute;top:10px;width:30px;height:30px;margin-top:4px;border-radius:50%;border:1px solid var(--line);
+  background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(8,32,79,.12);
+  display:none;align-items:center;justify-content:center;z-index:3;color:var(--ink);cursor:pointer;
+  opacity:0;pointer-events:none;transition:opacity .25s var(--ease),transform .18s var(--ease)}
+.wk-arrow.l{left:-6px}.wk-arrow.r{right:-6px}
+.wkbar.can-l .wk-arrow.l,.wkbar.can-r .wk-arrow.r{opacity:1;pointer-events:auto}
+.wk-arrow:active{transform:scale(.92)}
+@media(hover:hover) and (pointer:fine){.wkbar.over:not(.lens) .wk-arrow{display:flex}}
+/* weeks ripple in on first load and when switching back to By week */
+.wkbar.enter .wk{animation:tpIn .55s var(--spring) both;animation-delay:calc(var(--i) * 22ms)}
+.wkbar.enter .wk-ind{animation:fadeIn .4s var(--ease) both;animation-delay:.3s}
 
 /* ---------- week head ---------- */
 .weekhead{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;margin:6px 0 4px}
@@ -555,7 +597,6 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 .teampick.enter button{animation:tpIn .55s var(--spring) both;animation-delay:calc(var(--n) * 32ms + 60ms)}
 .teampick.enter .tp-ind{animation:fadeIn .4s var(--ease) both;animation-delay:.35s}
 .teampick.enter .dl{animation:fadeIn .4s var(--ease) both}
-.rail.enter{animation:riseIn .45s var(--ease) both}
 /* week / team title roll */
 #wkTitle{position:relative;display:inline-block}
 #wkTitle>span{display:inline-block}
@@ -637,7 +678,13 @@ body.noads .adrail,body.noads .adinline{display:none!important}
           <button data-mode="team" aria-pressed="false">By team</button>
         </div>
       </div>
-      <div class="rail" id="rail"></div>
+      <div class="wkbar" id="wkbar">
+        <button class="wk-arrow l" type="button" aria-label="Earlier weeks" tabindex="-1">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+        <div class="rail" id="rail" role="tablist" aria-label="Week"></div>
+        <button class="wk-arrow r" type="button" aria-label="Later weeks" tabindex="-1">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+      </div>
       <div class="teampick" id="teamPick" hidden></div>
       <div class="weekhead">
         <span id="wkLogo"></span>
@@ -1580,28 +1627,86 @@ function renderSummary(){
   summaryReady = true;
 }
 
-let railWeek = null;
+/* ==========================================================
+   WEEK PICKER
+   ========================================================== */
+const FINE = matchMedia('(hover:hover) and (pointer:fine)');
+const wkbar = $('#wkbar'), rail = $('#rail');
+let wkChips = [], railWeek = null;
+function buildRail(){
+  rail.innerHTML = `<div class="rail-track"><span class="wk-ind" aria-hidden="true"></span>${
+    Array.from({length:WEEKS}, (_, i) => `<button class="wk" role="tab" data-w="${i+1}" style="--i:${i}">
+      <span class="wk-in">
+        <svg class="ring" viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="18"/><circle class="prg" cx="20" cy="20" r="18" pathLength="100"/></svg>
+        <span class="num">${i+1}</span>
+      </span><span class="dot"></span></button>`).join('')}</div>`;
+  wkChips = [...rail.querySelectorAll('.wk')];
+  wkbar.classList.add('enter'); setTimeout(()=>wkbar.classList.remove('enter'), 1300);
+}
 function renderRail(){
+  if(!wkChips.length) buildRail();
   const now = currentWeek();
-  const rail = $('#rail');
-  if(rail.children.length !== WEEKS){
-    rail.innerHTML = Array.from({length:WEEKS},(_,i)=>`<button class="notch" data-w="${i+1}">
-      <span class="l">Wk</span><span class="n">${i+1}</span><span class="fill"><i></i></span></button>`).join('');
-  }
-  [...rail.children].forEach((btn, i)=>{
+  wkChips.forEach((c, i)=>{
     const w = i+1, gs = byWeek[w];
     const d = gs.filter(decided).length;
     const allFinal = gs.every(g => isFinal(g.i));
-    btn.className = ['notch', allFinal ? 'final' : '', w === now ? 'now' : ''].join(' ').trim();
-    btn.setAttribute('aria-current', S.week === w);
-    btn.title = `Week ${w} — ${allFinal ? 'all games final' : (gs.length - d) + ' left to pick'}`;
-    btn.querySelector('.fill i').style.transform = `scaleX(${(d/gs.length).toFixed(3)})`;
+    c.classList.toggle('final', allFinal);
+    c.classList.toggle('done', !allFinal && d === gs.length);
+    c.classList.toggle('zero', d === 0);
+    c.classList.toggle('now', w === now);
+    c.setAttribute('aria-current', S.week === w);
+    c.setAttribute('aria-selected', S.week === w);
+    c.setAttribute('aria-label', `Week ${w}${w === now ? ', this week' : ''} — ${allFinal ? 'all games final' : d + ' of ' + gs.length + ' decided'}`);
+    c.querySelector('.prg').style.strokeDashoffset = (100 - d / gs.length * 100).toFixed(2);
   });
+  layoutRail();
   if(railWeek !== S.week && rail.offsetParent){
-    const on = rail.children[S.week - 1];
-    rail.scrollTo({left: on.offsetLeft - rail.clientWidth/2 + on.offsetWidth/2, behavior: railWeek === null ? 'auto' : 'smooth'});
+    centerWeek(S.week, railWeek === null ? 'auto' : 'smooth');
     railWeek = S.week;
   }
+  lensUpdate();
+  placeWkInd();
+}
+function centerWeek(w, behavior){
+  const c = wkChips[w - 1]; if(!c) return;
+  rail.scrollTo({left: c.offsetLeft + c.offsetWidth/2 - rail.clientWidth/2, behavior});
+}
+/* the disc follows the selected ring, including its magnification */
+function placeWkInd(){
+  const ind = rail.querySelector('.wk-ind'), c = wkChips[S.week - 1];
+  if(!ind || !c || !rail.offsetParent) return;
+  const ring = c.querySelector('.wk-in');
+  const sc = parseFloat(c.style.getPropertyValue('--s')) || 1;
+  ind.style.transform = `translate(${c.offsetLeft + (c.offsetWidth - ring.offsetWidth)/2}px, ${(sc - 1) * -12}px) scale(${sc})`;
+  if(!ind.classList.contains('ready')) requestAnimationFrame(()=>requestAnimationFrame(()=>ind.classList.add('ready')));
+}
+function layoutRail(){
+  wkbar.classList.toggle('lens', !FINE.matches);
+  railEdges();
+}
+function railEdges(){
+  const max = rail.scrollWidth - rail.clientWidth, x = rail.scrollLeft;
+  const over = max > 1, canL = over && x > 2, canR = over && x < max - 2;
+  wkbar.classList.toggle('over', over);
+  wkbar.classList.toggle('can-l', canL);
+  wkbar.classList.toggle('can-r', canR);
+  rail.style.setProperty('--fl', canL ? '32px' : '0px');
+  rail.style.setProperty('--fr', canR ? '32px' : '0px');
+}
+/* touch: magnify toward the centre line; returns the centred week */
+function lensUpdate(){
+  if(!wkbar.classList.contains('lens') || !rail.offsetParent) return null;
+  const r = rail.getBoundingClientRect(), cx = r.left + r.width/2;
+  let best = null, bd = Infinity;
+  wkChips.forEach(c=>{
+    const b = c.getBoundingClientRect(), d = Math.abs(b.left + b.width/2 - cx);
+    if(!REDUCE.matches){
+      c.style.setProperty('--s', (1 + .2 * Math.exp(-(d*d) / (2*58*58))).toFixed(3));
+      c.style.setProperty('--o', (.4 + .6 * Math.exp(-(d*d) / (2*120*120))).toFixed(3));
+    }
+    if(d < bd){ bd = d; best = c; }
+  });
+  return best;
 }
 
 const CHECK = '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -1726,13 +1831,18 @@ function renderWeek(){
   const modeChanged = lastMode !== null && lastMode !== S.mode;
   if(gamesEnter && lastMode !== null){ refresh($('#wkMeta')); refresh($('#wkPill')); }
   if(modeChanged){
-    const tp = $('#teamPick'), rail = $('#rail');
-    tp.classList.remove('enter'); rail.classList.remove('enter');
-    requestAnimationFrame(()=>{ (team ? tp : rail).classList.add('enter'); });
+    const tp = $('#teamPick');
+    tp.classList.remove('enter'); wkbar.classList.remove('enter');
+    requestAnimationFrame(()=>{
+      if(team) tp.classList.add('enter');
+      else { wkbar.classList.add('enter'); setTimeout(()=>wkbar.classList.remove('enter'), 1300); }
+    });
   }
   lastMode = S.mode;
   document.querySelectorAll('#modeSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === S.mode));
-  $('#rail').hidden = team;
+  const wasHidden = wkbar.hidden;
+  wkbar.hidden = team;
+  if(!team && wasHidden) requestAnimationFrame(relayoutRail);
   $('#teamPick').hidden = !team;
   // no lines out yet for the games left this week -> it's a home-team fill
   const hasLines = !team && byWeek[S.week].some(g => !isFinal(g.i) && RES[g.i] && RES[g.i].line);
@@ -2047,10 +2157,74 @@ function goWeek(w){
   S.week = Math.max(1, Math.min(WEEKS, w)); userMovedWeek = true;
   renderRail(); renderWeek(); store.write();
 }
-$('#rail').addEventListener('click', e=>{
-  const n = e.target.closest('.notch'); if(!n) return;
+rail.addEventListener('click', e=>{
+  const n = e.target.closest('.wk'); if(!n) return;
+  if(+n.dataset.w !== S.week && !FINE.matches && navigator.vibrate) try{ navigator.vibrate(6); }catch(_){}
   goWeek(+n.dataset.w);
 });
+/* mouse: Dock-style magnification under the pointer */
+let mx = 0, mraf = 0;
+rail.addEventListener('pointermove', e=>{
+  if(e.pointerType !== 'mouse' || wkbar.classList.contains('lens') || REDUCE.matches) return;
+  mx = e.clientX;
+  if(!mraf) mraf = requestAnimationFrame(()=>{
+    mraf = 0; wkbar.classList.add('mag');
+    wkChips.forEach(c=>{
+      const b = c.getBoundingClientRect(), d = b.left + b.width/2 - mx;
+      c.style.setProperty('--s', (1 + .3 * Math.exp(-(d*d) / (2*50*50))).toFixed(3));
+    });
+    placeWkInd();
+  });
+});
+rail.addEventListener('pointerleave', ()=>{
+  if(wkbar.classList.contains('lens')) return;
+  cancelAnimationFrame(mraf); mraf = 0;
+  wkbar.classList.remove('mag');
+  wkChips.forEach(c => c.style.setProperty('--s', 1));
+  placeWkInd();
+});
+/* touch: wheel scrolling — magnify, tick, and select the week it settles on */
+/* A swipe only "settles" once the finger is up and momentum + snapping are
+   done (scrollend); a pause mid-drag never selects anything. */
+let userScroll = false, touching = false, lastCentre = null, sraf = 0, settleT = 0;
+const HAS_SCROLLEND = 'onscrollend' in window;
+rail.addEventListener('touchstart', ()=>{ userScroll = true; touching = true; clearTimeout(settleT); }, {passive:true});
+const touchUp = () => { touching = false; if(!HAS_SCROLLEND){ clearTimeout(settleT); settleT = setTimeout(railSettle, 260); } };
+rail.addEventListener('touchend', touchUp, {passive:true});
+rail.addEventListener('touchcancel', touchUp, {passive:true});
+rail.addEventListener('pointerdown', ()=>{ userScroll = true; }, {passive:true});
+function railSettle(){
+  clearTimeout(settleT);
+  if(touching) return;
+  wkbar.classList.remove('scrolling');
+  if(!userScroll || !wkbar.classList.contains('lens')) return;
+  userScroll = false;
+  const c = lensUpdate();
+  if(c && +c.dataset.w !== S.week){ railWeek = +c.dataset.w; goWeek(+c.dataset.w); }
+}
+rail.addEventListener('scroll', ()=>{
+  wkbar.classList.add('scrolling');
+  if(!sraf) sraf = requestAnimationFrame(()=>{
+    sraf = 0; railEdges();
+    const c = lensUpdate(); placeWkInd();
+    if(c && c !== lastCentre){
+      if(lastCentre && userScroll && navigator.vibrate) try{ navigator.vibrate(4); }catch(_){}
+      lastCentre = c;
+    }
+  });
+  if(!HAS_SCROLLEND){ clearTimeout(settleT); settleT = setTimeout(railSettle, 260); }
+}, {passive:true});
+if(HAS_SCROLLEND) rail.addEventListener('scrollend', railSettle);
+/* mouse wheel scrolls the row sideways when the weeks overflow */
+rail.addEventListener('wheel', e=>{
+  if(!wkbar.classList.contains('over') || wkbar.classList.contains('lens')) return;
+  if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){ rail.scrollLeft += e.deltaY; e.preventDefault(); }
+}, {passive:false});
+wkbar.querySelector('.wk-arrow.l').addEventListener('click', ()=> rail.scrollBy({left: -rail.clientWidth * .7, behavior:'smooth'}));
+wkbar.querySelector('.wk-arrow.r').addEventListener('click', ()=> rail.scrollBy({left:  rail.clientWidth * .7, behavior:'smooth'}));
+const relayoutRail = () => { layoutRail(); centerWeek(S.week, 'auto'); lensUpdate(); placeWkInd(); };
+window.addEventListener('resize', ()=> requestAnimationFrame(relayoutRail));
+if(FINE.addEventListener) FINE.addEventListener('change', relayoutRail);
 const onGameClick = e=>{
   const b = e.target.closest('[data-g]'); if(!b) return;
   const gi = +b.dataset.g, p = b.dataset.p;
