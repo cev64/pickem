@@ -116,6 +116,7 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .bar .f{background:var(--ink)}
 .bar .p{background:var(--accent)}
 .updated{font-size:12px;color:var(--ink-3);width:100%;margin-top:-6px}
+.updated:empty{display:none}
 .updated .livedot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--live);margin-right:5px;vertical-align:1px;animation:pulse 1.6s infinite}
 @keyframes pulse{50%{opacity:.35}}
 
@@ -161,7 +162,6 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .seg button{background:none;border:none;border-radius:8px;color:var(--ink-2);font-weight:600;font-size:13px;padding:6px 14px;cursor:pointer}
 .seg button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(16,24,40,.12)}
 .seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.modehint{font-size:12.5px;color:var(--ink-3)}
 .teampick{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px 6px;margin:0 0 14px;padding:10px;border:1px solid var(--line);border-radius:var(--radius);background:#fff}
 .teampick .dv{display:flex;flex-direction:column;gap:4px;align-items:stretch}
 .teampick .dl{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--ink-3);text-align:center;white-space:nowrap}
@@ -283,7 +283,7 @@ tr.out .logo{opacity:.5}
 
 /* ---------- draft order ---------- */
 .draft{margin:14px 0 22px}
-.draft .dsub{font-size:13px;color:var(--ink-3);margin:-4px 0 12px}
+.draft .conftitle{margin-bottom:12px}
 .draft .dcols{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
 @media(max-width:880px){.draft .dcols{grid-template-columns:1fr}}
 .draft td:first-child{font-weight:700;color:var(--ink);width:34px}
@@ -346,9 +346,6 @@ tr.out .logo{opacity:.5}
 .mrow.tbd{cursor:default;color:var(--ink-3)}
 .mrow.tbd .tm{font-weight:500}
 .mnote{font-size:10.5px;color:var(--ink-3);padding:4px 10px 5px;border-top:1px solid var(--line);background:var(--surface)}
-@container (max-width:175px){
-  .col h5 .rd{display:none}
-}
 @container (max-width:150px){
   .mrow .rc{display:none}
 }
@@ -361,7 +358,7 @@ tr.out .logo{opacity:.5}
 .sbcol .colbody{height:530px;flex:none}
 .sbslot{flex:1;display:flex;align-items:center;position:relative}
 .sbslot>.matchup{width:100%;border:1.5px solid var(--ink);position:relative;z-index:1}
-.sbhead{position:absolute;left:0;right:0;bottom:calc(50% + 62px);text-align:center}
+.sbhead{position:absolute;left:0;right:0;bottom:calc(50% + 54px);text-align:center}
 .sbhead b{display:block;white-space:nowrap;font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:.03em;text-transform:uppercase;line-height:1}
 .sbhead span{font-size:11.5px;color:var(--ink-3)}
 .champ{position:absolute;left:-10px;right:-10px;top:calc(50% + 62px);text-align:center;padding:14px 8px;border-radius:var(--radius);background:var(--surface)}
@@ -395,8 +392,6 @@ tr.out .logo{opacity:.5}
   .mrow .sd{width:9px;font-size:10px}
   .mnote{display:none}
 }
-.notice{background:var(--surface);border:1px solid var(--line);padding:10px 14px;font-size:13px;color:var(--ink-2);margin-bottom:18px;border-radius:10px}
-.notice b{color:var(--ink)}
 
 /* ---------- rules ---------- */
 .rules{max-width:760px}
@@ -430,8 +425,10 @@ tr.out .logo{opacity:.5}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
 /* ---------- share bar ---------- */
-.sharebar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
-.sharebar .hint{font-size:12px;color:var(--ink-3)}
+.pohead{margin:0 0 18px;flex-wrap:nowrap}
+.pohead h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pohead .acts{margin-left:auto!important;width:auto!important;flex:none}
+@media(max-width:620px){.pohead h2{font-size:26px}}
 
 /* ---------- ads ----------
    Every slot sits outside the parts of the page that re-render on a pick,
@@ -546,7 +543,6 @@ body.noads .adrail,body.noads .adinline{display:none!important}
           <button data-mode="week" aria-pressed="true">By week</button>
           <button data-mode="team" aria-pressed="false">By team</button>
         </div>
-        <span class="modehint" id="modeHint"></span>
       </div>
       <div class="rail" id="rail"></div>
       <div class="teampick" id="teamPick" hidden></div>
@@ -573,7 +569,7 @@ body.noads .adrail,body.noads .adinline{display:none!important}
     </div>
     <aside class="side">
       <div class="seedrail">
-        <h3>Playoff picture <span>· if the season ended now</span></h3>
+        <h3>Playoff Picture</h3>
         <div id="seeds"></div>
       </div>
       <div class="adinline side-ad" id="adSide"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
@@ -597,12 +593,14 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 </section>
 
 <section class="panel" id="panel-playoffs">
-  <div class="sharebar">
-    <button class="btn primary" id="btnImg">Save bracket image</button>
-    <button class="btn" id="btnShare" hidden>Share bracket</button>
-    <span class="hint">PNG · ready to post</span>
+  <div class="weekhead pohead">
+    <h2>Playoff Bracket</h2>
+    <div class="acts">
+      <button class="btn ghost share" id="btnSharePo" title="Share an image of your bracket">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+        <span>Share</span></button>
+    </div>
   </div>
-  <div id="poNotice"></div>
   <div id="poBody"><div class="bk">
     <div class="conf afc" id="bkAFC"></div>
     <div class="adinline m-only bk-ad" id="adBracket"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
@@ -678,9 +676,9 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 </section>
 
 <footer class="credits">
-  Schedule, scores and point spreads from <a href="https://github.com/nflverse/nflverse-data" target="_blank" rel="noopener">nflverse</a>
+  Data: <a href="https://github.com/nflverse/nflverse-data" target="_blank" rel="noopener">nflverse</a>
   (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>).
-  Not affiliated with or endorsed by the NFL or any team. Lines are for reference only.
+  Not affiliated with the NFL.
 </footer>
 
 </div>
@@ -1071,7 +1069,6 @@ const store = {
    REAL RESULTS  (data/results.json, kept fresh by a GitHub Action)
    ========================================================== */
 let RES = {};           // game index -> {st:'pre'|'in'|'post', as, hs, win, kick, clock, ot}
-let RES_UPDATED = null;
 const gameKey = {};
 GAMES.forEach(g => { gameKey[`${g.w}|${g.a}|${g.h}`] = g.i; });
 
@@ -1089,7 +1086,6 @@ function applyResults(data){
     out[gi] = x;
   });
   RES = out;
-  RES_UPDATED = data && data.updated ? new Date(data.updated) : null;
 }
 const isFinal = gi => !!(RES[gi] && RES[gi].st === 'post' && RES[gi].win);
 const isLive  = gi => !!(RES[gi] && RES[gi].st === 'in');
@@ -1412,15 +1408,6 @@ function render(){
 const decided = g => !!outcome(g.i);
 const leftToPick = () => GAMES.filter(g => !decided(g)).length;
 
-function ago(d){
-  const m = Math.round((Date.now() - d) / 60000);
-  if(m < 1) return 'just now';
-  if(m < 60) return m + ' min ago';
-  const h = Math.round(m / 60);
-  if(h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago');
-  return d.toLocaleDateString(undefined, {month:'short', day:'numeric'});
-}
-
 function renderSummary(){
   const fin = GAMES.filter(g => isFinal(g.i)).length;
   const picked = GAMES.filter(g => !isFinal(g.i) && S.picks[g.i]).length;
@@ -1432,9 +1419,7 @@ function renderSummary(){
   $('#barP').style.width = (picked / GAMES.length * 100).toFixed(2) + '%';
 
   const live = GAMES.some(g => isLive(g.i));
-  $('#updated').innerHTML = RES_UPDATED
-    ? `${live ? '<span class="livedot"></span>Games in progress · ' : ''}Results updated ${ago(RES_UPDATED)}`
-    : '';
+  $('#updated').innerHTML = live ? '<span class="livedot"></span>Games in progress' : '';
 }
 
 function renderRail(){
@@ -1461,7 +1446,7 @@ function teamLabel(t){
   return `${logo(t)}
     <span class="who">
       <b><span class="nm-long">${esc(T.n)}</span><span class="nm-short">${t}</span></b>
-      <span><span class="nm-long">${esc(T.c)} · </span>${fmtRec(R[t].ov)}</span>
+      <span>${fmtRec(R[t].ov)}</span>
     </span>`;
 }
 
@@ -1555,14 +1540,12 @@ function renderWeek(){
   $('#btnRand').textContent = team ? 'Lose out' : 'Random';
   $('#btnHome').title = team ? 'Pick this team to win every game left' : 'Pick the favourite in every game left this week (home team if no line)';
   $('#btnRand').title = team ? 'Pick this team to lose every game left' : 'Coin flip every game left this week';
-  $('#modeHint').textContent = team ? 'Pick one team’s whole season at a time' : '';
   if(team) return renderTeam();
   $('#wkLogo').innerHTML = '';
 
   const w = S.week, gs = byWeek[w].slice();
   $('#wkTitle').textContent = 'Week ' + w;
 
-  const left = gs.filter(g => !decided(g)).length;
   const allFinal = gs.every(g => isFinal(g.i));
   const pill = $('#wkPill');
   pill.hidden = false;
@@ -1576,7 +1559,6 @@ function renderWeek(){
   const kicks = gs.map(kickOf).filter(Boolean).sort((a,b)=>a-b);
   const parts = [];
   if(kicks.length) parts.push(`${fmtShort(kicks[0])} – ${fmtShort(kicks[kicks.length-1])}`);
-  parts.push(allFinal ? 'All games final' : `<b>${left}</b> of ${gs.length} left to pick`);
   const b = byeTeams[w];
   if(b.length) parts.push(`Bye: ${b.map(t=>`<span class="bye" title="${esc(TEAMS[t].c + ' ' + TEAMS[t].n)}">${logo(t)}${esc(TEAMS[t].n)}</span>`).join(', ')}`);
   $('#wkMeta').innerHTML = parts.join(' · ');
@@ -1604,7 +1586,6 @@ function renderTeam(){
   $('#wkLogo').innerHTML = logo(t);
   $('#wkTitle').textContent = T.c + ' ' + T.n;
   const gs = GAMES.filter(g => g.a === t || g.h === t);
-  const left = gs.filter(g => !decided(g)).length;
   const pill = $('#wkPill');
   pill.hidden = false; pill.className = 'pill'; pill.textContent = T.dv;
   ['#btnHome','#btnRand','#btnClearWk'].forEach(id => $(id).hidden = !gs.some(g => !isFinal(g.i)));
@@ -1614,7 +1595,6 @@ function renderTeam(){
   $('#wkMeta').innerHTML = [
     `Projected <b>${fmtRec(R[t].ov)}</b>`,
     seed > -1 ? `${T.cf} ${seed+1} seed` : 'Out of the playoffs',
-    left ? `<b>${left}</b> of ${gs.length} left to pick` : 'Season fully decided',
     bye ? `Bye: week ${bye}` : ''
   ].filter(Boolean).join(' · ');
 
@@ -1679,7 +1659,6 @@ function renderDraft(){
       <td class="st">${note}</td></tr>`).join('')}</tbody></table></div>`;
   const first = d.slice(0,16), second = d.slice(16);
   $('#draft').innerHTML = `<h3 class="conftitle">2027 Draft order</h3>
-    <p class="dsub">Round 1 as your season stands, before trades. Picks 1–18 go to non-playoff teams, worst record first; playoff teams follow by the round they're knocked out in your bracket. Equal records: easier schedule picks first.</p>
     <div class="dcols">${table(first, 0)}${table(second, 16)}</div>`;
 }
 
@@ -1757,33 +1736,28 @@ const slot = inner => `<div class="slot">${inner}</div>`;
 function confBracket(cf){
   const b = BR[cf], so = b.seedOf;
   // wild card column top to bottom: 1 (bye), 4v5, 3v6, 2v7 — wc[] is [2v7, 3v6, 4v5]
-  const wc = `<div class="col"><h5>Wild Card<span class="rd"> · Jan 16–18</span></h5><div class="colbody">
+  const wc = `<div class="col"><h5>Wild Card</h5><div class="colbody">
       <div class="pair">${slot(byeCard(b.seeds[0]))}${slot(matchup(b.wcIds[2], b.wc[2], so))}</div>
       <div class="pair">${slot(matchup(b.wcIds[1], b.wc[1], so))}${slot(matchup(b.wcIds[0], b.wc[0], so))}</div>
     </div></div>`;
-  const dv = `<div class="col"><h5>Divisional<span class="rd"> · Jan 23–24</span></h5><div class="colbody">
+  const dv = `<div class="col"><h5>Divisional</h5><div class="colbody">
       <div class="pair">${[0,1].map(i => slot(b.dv ? matchup(b.dvIds[i], b.dv[i], so) : matchup(null, null))).join('')}</div>
     </div></div>`;
-  const cc = `<div class="col"><h5>${cf} Final<span class="rd"> · Jan 31</span></h5><div class="colbody">
+  const cc = `<div class="col"><h5>${cf} Final</h5><div class="colbody">
       <div class="single">${slot(matchup(b.ccId, b.cc, so))}</div>
     </div></div>`;
   return `<h4 class="confhd">${cf}</h4><div class="cols3">${wc}${dv}${cc}</div>`;
 }
 
 function renderPlayoffs(){
-  const left = leftToPick();
-  $('#poNotice').innerHTML = left
-    ? `<div class="notice"><b>${left} games still to pick.</b> The field below reflects real results plus your picks so far, and will keep moving until the board is full. Click a team to advance it.</div>`
-    : `<div class="notice">Click a team to advance it.</div>`;
-
   const sb = BR.sb;
   const sbSeed = t => BR.AFC.seeds.includes(t) ? BR.AFC.seedOf(t) : BR.NFC.seedOf(t);
   const champ = sb.win
     ? `<div class="champ">${logo(sb.win, 'logo big')}<div class="k">Your champion</div>
          <div class="v">${esc(TEAMS[sb.win].c)} ${esc(TEAMS[sb.win].n)}</div></div>`
-    : `<div class="champ wait"><div class="k">Champion</div><div class="v">${sb.teams ? 'Pick the Super Bowl winner' : 'Pick the conference champions'}</div></div>`;
+    : `<div class="champ wait"><div class="k">Champion</div><div class="v">TBD</div></div>`;
   const sbCol = `<div class="colbody"><div class="sbslot">
-      <div class="sbhead"><b>Super Bowl LXI</b><span>SoFi Stadium · Feb 14, 2027</span></div>
+      <div class="sbhead"><b>Super Bowl LXI</b></div>
       ${matchup('sb', sb.teams, sbSeed)}
       ${champ}
     </div></div>`;
@@ -2128,9 +2102,8 @@ async function buildBracketImage(){
   const sb = BR.sb, cx = xSB + SBW/2;
   c.textAlign = 'center'; c.fillStyle = IMG.ink;
   c.font = '700 32px "Barlow Condensed", sans-serif'; track(c, 1.5);
-  c.fillText('SUPER BOWL LXI', cx, mid - 70);
-  track(c, 0); c.fillStyle = IMG.faint; c.font = '500 12px Inter, sans-serif';
-  c.fillText('SoFi Stadium · Feb 14, 2027', cx, mid - 50);
+  c.fillText('SUPER BOWL LXI', cx, mid - 58);
+  track(c, 0);
   const sbSeed = t => BR.AFC.seeds.includes(t) ? BR.AFC.seedOf(t) : BR.NFC.seedOf(t);
   imgCard(c, xSB, mid, SBW, sb.teams, sbSeed, sb.win, 40);
   c.strokeStyle = IMG.ink; c.lineWidth = 1.5; rr(c, xSB + .75, mid - 40 + .75, SBW - 1.5, 80 - 1.5, 8); c.stroke();
@@ -2149,7 +2122,7 @@ async function buildBracketImage(){
     c.fillStyle = IMG.faint; c.font = '700 11px Inter, sans-serif'; track(c, 1.6);
     c.fillText('CHAMPION', cx, cy + 66);
     track(c, 0); c.font = '500 15px Inter, sans-serif';
-    c.fillText('To be decided', cx, cy + 90);
+    c.fillText('TBD', cx, cy + 90);
   }
   track(c, 0);
 
@@ -2158,9 +2131,8 @@ async function buildBracketImage(){
   c.fillStyle = IMG.line; c.fillRect(P, fy - 24, W - 2*P, 1);
   c.font = '500 12px Inter, sans-serif'; c.fillStyle = IMG.faint; track(c, 1.3);
   c.textAlign = 'left'; c.fillText('BRACKETEER · REAL NFL TIEBREAKERS · DATA: NFLVERSE (CC BY 4.0)', P, fy);
-  const left = leftToPick();
   c.textAlign = 'right';
-  c.fillText(left ? `${left} REGULAR-SEASON GAMES STILL TO PICK` : 'FULL SEASON PICKED', W - P, fy);
+  c.fillText('2026 SEASON', W - P, fy);
   track(c, 0); c.textAlign = 'left';
   return cv;
 }
@@ -2168,31 +2140,6 @@ async function buildBracketImage(){
 function canvasBlob(cv){
   return new Promise(res => cv.toBlob(res, 'image/png'));
 }
-$('#btnImg').addEventListener('click', async ()=>{
-  const cv = await buildBracketImage();
-  const blob = await canvasBlob(cv);
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'my-2026-nfl-bracket.png';
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
-  toast('Bracket image saved.');
-});
-if(navigator.canShare){
-  const probe = new File([new Blob([''],{type:'image/png'})], 'x.png', {type:'image/png'});
-  if(navigator.canShare({files:[probe]})){
-    $('#btnShare').hidden = false;
-    $('#btnShare').addEventListener('click', async ()=>{
-      try{
-        const cv = await buildBracketImage();
-        const blob = await canvasBlob(cv);
-        const f = new File([blob], 'my-2026-nfl-bracket.png', {type:'image/png'});
-        await navigator.share({files:[f], title:"My 2026 NFL bracket"});
-      }catch(e){ if(e && e.name !== 'AbortError') toast('Sharing was blocked — use Save bracket image instead.'); }
-    });
-  }
-}
-
 /* ==========================================================
    SHAREABLE PICKS IMAGE (one week, or one team's season)
    Portrait, sized for a phone screen / story. Finished games show the final
@@ -2324,6 +2271,11 @@ async function shareOrSave(cv, filename, title){
   toast('Image saved.');
 }
 
+$('#btnSharePo').addEventListener('click', async ()=>{
+  const b = $('#btnSharePo'); b.disabled = true;
+  try{ await shareOrSave(await buildBracketImage(), 'bracketeer-bracket-2026.png', 'My 2026 playoff bracket'); }
+  finally{ b.disabled = false; }
+});
 $('#btnShareWk').addEventListener('click', async ()=>{
   const b = $('#btnShareWk'); b.disabled = true;
   try{
@@ -2332,19 +2284,17 @@ $('#btnShareWk').addEventListener('click', async ()=>{
       const seed = VIEW.conf[TEAMS[t].cf].seeds.indexOf(t);
       const cv = await buildPicksImage({
         title: `${TEAMS[t].c} ${TEAMS[t].n}`,
-        sub: `My 2026 picks · Projected ${fmtRec(R[t].ov)} · ${seed > -1 ? TEAMS[t].cf + ' ' + (seed+1) + ' seed' : 'Out of the playoffs'}`,
+        sub: `Projected ${fmtRec(R[t].ov)} · ${seed > -1 ? TEAMS[t].cf + ' ' + (seed+1) + ' seed' : 'Out of the playoffs'}`,
         games: gs, withWeek: true, byes: true
       });
       await shareOrSave(cv, `bracketeer-${t.toLowerCase()}-2026.png`, `My ${TEAMS[t].n} picks`);
     }else{
       const w = S.week, gs = byWeek[w].slice();
       if(gs.every(g => kickOf(g))) gs.sort((x,y) => kickOf(x) - kickOf(y) || x.i - y.i);
-      const open = gs.filter(g => !isFinal(g.i)), picked = open.filter(g => S.picks[g.i]).length;
       const kicks = gs.map(kickOf).filter(Boolean).sort((a,b)=>a-b);
-      const range = kicks.length ? `${fmtShort(kicks[0])} – ${fmtShort(kicks[kicks.length-1])} · ` : '';
       const cv = await buildPicksImage({
         title: `Week ${w} picks`,
-        sub: range + (open.length ? `${picked} of ${open.length} picked` : 'All games final'),
+        sub: kicks.length ? `${fmtShort(kicks[0])} – ${fmtShort(kicks[kicks.length-1])}` : '2026 season',
         games: gs, withWeek: false
       });
       await shareOrSave(cv, `bracketeer-week-${w}.png`, `My Week ${w} picks`);
@@ -2412,7 +2362,7 @@ document.addEventListener('keydown', e=>{
 const ADSENSE = {
   client: '',                        // e.g. 'ca-pub-1234567890123456'
   slots: { rail: '', inline: '' },   // ad unit IDs, e.g. '1234567890'
-  placeholders: true                 // show dashed boxes while not configured
+  placeholders: false                // true shows dashed boxes where ads will go
 };
 const AD_SIZE = { rail:[160,600], inline:[300,250] };
 
