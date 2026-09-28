@@ -1,6 +1,6 @@
 /* Pick 'Em — service worker.
    Bump VERSION whenever you change index.html so installed apps update. */
-const VERSION = 'v1.1.0';
+const VERSION = 'v1.2.0';
 const SHELL   = 'pickem-shell-'   + VERSION;
 const RUNTIME = 'pickem-runtime-' + VERSION;
 
@@ -87,8 +87,10 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Google Fonts and anything else: serve cached, refresh in the background.
+  // Google Fonts: serve cached, refresh in the background.
   // If it never arrives, the page falls back to system fonts on its own.
+  // Anything else cross-origin (ads, analytics) goes straight to the network.
+  if (!/^fonts\.(googleapis|gstatic)\.com$/.test(url.hostname)) return;
   e.respondWith((async () => {
     const cache = await caches.open(RUNTIME);
     const hit = await cache.match(req);

@@ -144,6 +144,27 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .wkmeta{font-size:13px;color:var(--ink-3);margin:0 0 16px}
 .wkmeta b{color:var(--ink-2);font-weight:500}
 
+/* ---------- mode switch + team picker ---------- */
+.modebar{display:flex;align-items:center;gap:12px;margin:0 0 12px;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--surface-2);padding:3px;border-radius:10px;gap:2px}
+.seg button{background:none;border:none;border-radius:8px;color:var(--ink-2);font-weight:600;font-size:13px;padding:6px 14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(16,24,40,.12)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.modehint{font-size:12.5px;color:var(--ink-3)}
+.teampick{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px 6px;margin:0 0 14px;padding:10px;border:1px solid var(--line);border-radius:var(--radius);background:#fff}
+.teampick .dv{display:flex;flex-direction:column;gap:4px;align-items:stretch}
+.teampick .dl{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--ink-3);text-align:center;white-space:nowrap}
+.teampick button{display:flex;align-items:center;justify-content:center;gap:5px;background:none;border:1.5px solid transparent;border-radius:8px;padding:4px 2px;cursor:pointer;font-size:11.5px;font-weight:600;color:var(--ink-2)}
+.teampick button:hover{background:var(--surface)}
+.teampick button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.teampick button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.teampick .logo{width:24px;height:24px}
+@media(max-width:620px){.teampick{gap:4px 2px;padding:8px 4px}.teampick button span{display:none}.teampick .logo{width:26px;height:26px}}
+#wkLogo:empty{display:none}
+#wkLogo .logo{width:40px;height:40px}
+.byecard{border:1px dashed var(--line-2);border-radius:var(--radius);padding:12px 14px;font-size:13px;color:var(--ink-3)}
+.byecard b{color:var(--ink-2)}
+
 /* ---------- games ---------- */
 .games{display:flex;flex-direction:column;gap:10px}
 .dayhead{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:10px 2px -2px}
@@ -237,6 +258,16 @@ tr.out .logo{opacity:.5}
 .tag.x{background:var(--accent-soft);color:var(--accent-ink)}
 .how{font-size:10.5px;letter-spacing:.04em;color:var(--ink-3)}
 
+/* ---------- draft order ---------- */
+.draft{margin:14px 0 22px}
+.draft .dsub{font-size:13px;color:var(--ink-3);margin:-4px 0 12px}
+.draft .dcols{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+@media(max-width:880px){.draft .dcols{grid-template-columns:1fr}}
+.draft td:first-child{font-weight:700;color:var(--ink);width:34px}
+.draft .st{font-size:11.5px;color:var(--ink-3);text-align:left}
+.draft tr.po .st{color:var(--accent-ink)}
+.draft th.stc{text-align:left}
+
 /* ---------- tiebreak log ---------- */
 .logbox{border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-top:8px}
 .logbox h4{font-size:14px;font-weight:600;margin:0 0 8px}
@@ -250,31 +281,97 @@ tr.out .logo{opacity:.5}
 .empty{color:var(--ink-3);font-size:13px}
 
 /* ---------- bracket ---------- */
-.bracket{margin-bottom:30px}
-.bracket .bhead{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:.04em;text-transform:uppercase;margin:0 0 10px}
-.rounds{display:grid;grid-template-columns:repeat(3,minmax(200px,1fr));gap:16px}
-@media(max-width:760px){.rounds{grid-template-columns:1fr}}
-.round h5{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
-.matchup{border:1px solid var(--line);border-radius:10px;background:#fff;margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow)}
-.mrow{display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;transition:.12s;background:none;border:none;width:100%;text-align:left;color:var(--ink);font-size:14px}
+.bk{display:grid;grid-template-columns:minmax(0,1fr) 210px minmax(0,1fr);grid-template-areas:"afc sb nfc";gap:0 22px;align-items:start;margin-top:4px}
+.bk .conf.afc{grid-area:afc}
+.bk .conf.nfc{grid-area:nfc}
+.bk .sbcol{grid-area:sb}
+.confhd{font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:.04em;text-transform:uppercase;margin:0 0 6px;line-height:1}
+.conf.nfc .confhd{text-align:right}
+.cols3{display:flex;gap:22px;height:530px}
+.conf.nfc .cols3{flex-direction:row-reverse}
+.col{flex:1;min-width:0;display:flex;flex-direction:column;container-type:inline-size}
+.col h5,.sbcol h5{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:0;height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conf.nfc .col h5{text-align:right}
+.colbody{flex:1;display:flex;flex-direction:column}
+.pair,.single{flex:1;display:flex;flex-direction:column;position:relative}
+.slot{flex:1;display:flex;align-items:center;position:relative;min-height:0}
+.slot>.matchup{width:100%;margin:0;position:relative;z-index:1}
+/* connector lines: a bracket from each pair of games, then a stub into the next round */
+.pair::after{content:'';position:absolute;top:25%;bottom:25%;width:11px;border:1.5px solid var(--line-2);pointer-events:none}
+.pair::before,.single::before{content:'';position:absolute;top:50%;width:11px;border-top:1.5px solid var(--line-2);pointer-events:none}
+.conf.afc .pair::after{right:-11px;border-left:none;border-radius:0 6px 6px 0}
+.conf.afc .pair::before{right:-22px}
+.conf.afc .single::before{right:-22px;width:22px}
+.conf.nfc .pair::after{left:-11px;border-right:none;border-radius:6px 0 0 6px}
+.conf.nfc .pair::before{left:-22px}
+.conf.nfc .single::before{left:-22px;width:22px}
+
+.matchup{border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden;box-shadow:var(--shadow)}
+.mrow{display:flex;align-items:center;gap:7px;padding:7px 9px;cursor:pointer;transition:.12s;background:none;border:none;width:100%;text-align:left;color:var(--ink);font-size:13.5px;min-height:38px}
 .mrow+.mrow{border-top:1px solid var(--line)}
 .mrow:hover:not(.tbd):not(.fixed){background:var(--surface)}
-.mrow .sd{font-size:11.5px;color:var(--ink-3);width:14px;flex:none;text-align:right}
-.mrow .logo{width:24px;height:24px}
-.mrow .tm{font-weight:600}
-.mrow .rc{margin-left:auto;font-size:12px;color:var(--ink-3)}
+.mrow .sd{font-size:11px;color:var(--ink-3);width:12px;flex:none;text-align:right}
+.mrow .logo{width:22px;height:22px}
+.mrow .tm{font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mrow .rc{margin-left:auto;font-size:11.5px;color:var(--ink-3);flex:none}
+.mrow .bn-short{display:none}
 .mrow.adv{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
 .mrow.adv .tm{color:var(--accent-ink)}
+.mrow.adv .rc{color:var(--accent-ink)}
 .mrow.out{opacity:.45}
 .mrow.fixed{cursor:default}
-.mrow.tbd{cursor:default;color:var(--ink-3);font-size:13px;padding:13px 12px}
-.mnote{font-size:11px;color:var(--ink-3);padding:5px 12px 7px;border-top:1px solid var(--line);background:var(--surface)}
-.sb{max-width:440px;margin:0 auto;border:1.5px solid var(--ink);border-radius:var(--radius);background:#fff;overflow:hidden}
-.sb .bhead{background:var(--ink);color:#fff;margin:0;padding:8px 14px;font-size:20px}
-.champ{text-align:center;padding:24px 16px;border-radius:var(--radius);background:var(--surface);margin-top:18px}
-.champ img{width:72px;height:72px;object-fit:contain}
-.champ .k{font-size:12px;font-weight:600;letter-spacing:.1em;color:var(--ink-3);text-transform:uppercase;margin-top:6px}
-.champ .v{font-family:var(--display);font-weight:700;font-size:clamp(28px,6vw,44px);letter-spacing:.03em;text-transform:uppercase;line-height:1.1;margin-top:4px}
+.mrow.tbd{cursor:default;color:var(--ink-3)}
+.mrow.tbd .tm{font-weight:500}
+.mnote{font-size:10.5px;color:var(--ink-3);padding:4px 10px 5px;border-top:1px solid var(--line);background:var(--surface)}
+@container (max-width:175px){
+  .col h5 .rd{display:none}
+}
+@container (max-width:150px){
+  .mrow .rc{display:none}
+}
+@container (max-width:125px){
+  .mrow .bn-long{display:none}
+  .mrow .bn-short{display:inline}
+}
+
+.sbcol{display:flex;flex-direction:column;padding-top:34px}
+.sbcol .colbody{height:530px;flex:none}
+.sbslot{flex:1;display:flex;align-items:center;position:relative}
+.sbslot>.matchup{width:100%;border:1.5px solid var(--ink);position:relative;z-index:1}
+.sbhead{position:absolute;left:0;right:0;bottom:calc(50% + 62px);text-align:center}
+.sbhead b{display:block;white-space:nowrap;font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:.03em;text-transform:uppercase;line-height:1}
+.sbhead span{font-size:11.5px;color:var(--ink-3)}
+.champ{position:absolute;left:-10px;right:-10px;top:calc(50% + 62px);text-align:center;padding:14px 8px;border-radius:var(--radius);background:var(--surface)}
+.champ img{width:56px;height:56px;object-fit:contain}
+.champ .k{font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--ink-3);text-transform:uppercase;margin-top:4px}
+.champ .v{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:.03em;text-transform:uppercase;line-height:1.1;margin-top:2px}
+.champ.wait .v{font-size:15px;color:var(--ink-3);font-family:var(--body);font-weight:500;text-transform:none;letter-spacing:0}
+
+@media(max-width:1080px){
+  .bk{grid-template-columns:minmax(0,1fr);grid-template-areas:"afc" "nfc" "sb";gap:26px}
+  .conf.nfc .confhd,.conf.nfc .col h5{text-align:left}
+  .conf.nfc .cols3{flex-direction:row}
+  .conf.nfc .pair::after{left:auto;right:-11px;border-left:none;border-right:1.5px solid var(--line-2);border-radius:0 6px 6px 0}
+  .conf.nfc .pair::before{left:auto;right:-22px}
+  .conf.nfc .single::before{display:none}
+  .conf.afc .single::before{display:none}
+  .cols3{height:500px;gap:18px}
+  .sbcol{padding-top:0;max-width:340px;width:100%;margin:0 auto}
+  .sbcol .colbody{height:auto}
+  .sbslot{flex-direction:column;gap:12px}
+  .sbhead,.champ{position:static}
+  .champ{width:100%}
+}
+@media(max-width:620px){
+  .cols3{gap:14px;height:470px}
+  .pair::after{width:7px}
+  .conf.afc .pair::after,.conf.nfc .pair::after{right:-7px}
+  .conf.afc .pair::before,.conf.nfc .pair::before{right:-14px;width:7px}
+  .mrow{padding:6px;gap:5px;font-size:12.5px;min-height:34px}
+  .mrow .logo{width:18px;height:18px}
+  .mrow .sd{width:9px;font-size:10px}
+  .mnote{display:none}
+}
 .notice{background:var(--surface);border:1px solid var(--line);padding:10px 14px;font-size:13px;color:var(--ink-2);margin-bottom:18px;border-radius:10px}
 .notice b{color:var(--ink)}
 
@@ -305,10 +402,28 @@ tr.out .logo{opacity:.5}
 .sharebar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
 .sharebar .hint{font-size:12px;color:var(--ink-3)}
 
+/* ---------- ad rails ----------
+   Fixed in the side margins, outside the page flow, with their size reserved
+   up front: an ad loading (or failing) can't push content around. Hidden below
+   1660px, where there is no margin to put them in. */
+.adrail{display:none}
+@media(min-width:1660px){
+  .adrail{display:block;position:fixed;top:84px;width:160px;height:600px;z-index:1}
+  .adrail.l{left:calc(50% - 620px - 190px)}
+  .adrail.r{right:calc(50% - 620px - 190px)}
+}
+.adslot{width:160px;height:600px;contain:strict;overflow:hidden;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;border:1px dashed var(--line-2);background:var(--surface)}
+.adslot span{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.adslot.live{border:none;background:none}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
+<!-- Ad rails: only shown on screens wide enough to have empty margins (see ADSENSE below) -->
+<aside class="adrail l" aria-label="Advertisement"><div class="adslot" data-pos="left"><span>Advertisement</span></div></aside>
+<aside class="adrail r" aria-label="Advertisement"><div class="adslot" data-pos="right"><span>Advertisement</span></div></aside>
 
 <header class="topbar">
   <div class="in">
@@ -349,8 +464,17 @@ tr.out .logo{opacity:.5}
 <section class="panel on" id="panel-picks">
   <div class="split">
     <div>
+      <div class="modebar">
+        <div class="seg" id="modeSeg" role="group" aria-label="Pick games">
+          <button data-mode="week" aria-pressed="true">By week</button>
+          <button data-mode="team" aria-pressed="false">By team</button>
+        </div>
+        <span class="modehint" id="modeHint"></span>
+      </div>
       <div class="rail" id="rail"></div>
+      <div class="teampick" id="teamPick" hidden></div>
       <div class="weekhead">
+        <span id="wkLogo"></span>
         <h2 id="wkTitle">Week 1</h2>
         <span class="pill" id="wkPill"></span>
         <div class="acts">
@@ -371,6 +495,7 @@ tr.out .logo{opacity:.5}
 
 <section class="panel" id="panel-standings">
   <div class="cols" id="standings"></div>
+  <section class="draft" id="draft"></section>
   <div class="logbox">
     <h4>Tiebreakers applied</h4>
     <div id="tblog"></div>
@@ -858,6 +983,8 @@ try{ const c = localStorage.getItem(RES_KEY); if(c) applyResults(JSON.parse(c));
 
 let userMovedWeek = false;
 S.week = currentWeek();
+S.mode = 'week';                          // always open on the week view
+if(!TEAMS[S.team]) S.team = 'BUF';
 
 async function loadResults(){
   try{
@@ -1233,7 +1360,9 @@ const fmtDay  = d => d.toLocaleDateString(undefined, {weekday:'long', month:'sho
 const fmtShort = d => d.toLocaleDateString(undefined, {month:'short', day:'numeric'});
 const kickOf = g => RES[g.i] && RES[g.i].kick ? new Date(RES[g.i].kick) : null;
 
-function gameCard(g){
+const fmtWhen = d => d.toLocaleString(undefined, {weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
+
+function gameCard(g, withWeek){
   const res = RES[g.i], fin = isFinal(g.i), live = isLive(g.i);
   const p = fin ? null : S.picks[g.i];
   const k = kickOf(g);
@@ -1241,7 +1370,12 @@ function gameCard(g){
   let st = '';
   if(fin) st = `<span class="st">Final${res.ot ? '/OT' : ''}</span>`;
   else if(live) st = `<span class="st live">Live${res.clock ? ' · ' + esc(res.clock) : ''}</span>`;
-  else if(k) st = `<span class="st">${fmtTime(k)}</span>`;
+  else if(k) st = `<span class="st">${withWeek ? fmtWhen(k) : fmtTime(k)}</span>`;
+  if(withWeek){
+    const wk = `<span class="st">Week ${g.w}</span>`;
+    st = st ? `${wk}<span>·</span>${st}` : wk;
+    if(fin && k) st += `<span>·</span><span>${fmtShort(k)}</span>`;
+  }
 
   let badge = '';
   if(fin){
@@ -1268,6 +1402,18 @@ function gameCard(g){
 }
 
 function renderWeek(){
+  const team = S.mode === 'team';
+  document.querySelectorAll('#modeSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === S.mode));
+  $('#rail').hidden = team;
+  $('#teamPick').hidden = !team;
+  $('#btnHome').textContent = team ? 'Win out' : 'Home teams';
+  $('#btnRand').textContent = team ? 'Lose out' : 'Random';
+  $('#btnHome').title = team ? 'Pick this team to win every game left' : 'Pick every home team for the games left this week';
+  $('#btnRand').title = team ? 'Pick this team to lose every game left' : 'Coin flip every game left this week';
+  $('#modeHint').textContent = team ? 'Pick one team’s whole season at a time' : '';
+  if(team) return renderTeam();
+  $('#wkLogo').innerHTML = '';
+
   const w = S.week, gs = byWeek[w].slice();
   $('#wkTitle').textContent = 'Week ' + w;
 
@@ -1305,6 +1451,42 @@ function renderWeek(){
   }
 }
 
+function renderTeamPicker(){
+  $('#teamPick').innerHTML = DIVS.map(d => `<div class="dv">
+      <div class="dl">${d.replace('North','N').replace('South','S').replace('East','E').replace('West','W')}</div>
+      ${divTeams(d).map(t => `<button data-team="${t}" aria-pressed="${S.team===t}" title="${esc(TEAMS[t].c + ' ' + TEAMS[t].n)}">
+        ${logo(t)}<span>${t}</span></button>`).join('')}
+    </div>`).join('');
+}
+
+function renderTeam(){
+  const t = S.team, T = TEAMS[t];
+  renderTeamPicker();
+  $('#wkLogo').innerHTML = logo(t);
+  $('#wkTitle').textContent = T.c + ' ' + T.n;
+  const gs = GAMES.filter(g => g.a === t || g.h === t);
+  const left = gs.filter(g => !decided(g)).length;
+  const pill = $('#wkPill');
+  pill.hidden = false; pill.className = 'pill'; pill.textContent = T.dv;
+  ['#btnHome','#btnRand','#btnClearWk'].forEach(id => $(id).hidden = !gs.some(g => !isFinal(g.i)));
+
+  const bye = [...Array(WEEKS)].map((_,i)=>i+1).find(w => byeTeams[w].includes(t));
+  const seed = VIEW.conf[T.cf].seeds.indexOf(t);
+  $('#wkMeta').innerHTML = [
+    `Projected <b>${fmtRec(R[t].ov)}</b>`,
+    seed > -1 ? `${T.cf} ${seed+1} seed` : 'Out of the playoffs',
+    left ? `<b>${left}</b> of ${gs.length} left to pick` : 'Season fully decided',
+    bye ? `Bye: week ${bye}` : ''
+  ].filter(Boolean).join(' · ');
+
+  let html = '';
+  for(let w=1; w<=WEEKS; w++){
+    const g = gs.find(x => x.w === w);
+    html += g ? gameCard(g, true) : `<div class="byecard"><b>Week ${w}</b> · Bye</div>`;
+  }
+  $('#games').innerHTML = html;
+}
+
 function seedRow(t, i){
   return `<div class="seedrow${i===0?' bye':''}">
     <span class="n">${i+1}</span>${logo(t)}
@@ -1321,7 +1503,49 @@ function renderSeedRail(){
   }).join('');
 }
 
+/* 2027 draft, round 1 (before trades). Non-playoff teams pick 1–18, worst
+   record first; playoff teams follow by the round they went out in, then
+   record. Equal records: lower strength of schedule picks first, then a
+   seeded coin toss. Playoff exits come from the user's bracket picks. */
+function draftOrder(){
+  const stage = {}, note = {};
+  const inPO = new Set([...VIEW.conf.AFC.seeds, ...VIEW.conf.NFC.seeds]);
+  IDS.forEach(t => { if(!inPO.has(t)){ stage[t] = 0; note[t] = 'Missed playoffs'; } });
+  const lose = (pair, w, st, label) => { const l = pair.find(x => x !== w); stage[l] = st; note[l] = label; };
+  ['AFC','NFC'].forEach(cf=>{
+    const b = BR[cf];
+    b.seeds.forEach((t,i) => { stage[t] = i === 0 ? 2 : 1; note[t] = 'Playoffs'; });
+    b.wc.forEach((m,i) => { const w = b.wcWin[i]; if(w){ lose(m, w, 1, 'Lost wild card'); stage[w] = 2; } });
+    if(b.dv) b.dv.forEach((m,i) => { const w = b.dvWin[i]; if(w){ lose(m, w, 2, 'Lost divisional'); stage[w] = 3; } });
+    if(b.cc && b.ccWin){ lose(b.cc, b.ccWin, 3, 'Lost conference title'); stage[b.ccWin] = 4; }
+  });
+  if(BR.sb.teams && BR.sb.win){
+    lose(BR.sb.teams, BR.sb.win, 4, 'Lost Super Bowl');
+    stage[BR.sb.win] = 5; note[BR.sb.win] = 'Won Super Bowl';
+  }
+  return IDS.slice().sort((a,b) =>
+    stage[a] - stage[b] || R[a].pct - R[b].pct || R[a].sos - R[b].sos ||
+    hash('draft#'+a) - hash('draft#'+b)
+  ).map(t => ({t, note:note[t], po:stage[t] > 0}));
+}
+
+function renderDraft(){
+  const d = draftOrder();
+  const table = (rows, off) => `<div class="tcard"><table>
+    <thead><tr><th>Pick</th><th>Team</th><th>W-L</th><th>SOS</th><th class="stc">Status</th></tr></thead>
+    <tbody>${rows.map(({t, note, po}, i) => `<tr class="${po ? 'po' : ''}">
+      <td>${off + i + 1}</td>
+      <td class="team">${logo(t)}${esc(TEAMS[t].n)}</td>
+      <td>${fmtRec(R[t].ov)}</td><td>${fmtPct(R[t].sos)}</td>
+      <td class="st">${note}</td></tr>`).join('')}</tbody></table></div>`;
+  const first = d.slice(0,16), second = d.slice(16);
+  $('#draft').innerHTML = `<h3 class="conftitle">2027 Draft order</h3>
+    <p class="dsub">Round 1 as your season stands, before trades. Picks 1–18 go to non-playoff teams, worst record first; playoff teams follow by the round they're knocked out in your bracket. Equal records: easier schedule picks first.</p>
+    <div class="dcols">${table(first, 0)}${table(second, 16)}</div>`;
+}
+
 function renderStandings(){
+  renderDraft();
   $('#standings').innerHTML = ['AFC','NFC'].map(cf=>{
     const C = VIEW.conf[cf];
     const seedIdx = t => C.seeds.indexOf(t);
@@ -1368,68 +1592,65 @@ function renderStandings(){
     : `<div class="empty">No ties to break yet — every group is separated on record.</div>`;
 }
 
-function mrow(t, seed, picked, disabled){
-  if(!t) return `<div class="mrow tbd">Winner to be decided</div>`;
+function mrow(t, seed, picked, id){
+  if(!t) return `<div class="mrow tbd"><span class="sd"></span><span class="tm">TBD</span></div>`;
   const cls = picked === t ? 'adv' : (picked ? 'out' : '');
-  return `<button class="mrow ${cls}" data-po="${disabled}" data-team="${t}">
+  return `<button class="mrow ${cls}" data-po="${id}" data-team="${t}" aria-pressed="${picked===t}"
+      title="${esc(TEAMS[t].c + ' ' + TEAMS[t].n)} · ${fmtRec(R[t].ov)}">
     <span class="sd">${seed||''}</span>${logo(t)}
-    <span class="tm">${esc(TEAMS[t].n)}</span><span class="rc">${fmtRec(R[t].ov)}</span></button>`;
+    <span class="tm"><span class="bn-long">${esc(TEAMS[t].n)}</span><span class="bn-short">${t}</span></span>
+    <span class="rc">${fmtRec(R[t].ov)}</span></button>`;
 }
-function matchup(id, pair, seedOf, note){
-  const picked = S.po[id] && pair && pair.includes(S.po[id]) ? S.po[id] : null;
+/* nothing is highlighted until the user clicks a winner */
+function matchup(id, pair, seedOf){
   if(!pair) return `<div class="matchup">${mrow(null)}${mrow(null)}</div>`;
-  return `<div class="matchup">
-    ${mrow(pair[0], seedOf(pair[0]), picked, id)}
-    ${mrow(pair[1], seedOf(pair[1]), picked, id)}
-    ${note ? `<div class="mnote">${esc(note)}</div>` : ''}
-  </div>`;
+  const picked = S.po[id] && pair.includes(S.po[id]) ? S.po[id] : null;
+  return `<div class="matchup">${mrow(pair[0], seedOf(pair[0]), picked, id)}${mrow(pair[1], seedOf(pair[1]), picked, id)}</div>`;
+}
+function byeCard(t){
+  return `<div class="matchup"><div class="mrow fixed" title="${esc(TEAMS[t].c + ' ' + TEAMS[t].n)}">
+    <span class="sd">1</span>${logo(t)}
+    <span class="tm"><span class="bn-long">${esc(TEAMS[t].n)}</span><span class="bn-short">${t}</span></span>
+    <span class="rc">${fmtRec(R[t].ov)}</span></div><div class="mnote">First-round bye</div></div>`;
+}
+const slot = inner => `<div class="slot">${inner}</div>`;
+
+function confBracket(cf){
+  const b = BR[cf], so = b.seedOf;
+  // wild card column top to bottom: 1 (bye), 4v5, 3v6, 2v7 — wc[] is [2v7, 3v6, 4v5]
+  const wc = `<div class="col"><h5>Wild Card<span class="rd"> · Jan 16–18</span></h5><div class="colbody">
+      <div class="pair">${slot(byeCard(b.seeds[0]))}${slot(matchup(b.wcIds[2], b.wc[2], so))}</div>
+      <div class="pair">${slot(matchup(b.wcIds[1], b.wc[1], so))}${slot(matchup(b.wcIds[0], b.wc[0], so))}</div>
+    </div></div>`;
+  const dv = `<div class="col"><h5>Divisional<span class="rd"> · Jan 23–24</span></h5><div class="colbody">
+      <div class="pair">${[0,1].map(i => slot(b.dv ? matchup(b.dvIds[i], b.dv[i], so) : matchup(null, null))).join('')}</div>
+    </div></div>`;
+  const cc = `<div class="col"><h5>${cf} Final<span class="rd"> · Jan 31</span></h5><div class="colbody">
+      <div class="single">${slot(matchup(b.ccId, b.cc, so))}</div>
+    </div></div>`;
+  return `<div class="conf ${cf.toLowerCase()}"><h4 class="confhd">${cf}</h4><div class="cols3">${wc}${dv}${cc}</div></div>`;
 }
 
 function renderPlayoffs(){
   const left = leftToPick();
   $('#poNotice').innerHTML = left
-    ? `<div class="notice"><b>${left} games still to pick.</b> Seeds below reflect real results plus the games you've picked so far, and will keep moving until the board is full.</div>`
-    : '';
-
-  const secs = ['AFC','NFC'].map(cf=>{
-    const b = BR[cf], so = b.seedOf;
-    return `<div class="bracket">
-      <h4 class="bhead">${cf}</h4>
-      <div class="rounds">
-        <div class="round"><h5>Wild Card · Jan 16–18</h5>
-          ${b.wc.map((m,i)=>matchup(b.wcIds[i], m, so, `${so(m[0])} seed hosts`)).join('')}
-          <div class="matchup"><div class="mrow adv fixed">
-            <span class="sd">1</span>${logo(b.seeds[0])}
-            <span class="tm">${esc(TEAMS[b.seeds[0]].n)}</span><span class="rc">bye</span></div></div>
-        </div>
-        <div class="round"><h5>Divisional · Jan 23–24</h5>
-          ${b.dv ? b.dv.map((m,i)=>matchup(b.dvIds[i], m, so, `${so(m[0])} seed hosts`)).join('')
-                 : `<div class="matchup">${mrow(null)}${mrow(null)}</div><div class="matchup">${mrow(null)}${mrow(null)}</div>`}
-        </div>
-        <div class="round"><h5>${cf} Championship · Jan 31</h5>
-          ${b.cc ? matchup(b.ccId, b.cc, so, `${so(b.cc[0])} seed hosts`)
-                 : `<div class="matchup">${mrow(null)}${mrow(null)}</div>`}
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+    ? `<div class="notice"><b>${left} games still to pick.</b> The field below reflects real results plus your picks so far, and will keep moving until the board is full. Click a team to advance it.</div>`
+    : `<div class="notice">Click a team to advance it.</div>`;
 
   const sb = BR.sb;
-  const sbHtml = `<div class="sb">
-    <h4 class="bhead">Super Bowl LXI</h4>
-    ${sb.teams
-      ? `${mrow(sb.teams[0], 'AFC', sb.win, 'sb')}${mrow(sb.teams[1], 'NFC', sb.win, 'sb')}
-         <div class="mnote">SoFi Stadium, Inglewood · Feb 14, 2027 · neutral site</div>`
-      : `${mrow(null)}${mrow(null)}<div class="mnote">Conference champions pending</div>`}
-  </div>`;
+  const sbSeed = t => BR.AFC.seeds.includes(t) ? BR.AFC.seedOf(t) : BR.NFC.seedOf(t);
+  const champ = sb.win
+    ? `<div class="champ"><img src="${logoSrc(sb.win)}" alt=""><div class="k">Your champion</div>
+         <div class="v">${esc(TEAMS[sb.win].c)} ${esc(TEAMS[sb.win].n)}</div></div>`
+    : `<div class="champ wait"><div class="k">Champion</div><div class="v">${sb.teams ? 'Pick the Super Bowl winner' : 'Pick the conference champions'}</div></div>`;
+  const sbCol = `<div class="sbcol"><div class="colbody"><div class="sbslot">
+      <div class="sbhead"><b>Super Bowl LXI</b><span>SoFi Stadium · Feb 14, 2027</span></div>
+      ${matchup('sb', sb.teams, sbSeed)}
+      ${champ}
+    </div></div></div>`;
 
-  const champ = sb.win ? `<div class="champ"><img src="${logoSrc(sb.win)}" alt="">
-    <div class="k">Your Super Bowl LXI champion</div>
-    <div class="v">${esc(TEAMS[sb.win].c)} ${esc(TEAMS[sb.win].n)}</div></div>` : '';
-
-  $('#poBody').innerHTML = secs + sbHtml + champ;
+  $('#poBody').innerHTML = `<div class="bk">${confBracket('AFC')}${sbCol}${confBracket('NFC')}</div>`;
 }
-
 
 /* ==========================================================
    EVENTS
@@ -1473,10 +1694,28 @@ $('#tblog').addEventListener('click', e=>{
   S.flips[key] = ids[(idx+1) % ids.length];
   render();
 });
-// week shortcuts only touch games that haven't been played yet
-const openGames = () => byWeek[S.week].filter(g => !isFinal(g.i));
-$('#btnHome').addEventListener('click', ()=>{ openGames().forEach(g=>S.picks[g.i]='h'); render(); });
-$('#btnRand').addEventListener('click', ()=>{ openGames().forEach(g=>S.picks[g.i]=Math.random()<0.5?'a':'h'); render(); });
+// shortcuts only touch games that haven't been played yet
+const openGames = () => (S.mode === 'team'
+  ? GAMES.filter(g => g.a === S.team || g.h === S.team)
+  : byWeek[S.week]).filter(g => !isFinal(g.i));
+const sideOf = (g, t) => g.a === t ? 'a' : 'h';
+$('#btnHome').addEventListener('click', ()=>{
+  openGames().forEach(g => S.picks[g.i] = S.mode === 'team' ? sideOf(g, S.team) : 'h'); render();
+});
+$('#btnRand').addEventListener('click', ()=>{
+  openGames().forEach(g => S.picks[g.i] = S.mode === 'team'
+    ? (sideOf(g, S.team) === 'a' ? 'h' : 'a')
+    : (Math.random()<0.5 ? 'a' : 'h'));
+  render();
+});
+$('#modeSeg').addEventListener('click', e=>{
+  const b = e.target.closest('[data-mode]'); if(!b || b.dataset.mode === S.mode) return;
+  S.mode = b.dataset.mode; renderWeek(); store.write();
+});
+$('#teamPick').addEventListener('click', e=>{
+  const b = e.target.closest('[data-team]'); if(!b) return;
+  S.team = b.dataset.team; renderWeek(); store.write();
+});
 $('#btnClearWk').addEventListener('click', ()=>{ openGames().forEach(g=>delete S.picks[g.i]); render(); });
 // close the Board menu after choosing, or when clicking elsewhere
 document.addEventListener('click', e=>{
@@ -1493,7 +1732,7 @@ $('#btnReset').addEventListener('click', async ()=>{
     yes:'Clear everything', no:'Keep my picks'
   });
   if(!ok) return;
-  S = {picks:{}, po:{}, flips:{}, week:currentWeek()};
+  S = {picks:{}, po:{}, flips:{}, week:currentWeek(), mode:S.mode, team:S.team};
   try{ localStorage.removeItem(KEY); }catch(e){}
   render();
   toast(`Picks cleared — ${leftToPick()} games back on the table.`);
@@ -1513,7 +1752,7 @@ $('#fileIn').addEventListener('change', e=>{
     try{
       const v = JSON.parse(fr.result);
       if(!v || typeof v.picks !== 'object') throw 0;
-      S = {picks:v.picks||{}, po:v.po||{}, flips:v.flips||{}, week:S.week};
+      S = {picks:v.picks||{}, po:v.po||{}, flips:v.flips||{}, week:S.week, mode:S.mode, team:S.team};
       render();
     }catch(err){ alert("That file isn't a saved board. Pick a nfl-2026-picks.json file."); }
   };
@@ -1698,7 +1937,7 @@ async function buildBracketImage(){
     });
     c.fillStyle = IMG.panel; rr(c,P,cy,col,50,5); c.fill();
     c.strokeStyle = IMG.line; c.lineWidth=1; rr(c,P+.5,cy+.5,col-1,49,5); c.stroke();
-    imgRow(c, P+3, cy+3, col-6, 44, b.seeds[0], 1, 'win');
+    imgRow(c, P+3, cy+3, col-6, 44, b.seeds[0], 1, 'plain');
     c.fillStyle = IMG.faint; c.font='500 11px Inter, sans-serif'; track(c,1.2);
     c.textAlign='right'; c.fillText('BYE', P+col-70, cy+30); track(c,0); c.textAlign='left';
     const wcBottom = cy + 50;
@@ -1806,13 +2045,45 @@ document.addEventListener('keydown', e=>{
   if(!$('#modal').hidden) return;
   const t = e.target;
   if(t && typeof t.matches === 'function' && t.matches('input,textarea,select')) return;
-  if(!$('#panel-picks').classList.contains('on')) return;
+  if(!$('#panel-picks').classList.contains('on') || S.mode === 'team') return;
   if(e.key === 'ArrowRight' && S.week < WEEKS) goWeek(S.week + 1);
   if(e.key === 'ArrowLeft' && S.week > 1) goWeek(S.week - 1);
 });
 
+/* ==========================================================
+   ADSENSE
+   Fill in your publisher ID and two 160x600 display ad unit IDs from
+   AdSense to switch the placeholders to real ads. The script only loads
+   on wide screens, after the page has finished loading and gone idle,
+   so it never competes with the app for startup time.
+   ========================================================== */
+const ADSENSE = {
+  client: '',              // e.g. 'ca-pub-1234567890123456'
+  slots: { left: '', right: '' }   // ad unit IDs, e.g. '1234567890'
+};
+function loadAds(){
+  if(!ADSENSE.client || !matchMedia('(min-width:1660px)').matches) return;
+  const go = ()=>{
+    const units = [...document.querySelectorAll('.adslot')].filter(el => ADSENSE.slots[el.dataset.pos]);
+    if(!units.length) return;
+    units.forEach(el=>{
+      el.classList.add('live');
+      el.innerHTML = `<ins class="adsbygoogle" style="display:inline-block;width:160px;height:600px"
+        data-ad-client="${ADSENSE.client}" data-ad-slot="${ADSENSE.slots[el.dataset.pos]}"></ins>`;
+    });
+    const sc = document.createElement('script');
+    sc.async = true; sc.crossOrigin = 'anonymous';
+    sc.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(ADSENSE.client);
+    document.head.appendChild(sc);
+    units.forEach(()=> (window.adsbygoogle = window.adsbygoogle || []).push({}));
+  };
+  const idle = ()=> 'requestIdleCallback' in window ? requestIdleCallback(go, {timeout:5000}) : setTimeout(go, 3000);
+  if(document.readyState === 'complete') idle(); else window.addEventListener('load', idle);
+}
+
 render();
 loadResults();
+loadAds();
 // keep scores fresh while the page is open
 setInterval(()=>{ if(!document.hidden) loadResults(); }, 5*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) loadResults(); });

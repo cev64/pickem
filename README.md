@@ -66,10 +66,18 @@ The old caches get deleted on the next visit and the new files load.
 between weeks. *Home teams* and *Random* fill the unplayed games of a week in
 one go. Finished games show the final score and can't be changed.
 
+**Games → By team** — pick one team's whole season at once, with *Win out* /
+*Lose out* shortcuts.
+
 **Standings** — division tables and 1–7 seeding for each conference, with every
 tiebreaker that fired listed underneath and explained.
 
-**Playoffs** — click a team to advance it. **Save bracket image** exports a PNG
+**Standings → 2027 Draft order** — round 1 as your season stands (before
+trades): non-playoff teams by worst record, then playoff teams by the round they
+go out in your bracket, ties broken by strength of schedule.
+
+**Playoffs** — a full bracket: AFC on the left, NFC on the right, Super Bowl in
+the middle. Nothing is picked until you click a team to advance it. **Save bracket image** exports a PNG
 built for sharing; on Android you'll also get **Share bracket**, which opens the
 system share sheet directly.
 
@@ -94,3 +102,21 @@ The 2026 schedule is the league's May 14, 2026 release — all 272 games includi
 the nine international games and every bye week. Week 16, 17 and 18 kickoff
 times were still TBD at release; the matchups themselves are final, which is all
 this app needs.
+
+## Ads (Google AdSense)
+
+Two 160×600 ad slots sit in the side margins, fixed in place and outside the
+page layout, so they can't shift or slow the app. They only appear on screens
+at least 1660px wide, where there is empty margin; phones and laptops never
+load the ad script. Until configured they show a dashed placeholder.
+
+To switch them on:
+
+1. Put the site on a domain you own (AdSense won't approve a `github.io`
+   address) — GitHub Pages supports custom domains.
+2. Get approved in AdSense, then create two *Display* ad units, fixed size
+   160×600.
+3. In `index.html`, fill in `ADSENSE.client` (`ca-pub-…`) and the two slot IDs.
+4. Add an `ads.txt` file at the site root with the line AdSense gives you.
+5. Leave AdSense **Auto ads off** — they inject ads into the content and cause
+   the jank the fixed rails are there to avoid.
