@@ -1,6 +1,6 @@
 /* Pick 'Em — service worker.
    Bump VERSION whenever you change index.html so installed apps update. */
-const VERSION = 'v1.5.1';
+const VERSION = 'v1.5.2';
 const SHELL   = 'pickem-shell-'   + VERSION;
 const RUNTIME = 'pickem-runtime-' + VERSION;
 
