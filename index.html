@@ -43,11 +43,18 @@
   --shadow:0 1px 2px rgba(16,24,40,.05);
   --shadow-lg:0 12px 32px rgba(16,24,40,.14);
   --display:'Barlow Condensed','Arial Narrow',sans-serif;
+  /* motion: one ease-out for movement, one gentle spring for "settle" moments */
+  --ease:cubic-bezier(.22,1,.36,1);
+  --spring:cubic-bezier(.34,1.4,.64,1);
   --body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 }
 *{box-sizing:border-box}
 /* no grey/blue flash on tap in mobile browsers; :active below gives feedback instead */
-html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;
+  /* reserve the scrollbar's space on every tab, so switching between a long
+     page and a short one never nudges the layout sideways */
+  scrollbar-gutter:stable}
+@supports not (scrollbar-gutter:stable){html{overflow-y:scroll}}
 button,summary,a,[role="tab"]{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 button,summary{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
 [hidden]{display:none!important}
@@ -61,15 +68,20 @@ button{font-family:inherit}
 
 /* ---------- header ---------- */
 .topbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:saturate(1.4) blur(8px);border-bottom:1px solid var(--line)}
-.topbar{padding-top:env(safe-area-inset-top)}
+.topbar{padding-top:env(safe-area-inset-top);transition:box-shadow .3s var(--ease),border-color .3s var(--ease)}
+.topbar.scrolled{box-shadow:0 8px 24px rgba(8,32,79,.07);border-bottom-color:transparent}
 .topbar .in{max-width:1240px;margin:0 auto;padding:10px max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));display:flex;align-items:center;gap:12px}
 .mark{width:34px;height:34px;border-radius:8px;flex:none}
 h1{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:.03em;text-transform:uppercase;margin:0;line-height:1}
 h1 .yr{color:var(--accent)}
-nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);padding:3px;border-radius:10px}
-.tab{background:none;border:none;border-radius:8px;color:var(--ink-2);font-weight:600;font-size:13.5px;padding:6px 14px;cursor:pointer;transition:.12s}
-.tab:hover{color:var(--ink)}
-.tab[aria-selected="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(16,24,40,.12)}
+nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);padding:3px;border-radius:10px;position:relative}
+.tab{background:none;border:none;border-radius:8px;color:var(--ink-2);font-weight:600;font-size:13.5px;padding:6px 14px;cursor:pointer;
+  position:relative;z-index:1;transition:color .25s var(--ease),transform .18s var(--ease)}
+@media(hover:hover){.tab:hover{color:var(--ink)}}
+.tab[aria-selected="true"]{color:var(--ink)}
+.seg-ind{position:absolute;top:3px;left:0;height:calc(100% - 6px);border-radius:8px;background:#fff;
+  box-shadow:0 1px 3px rgba(16,24,40,.12),0 1px 1px rgba(16,24,40,.04);pointer-events:none;z-index:0;will-change:transform,width}
+.seg-ind.ready{transition:transform .45s var(--ease),width .45s var(--ease)}
 .headmeta{margin-left:auto;display:flex;gap:8px;align-items:center}
 @media(max-width:760px){
   .topbar .in{flex-wrap:wrap;row-gap:8px}
@@ -79,20 +91,23 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 
 .btn{
   font-weight:500;font-size:13px;background:#fff;color:var(--ink-2);border:1px solid var(--line-2);
-  padding:6px 12px;border-radius:var(--radius-sm);cursor:pointer;transition:.12s;white-space:nowrap;
+  padding:6px 12px;border-radius:var(--radius-sm);cursor:pointer;white-space:nowrap;
+  transition:background-color .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease),transform .18s var(--ease),opacity .2s;
 }
-.btn:hover{color:var(--ink);background:var(--surface)}
-.btn:active,.tab:active,.notch:active,.pickbtn:active,.mrow:active,.seg button:active,.teampick button:active{transform:scale(.97)}
+@media(hover:hover){.btn:hover{color:var(--ink);background:var(--surface)}}
+.btn:active,.notch:active,.pickbtn:active,.mrow:active,.teampick button:active{transform:scale(.97)}
+.tab:active,.seg button:active{transform:scale(.96)}
+.btn:disabled{opacity:.55}
 .btn.share{display:inline-flex;align-items:center;gap:6px}
 /* keep taps from leaving a focus ring behind; keyboard focus still shows */
 :focus:not(:focus-visible){outline:none}
 .btn:focus-visible,.tab:focus-visible,.notch:focus-visible,.pickbtn:focus-visible,.tiebtn:focus-visible,.mrow:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.primary:hover{background:var(--accent-ink)}
+@media(hover:hover){.btn.primary:hover{background:var(--accent-ink)}}
 .btn.danger{color:var(--bad);border-color:#F3C1C1}
-.btn.danger:hover{background:#FEF2F2}
+@media(hover:hover){.btn.danger:hover{background:#FEF2F2}}
 .btn.ghost{border-color:transparent;background:none}
-.btn.ghost:hover{background:var(--surface-2)}
+@media(hover:hover){.btn.ghost:hover{background:var(--surface-2)}}
 
 
 /* ---------- summary strip ---------- */
@@ -102,7 +117,7 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .stat span{font-size:12px;color:var(--ink-3)}
 .stat.acc b{color:var(--accent)}
 .bar{flex:1;min-width:200px;height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;display:flex}
-.bar i{display:block;height:100%;transition:width .3s}
+.bar i{display:block;height:100%;transition:width .6s var(--ease)}
 .bar .f{background:var(--ink)}
 .bar .p{background:var(--accent)}
 .updated{font-size:12px;color:var(--ink-3);width:100%;margin-top:-6px}
@@ -121,14 +136,15 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .rail{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 10px;margin:0 -2px 8px;scrollbar-width:thin;scroll-snap-type:x proximity}
 .notch{
   flex:1 0 44px;min-width:44px;background:#fff;border:1px solid var(--line);border-radius:10px;
-  padding:6px 0 8px;cursor:pointer;color:var(--ink-2);position:relative;transition:.12s;scroll-snap-align:center;
+  padding:6px 0 8px;cursor:pointer;color:var(--ink-2);position:relative;scroll-snap-align:center;
+  transition:background-color .3s var(--ease),border-color .3s var(--ease),color .3s var(--ease),transform .18s var(--ease);
   display:flex;flex-direction:column;align-items:center;gap:1px;overflow:hidden;
 }
 .notch .l{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
 .notch .n{font-size:15px;font-weight:700}
-.notch:hover{border-color:var(--line-2);background:var(--surface)}
+@media(hover:hover){.notch:hover{border-color:var(--line-2);background:var(--surface)}}
 .notch .fill{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--line);}
-.notch .fill i{display:block;height:100%;background:var(--accent);transform-origin:left;transition:transform .3s}
+.notch .fill i{display:block;height:100%;background:var(--accent);transform-origin:left;transition:transform .6s var(--ease),background-color .3s}
 .notch.final .fill i{background:var(--ink)}
 .notch.now::before{content:'';position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
 .notch[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
@@ -148,9 +164,10 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 
 /* ---------- mode switch + team picker ---------- */
 .modebar{display:flex;align-items:center;gap:12px;margin:0 0 12px;flex-wrap:wrap}
-.seg{display:inline-flex;background:var(--surface-2);padding:3px;border-radius:10px;gap:2px}
-.seg button{background:none;border:none;border-radius:8px;color:var(--ink-2);font-weight:600;font-size:13px;padding:6px 14px;cursor:pointer}
-.seg button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(16,24,40,.12)}
+.seg{display:inline-flex;background:var(--surface-2);padding:3px;border-radius:10px;gap:2px;position:relative}
+.seg button{background:none;border:none;border-radius:8px;color:var(--ink-2);font-weight:600;font-size:13px;padding:6px 14px;cursor:pointer;
+  position:relative;z-index:1;transition:color .25s var(--ease),transform .18s var(--ease)}
+.seg button[aria-pressed="true"]{color:var(--ink)}
 .seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .teampick{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px 6px;margin:0 0 14px;padding:10px;border:1px solid var(--line);border-radius:var(--radius);background:#fff}
 .teampick .dv{display:flex;flex-direction:column;gap:4px;align-items:stretch}
@@ -158,7 +175,7 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 /* every button uses the same fixed tracks (badge | 3-letter label), centred as a
    block, so the circles line up down each division whatever the label width */
 .teampick button{display:grid;grid-template-columns:24px 30px;align-items:center;justify-content:center;justify-items:start;column-gap:6px;background:none;border:1.5px solid transparent;border-radius:8px;padding:4px 2px;cursor:pointer;font-size:11.5px;font-weight:600;color:var(--ink-2)}
-.teampick button:hover{background:var(--surface)}
+@media(hover:hover){.teampick button:hover{background:var(--surface)}}
 .teampick button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
 .teampick button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .teampick .logo{width:24px;height:24px}
@@ -185,9 +202,10 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .pickbtn{
   display:flex;align-items:center;gap:10px;text-align:left;width:100%;min-width:0;
   background:var(--surface);border:1.5px solid transparent;border-radius:10px;
-  padding:8px 12px;cursor:pointer;color:var(--ink);transition:.12s;min-height:58px;
+  padding:8px 12px;cursor:pointer;color:var(--ink);min-height:58px;
+  transition:background-color .25s var(--ease),border-color .25s var(--ease),opacity .3s var(--ease),transform .18s var(--ease);
 }
-.pickbtn:hover{background:var(--surface-2)}
+@media(hover:hover){.pickbtn:hover{background:var(--surface-2)}}
 .logo{width:34px;height:34px;object-fit:contain;flex:none}
 /* text scales with whatever size the badge is drawn at */
 .badge{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;letter-spacing:-.03em;line-height:1;
@@ -220,7 +238,7 @@ td.team .logo.badge{vertical-align:middle;margin-top:-2px}
 .mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
 .vs{font-size:12px;color:var(--ink-3);font-weight:600}
 .tiebtn{font-size:11px;font-weight:600;background:#fff;border:1px solid var(--line-2);color:var(--ink-3);border-radius:6px;padding:2px 7px;cursor:pointer;transition:.12s}
-.tiebtn:hover{color:var(--ink);border-color:var(--ink-3)}
+@media(hover:hover){.tiebtn:hover{color:var(--ink);border-color:var(--ink-3)}}
 .tiebtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
 @media(max-width:620px){
   .row{grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr);gap:6px}
@@ -290,7 +308,7 @@ tr.out .logo{opacity:.5}
 .logitem .txt{color:var(--ink-2);flex:1;min-width:200px}
 .logitem .txt b{color:var(--ink);font-weight:600}
 .flipbtn{font-size:11px;font-weight:600;background:#fff;border:1px solid var(--line-2);color:var(--ink-2);border-radius:6px;padding:2px 8px;cursor:pointer}
-.flipbtn:hover{border-color:var(--ink-3);color:var(--ink)}
+@media(hover:hover){.flipbtn:hover{border-color:var(--ink-3);color:var(--ink)}}
 .empty{color:var(--ink-3);font-size:13px}
 
 /* ---------- bracket ---------- */
@@ -320,9 +338,10 @@ tr.out .logo{opacity:.5}
 .conf.nfc .single::before{left:-22px;width:22px}
 
 .matchup{border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden;box-shadow:var(--shadow)}
-.mrow{display:flex;align-items:center;gap:7px;padding:7px 9px;cursor:pointer;transition:.12s;background:none;border:none;width:100%;text-align:left;color:var(--ink);font-size:13.5px;min-height:38px}
+.mrow{display:flex;align-items:center;gap:7px;padding:7px 9px;cursor:pointer;
+  transition:background-color .25s var(--ease),opacity .3s var(--ease),transform .18s var(--ease);background:none;border:none;width:100%;text-align:left;color:var(--ink);font-size:13.5px;min-height:38px}
 .mrow+.mrow{border-top:1px solid var(--line)}
-.mrow:hover:not(.tbd):not(.fixed){background:var(--surface)}
+@media(hover:hover){.mrow:hover:not(.tbd):not(.fixed){background:var(--surface)}}
 .mrow .sd{font-size:11px;color:var(--ink-3);width:12px;flex:none;text-align:right}
 .mrow .logo{width:22px;height:22px}
 .mrow .tm{font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -399,9 +418,15 @@ tr.out .logo{opacity:.5}
 .credits a{color:var(--ink-2)}
 
 /* ---------- modal ---------- */
-.modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(16,24,40,.45);backdrop-filter:blur(2px)}
+.modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:rgba(8,32,79,.28);-webkit-backdrop-filter:blur(8px) saturate(1.2);backdrop-filter:blur(8px) saturate(1.2);
+  opacity:0;transition:opacity .3s var(--ease)}
+.modal.open{opacity:1}
 .modal[hidden]{display:none}
-.sheet{background:#fff;border-radius:14px;max-width:420px;width:100%;padding:22px 24px 20px;box-shadow:var(--shadow-lg)}
+.sheet{background:rgba(255,255,255,.96);border-radius:18px;max-width:420px;width:100%;padding:22px 24px 20px;
+  box-shadow:0 24px 64px rgba(8,32,79,.22),0 2px 6px rgba(8,32,79,.06);
+  transform:translateY(14px) scale(.96);opacity:0;transition:transform .45s var(--spring),opacity .3s var(--ease)}
+.modal.open .sheet{transform:none;opacity:1}
 .sheet h4{font-size:18px;font-weight:700;margin:0 0 8px}
 .sheet p,.sheet .mbody{font-size:14px;color:var(--ink-2);margin:0 0 18px;line-height:1.5}
 .sheet .mbody .howto{margin:0}
@@ -412,8 +437,10 @@ tr.out .logo{opacity:.5}
 .sheet .btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
 
 /* ---------- toast ---------- */
-.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);z-index:60;background:var(--ink);color:#fff;border-radius:10px;padding:10px 18px;font-size:13.5px;opacity:0;pointer-events:none;transition:.22s;box-shadow:var(--shadow-lg)}
-.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));transform:translate(-50%,16px) scale(.96);z-index:60;
+  background:rgba(8,32,79,.86);-webkit-backdrop-filter:blur(14px) saturate(1.6);backdrop-filter:blur(14px) saturate(1.6);color:#fff;border-radius:10px;padding:10px 18px;font-size:13.5px;opacity:0;pointer-events:none;transition:.22s;box-shadow:var(--shadow-lg)}
+.toast{transition:opacity .3s var(--ease),transform .45s var(--spring)}
+.toast.on{opacity:1;transform:translate(-50%,0) scale(1)}
 
 /* ---------- share bar ---------- */
 .pohead{margin:0 0 18px;flex-wrap:nowrap}
@@ -471,7 +498,34 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 .bk .bk-ad{grid-area:ad}
 .bk .adinline.bk-ad{margin:0}
 
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* ---------- motion ---------- */
+@keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes ckPop{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
+@keyframes pickIn{from{background-color:var(--surface);border-color:transparent;transform:scale(.985)}}
+@keyframes loseOut{from{opacity:1}}
+@keyframes rowIn{from{background-color:transparent;box-shadow:inset 0 0 0 var(--accent)}}
+@keyframes settle{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes bump{40%{transform:scale(1.12)}to{transform:scale(1)}}
+
+/* first paint and every tab change: content fades up into place */
+.summary{animation:riseIn .55s var(--ease) both}
+.panel.on{animation:riseIn .42s var(--ease) both}
+/* changing week / team: cards cascade in (first dozen staggered, then together) */
+.games.enter>*{animation:riseIn .5s var(--ease) both;animation-delay:calc(min(var(--n,12),12) * 28ms)}
+/* a fresh pick: winner fills in, check springs, the other side eases back */
+.pickbtn.pop{animation:pickIn .4s var(--ease)}
+.pickbtn.pop .ck{animation:ckPop .5s var(--spring) both}
+.pickbtn.fade{animation:loseOut .4s var(--ease)}
+.tiebtn.pop{animation:bump .4s var(--spring)}
+/* bracket: picked row fills in, a matchup that just got its teams fades up */
+.mrow.adv.pop{animation:rowIn .45s var(--ease)}
+.matchup.enter{animation:settle .5s var(--ease) both}
+.champ.enter{animation:settle .6s var(--spring) both}
+.stat b.bump{display:inline-block;animation:bump .45s var(--spring)}
+.teampick button{transition:background-color .25s var(--ease),border-color .25s var(--ease),color .25s var(--ease),transform .18s var(--ease)}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
@@ -1387,35 +1441,51 @@ function render(){
 
 const decided = g => !!outcome(g.i);
 
+let summaryReady = false;
+function setNum(el, v){
+  v = String(v);
+  if(el.textContent === v) return;
+  el.textContent = v;
+  if(!summaryReady) return;
+  el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+}
 function renderSummary(){
   const fin = GAMES.filter(g => isFinal(g.i)).length;
   const picked = GAMES.filter(g => !isFinal(g.i) && S.picks[g.i]).length;
   const left = GAMES.length - fin - picked;
-  $('#sFinal').textContent = fin;
-  $('#sPicked').textContent = picked;
-  $('#sLeft').textContent = left;
+  setNum($('#sFinal'), fin);
+  setNum($('#sPicked'), picked);
+  setNum($('#sLeft'), left);
   $('#barF').style.width = (fin / GAMES.length * 100).toFixed(2) + '%';
   $('#barP').style.width = (picked / GAMES.length * 100).toFixed(2) + '%';
 
   const live = GAMES.some(g => isLive(g.i));
   $('#updated').innerHTML = live ? '<span class="livedot"></span>Games in progress' : '';
+  summaryReady = true;
 }
 
+let railWeek = null;
 function renderRail(){
   const now = currentWeek();
   const rail = $('#rail');
-  rail.innerHTML = Array.from({length:WEEKS},(_,i)=>{
+  if(rail.children.length !== WEEKS){
+    rail.innerHTML = Array.from({length:WEEKS},(_,i)=>`<button class="notch" data-w="${i+1}">
+      <span class="l">Wk</span><span class="n">${i+1}</span><span class="fill"><i></i></span></button>`).join('');
+  }
+  [...rail.children].forEach((btn, i)=>{
     const w = i+1, gs = byWeek[w];
     const d = gs.filter(decided).length;
     const allFinal = gs.every(g => isFinal(g.i));
-    const cls = ['notch', allFinal ? 'final' : '', w === now ? 'now' : ''].join(' ');
-    const tip = allFinal ? 'all games final' : `${gs.length - d} left to pick`;
-    return `<button class="${cls}" data-w="${w}" aria-current="${S.week===w}" title="Week ${w} — ${tip}">
-      <span class="l">Wk</span><span class="n">${w}</span>
-      <span class="fill"><i style="transform:scaleX(${(d/gs.length).toFixed(3)})"></i></span></button>`;
-  }).join('');
-  const on = rail.querySelector('[aria-current="true"]');
-  if(on) rail.scrollLeft = on.offsetLeft - rail.clientWidth/2 + on.offsetWidth/2;
+    btn.className = ['notch', allFinal ? 'final' : '', w === now ? 'now' : ''].join(' ').trim();
+    btn.setAttribute('aria-current', S.week === w);
+    btn.title = `Week ${w} — ${allFinal ? 'all games final' : (gs.length - d) + ' left to pick'}`;
+    btn.querySelector('.fill i').style.transform = `scaleX(${(d/gs.length).toFixed(3)})`;
+  });
+  if(railWeek !== S.week && rail.offsetParent){
+    const on = rail.children[S.week - 1];
+    rail.scrollTo({left: on.offsetLeft - rail.clientWidth/2 + on.offsetWidth/2, behavior: railWeek === null ? 'auto' : 'smooth'});
+    railWeek = S.week;
+  }
 }
 
 const CHECK = '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -1438,7 +1508,8 @@ function chip(g, side, picked){
     const cls = res.win === side ? 'won' : (res.win === 't' ? '' : 'lost');
     return `<div class="pickbtn ${cls}">${teamLabel(t)}${score}</div>`;
   }
-  const cls = picked === side ? 'win' : (picked ? 'lose' : '');
+  let cls = picked === side ? 'win' : (picked ? 'lose' : '');
+  if(JUST.has(g.i)) cls += picked === side ? ' pop' : (picked ? ' fade' : '');
   return `<button class="pickbtn ${cls}" data-g="${g.i}" data-p="${side}" aria-pressed="${picked===side}"
       aria-label="Pick ${esc(TEAMS[t].c + ' ' + TEAMS[t].n)}">
     ${teamLabel(t)}${score || `<span class="ck">${CHECK}</span>`}
@@ -1484,7 +1555,7 @@ function gameCard(g, withWeek){
       <div class="mid">
         <span class="vs">${g.site ? 'vs' : '@'}</span>
         ${fin ? (res.win === 't' ? '<span class="vs">Tie</span>' : '')
-              : `<button class="tiebtn${p==='t'?' on':''}" data-g="${g.i}" data-p="t" aria-pressed="${p==='t'}">Tie</button>`}
+              : `<button class="tiebtn${p==='t'?' on':''}${p==='t' && JUST.has(g.i)?' pop':''}" data-g="${g.i}" data-p="t" aria-pressed="${p==='t'}">Tie</button>`}
       </div>
       <div class="right" style="display:contents">${chip(g, 'h', p)}</div>
     </div>
@@ -1495,6 +1566,8 @@ function gameCard(g, withWeek){
    (after card 4 everywhere; after card 9 and at the end on phones only).
    cards: [{html, day}] in display order. */
 const AD_BREAKS = [4, 9];   // every week has 13+ games, so the last part always has 4+
+let JUST = new Set();          // game indexes picked by the last action (animate just those)
+let gamesKey = null, gamesEnter = false;
 function putGames(cards){
   const parts = ['', '', ''];
   let last = '';
@@ -1505,12 +1578,21 @@ function putGames(cards){
     last = c.day || '';
     parts[k] += h + c.html;
   });
-  $('#games').innerHTML = parts[0];
-  $('#games2').innerHTML = parts[1];
-  $('#games3').innerHTML = parts[2];
+  let n = 0;
+  ['#games','#games2','#games3'].forEach((id, k)=>{
+    const el = $(id);
+    el.classList.remove('enter');
+    el.innerHTML = parts[k];
+    if(gamesEnter){
+      [...el.children].forEach(c => c.style.setProperty('--n', n++));
+      void el.offsetWidth; el.classList.add('enter');
+    }
+  });
 }
 
 function renderWeek(){
+  const key = `${S.mode}|${S.mode === 'team' ? S.team : S.week}`;
+  gamesEnter = key !== gamesKey; gamesKey = key;
   const team = S.mode === 'team';
   document.querySelectorAll('#modeSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === S.mode));
   $('#rail').hidden = team;
@@ -1689,9 +1771,11 @@ function renderStandings(){
     : `<div class="empty">No ties to break yet — every group is separated on record.</div>`;
 }
 
+let JUST_PO = null, PO_PREV = {}, PO_NEXT = {}, PO_READY = false, CHAMP_PREV = null;
 function mrow(t, seed, picked, id){
   if(!t) return `<div class="mrow tbd"><span class="sd"></span><span class="tm">TBD</span></div>`;
-  const cls = picked === t ? 'adv' : (picked ? 'out' : '');
+  let cls = picked === t ? 'adv' : (picked ? 'out' : '');
+  if(picked === t && JUST_PO === id + '|' + t) cls += ' pop';
   return `<button class="mrow ${cls}" data-po="${id}" data-team="${t}" aria-pressed="${picked===t}"
       title="${esc(TEAMS[t].c + ' ' + TEAMS[t].n)} · ${fmtRec(R[t].ov)}">
     <span class="sd">${seed||''}</span>${logo(t)}
@@ -1702,7 +1786,9 @@ function mrow(t, seed, picked, id){
 function matchup(id, pair, seedOf){
   if(!pair) return `<div class="matchup">${mrow(null)}${mrow(null)}</div>`;
   const picked = S.po[id] && pair.includes(S.po[id]) ? S.po[id] : null;
-  return `<div class="matchup">${mrow(pair[0], seedOf(pair[0]), picked, id)}${mrow(pair[1], seedOf(pair[1]), picked, id)}</div>`;
+  const pk = pair.join('-'); PO_NEXT[id] = pk;
+  const enter = PO_READY && PO_PREV[id] !== pk ? ' enter' : '';
+  return `<div class="matchup${enter}">${mrow(pair[0], seedOf(pair[0]), picked, id)}${mrow(pair[1], seedOf(pair[1]), picked, id)}</div>`;
 }
 function byeCard(t){
   return `<div class="matchup"><div class="mrow fixed" title="${esc(TEAMS[t].c + ' ' + TEAMS[t].n)}">
@@ -1731,8 +1817,10 @@ function confBracket(cf){
 function renderPlayoffs(){
   const sb = BR.sb;
   const sbSeed = t => BR.AFC.seeds.includes(t) ? BR.AFC.seedOf(t) : BR.NFC.seedOf(t);
+  PO_NEXT = {};
+  const champEnter = sb.win && sb.win !== CHAMP_PREV && PO_READY ? ' enter' : '';
   const champ = sb.win
-    ? `<div class="champ">${logo(sb.win, 'logo big')}<div class="k">Your champion</div>
+    ? `<div class="champ${champEnter}">${logo(sb.win, 'logo big')}<div class="k">Your champion</div>
          <div class="v">${esc(TEAMS[sb.win].c)} ${esc(TEAMS[sb.win].n)}</div></div>`
     : `<div class="champ wait"><div class="k">Champion</div><div class="v">TBD</div></div>`;
   const sbCol = `<div class="colbody"><div class="sbslot">
@@ -1751,19 +1839,45 @@ function renderPlayoffs(){
   $('#bkAFC').innerHTML = confBracket('AFC');
   $('#bkSB').innerHTML = sbCol;
   $('#bkNFC').innerHTML = confBracket('NFC');
+  PO_PREV = PO_NEXT; CHAMP_PREV = sb.win; PO_READY = true;
 }
 
 /* ==========================================================
    EVENTS
    ========================================================== */
+/* segmented controls: one white pill that glides to the selected option */
+function placeInd(box){
+  if(!box || !box.offsetParent) return;
+  let ind = box.querySelector(':scope > .seg-ind');
+  if(!ind){ ind = document.createElement('span'); ind.className = 'seg-ind'; box.prepend(ind); }
+  const on = box.querySelector('[aria-selected="true"],[aria-pressed="true"]');
+  if(!on) return;
+  ind.style.width = on.offsetWidth + 'px';
+  ind.style.transform = `translateX(${on.offsetLeft}px)`;
+  if(!ind.classList.contains('ready')) requestAnimationFrame(()=>requestAnimationFrame(()=>ind.classList.add('ready')));
+}
+const placeAllInd = () => { placeInd($('nav.tabs')); placeInd($('#modeSeg')); };
+let indRaf = 0;
+window.addEventListener('resize', ()=>{ cancelAnimationFrame(indRaf); indRaf = requestAnimationFrame(placeAllInd); });
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(placeAllInd);
+
+const tabScroll = {};
+let curTab = 'picks';
 function showTab(name, push){
   if(!document.getElementById('panel-' + name)) name = 'picks';
+  if(name !== curTab) tabScroll[curTab] = window.scrollY;
   document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected', x.dataset.tab === name));
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on', p.id === 'panel-' + name));
   if(push) history.replaceState(null, '', name === 'picks' ? location.pathname + location.search : '#' + name);
+  curTab = name;
+  placeAllInd();
 }
 document.querySelectorAll('.tab').forEach(b=>{
-  b.addEventListener('click', ()=>{ showTab(b.dataset.tab, true); window.scrollTo({top:0}); });
+  b.addEventListener('click', ()=>{
+    if(b.dataset.tab === curTab) return;
+    showTab(b.dataset.tab, true);
+    window.scrollTo(0, tabScroll[b.dataset.tab] || 0);   // like iOS: each tab keeps its place
+  });
 });
 if(location.hash) showTab(location.hash.slice(1));
 window.addEventListener('hashchange', ()=> showTab(location.hash.slice(1)));
@@ -1781,7 +1895,7 @@ const onGameClick = e=>{
   if(isFinal(gi)) return;   // real result, locked
   S.picks[gi] = (S.picks[gi] === p) ? undefined : p;
   if(!S.picks[gi]) delete S.picks[gi];
-  render();
+  JUST = new Set([gi]); render(); JUST = new Set();
 };
 $('#games').addEventListener('click', onGameClick);
 $('#games2').addEventListener('click', onGameClick);
@@ -1798,7 +1912,7 @@ $('#poBody').addEventListener('click', e=>{
   if(!id || id==='undefined') return;
   S.po[id] = (S.po[id] === t) ? undefined : t;
   if(!S.po[id]) delete S.po[id];
-  render();
+  JUST_PO = S.po[id] ? id + '|' + t : null; render(); JUST_PO = null;
 });
 $('#tblog').addEventListener('click', e=>{
   const b = e.target.closest('[data-flip]'); if(!b) return;
@@ -1815,17 +1929,20 @@ const openGames = () => (S.mode === 'team'
 const sideOf = (g, t) => g.a === t ? 'a' : 'h';
 $('#btnHome').addEventListener('click', ()=>{
   const favOf = g => (RES[g.i] && RES[g.i].line && RES[g.i].line.fav) || 'h';
-  openGames().forEach(g => S.picks[g.i] = S.mode === 'team' ? sideOf(g, S.team) : favOf(g)); render();
+  const gs = openGames();
+  gs.forEach(g => S.picks[g.i] = S.mode === 'team' ? sideOf(g, S.team) : favOf(g));
+  JUST = new Set(gs.map(g => g.i)); render(); JUST = new Set();
 });
 $('#btnRand').addEventListener('click', ()=>{
-  openGames().forEach(g => S.picks[g.i] = S.mode === 'team'
+  const gs = openGames();
+  gs.forEach(g => S.picks[g.i] = S.mode === 'team'
     ? (sideOf(g, S.team) === 'a' ? 'h' : 'a')
     : (Math.random()<0.5 ? 'a' : 'h'));
-  render();
+  JUST = new Set(gs.map(g => g.i)); render(); JUST = new Set();
 });
 $('#modeSeg').addEventListener('click', e=>{
   const b = e.target.closest('[data-mode]'); if(!b || b.dataset.mode === S.mode) return;
-  S.mode = b.dataset.mode; renderWeek(); store.write();
+  S.mode = b.dataset.mode; renderWeek(); placeInd($('#modeSeg')); store.write();
 });
 $('#teamPick').addEventListener('click', e=>{
   const b = e.target.closest('[data-team]'); if(!b) return;
@@ -1839,6 +1956,12 @@ $('#btnClearWk').addEventListener('click', ()=>{
   render();
   if(hadBracket) toast('Picks and bracket cleared.');
 });
+let scrollRaf = 0;
+window.addEventListener('scroll', ()=>{
+  if(scrollRaf) return;
+  scrollRaf = requestAnimationFrame(()=>{ $('.topbar').classList.toggle('scrolled', window.scrollY > 4); scrollRaf = 0; });
+}, {passive:true});
+
 /* ==========================================================
    DIALOG + TOAST
    ========================================================== */
@@ -1851,13 +1974,17 @@ function ask({title, body, html, yes, no}){
   $('#mNo').hidden = no === null;
   $('#mYes').classList.toggle('danger', !html);
   $('#mYes').classList.toggle('primary', !!html);
-  $('#modal').hidden = false;
-  (no === null ? $('#mYes') : $('#mNo')).focus();
+  const m = $('#modal');
+  m.hidden = false;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>m.classList.add('open')));
+  (no === null ? $('#mYes') : $('#mNo')).focus({preventScroll:true});
   return new Promise(res => { askResolve = res; });
 }
 function closeAsk(v){
   if(!askResolve) return;
-  $('#modal').hidden = true;
+  const m = $('#modal');
+  m.classList.remove('open');
+  setTimeout(()=>{ if(!askResolve) m.hidden = true; }, 320);
   const r = askResolve; askResolve = null; r(v);
 }
 $('#mYes').addEventListener('click', ()=>closeAsk(true));
@@ -2363,6 +2490,7 @@ function loadAds(){
 }
 
 render();
+placeAllInd();
 loadResults();
 loadAds();
 // keep scores fresh while the page is open
