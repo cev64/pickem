@@ -165,14 +165,21 @@ Ad slots are placed so they can't slow the app down or get in the way:
   160×600 units per side. Each sits in its own ~1150px stretch of the page and
   stays pinned while that stretch scrolls by, so each one is actually seen.
   Short pages (like Playoffs) just show one; the rest never load.
-- **Tablets and laptops:** one 300×250 per tab at a natural break.
-- **Phones (≤880px):** in-feed 300×250s sized to the page: two in a week's
-  games (after games 5 and 11), three on the long Standings page (between
-  AFC and NFC, before the draft order, before the tiebreakers), one below the
-  bracket and one mid-way through Rules. That keeps ads at roughly 10–16% of
-  each page's height, under the 30% mobile ad-density ceiling Google enforces
-  via the Better Ads Standards. Never above the fold, never sticky, never a
-  pop-up, and kept clear of the pick buttons to avoid accidental taps.
+- **Laptops (941–1659px):** one 300×250 per tab at a natural break, plus one
+  under the Playoff picture in the sidebar on screens at least 900px tall
+  (where the card and the ad both fit without scrolling past each other).
+- **Phones (≤880px):** in-feed 300×250s at natural breaks, never above the
+  first screen and kept ~550px+ apart:
+  - *Games:* after games 4 and 9, and before the Playoff picture.
+  - *Standings:* after each conference's division tables, between AFC and
+    NFC, before the draft order and before the tiebreakers.
+  - *Playoffs:* between the AFC and NFC brackets, and below the Super Bowl.
+  - *Rules:* two, between sections.
+
+  That keeps ads at 15–24% of each tab's height, under the 30% mobile
+  ad-density ceiling Google enforces via the Better Ads Standards. Never
+  sticky, never a pop-up, and kept clear of the pick buttons to avoid
+  accidental taps.
 - Every slot has its size reserved up front (nothing jumps), sits outside the
   parts of the page that re-render when you pick (an ad is never reloaded by a
   tap), and only loads once the page is idle and the slot is about to scroll

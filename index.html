@@ -29,12 +29,12 @@
   --surface-2:#EEF1F5;
   --line:#E4E7EC;
   --line-2:#D5DAE1;
-  --ink:#101828;
+  --ink:#08204F;          /* logo navy */
   --ink-2:#475467;
   --ink-3:#8A94A6;
-  --accent:#1D4ED8;
-  --accent-ink:#1E40AF;
-  --accent-soft:#EFF4FF;
+  --accent:#1059FC;       /* logo blue */
+  --accent-ink:#0A45CC;
+  --accent-soft:#EDF3FF;
   --good:#15803D;
   --bad:#DC2626;
   --live:#DC2626;
@@ -123,7 +123,7 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .panel.on{display:block}
 
 /* ---------- layout ---------- */
-.split{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:28px;align-items:start}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}
 @media(max-width:940px){.split{grid-template-columns:minmax(0,1fr)}}
 
 /* ---------- week rail ---------- */
@@ -243,7 +243,8 @@ td.team .logo.badge{vertical-align:middle;margin-top:-2px}
 @media(min-width:621px){.pickbtn .who .nm-short{display:none}}
 
 /* ---------- seed rail ---------- */
-.seedrail{position:sticky;top:78px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;overflow:hidden;box-shadow:var(--shadow)}
+.side{position:sticky;top:78px}
+.seedrail{border:1px solid var(--line);border-radius:var(--radius);background:#fff;overflow:hidden;box-shadow:var(--shadow)}
 .seedrail h3{font-size:13px;font-weight:600;margin:0;padding:12px 14px;border-bottom:1px solid var(--line);color:var(--ink)}
 .seedrail h3 span{font-weight:400;color:var(--ink-3)}
 .seedgrp{padding:6px 0 8px}
@@ -256,7 +257,7 @@ td.team .logo.badge{vertical-align:middle;margin-top:-2px}
 .seedrow .rc{margin-left:auto;font-size:12px;color:var(--ink-2)}
 .seedrow.bye .n{color:var(--accent);font-weight:700}
 .seedgrp hr{border:none;border-top:1px dashed var(--line);margin:5px 14px}
-@media(max-width:940px){.seedrail{position:static}}
+@media(max-width:940px){.side{position:static}}
 
 /* ---------- standings ---------- */
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
@@ -370,7 +371,7 @@ tr.out .logo{opacity:.5}
 .champ.wait .v{font-size:15px;color:var(--ink-3);font-family:var(--body);font-weight:500;text-transform:none;letter-spacing:0}
 
 @media(max-width:1080px){
-  .bk{grid-template-columns:minmax(0,1fr);grid-template-areas:"afc" "nfc" "sb";gap:26px}
+  .bk{grid-template-columns:minmax(0,1fr);grid-template-areas:"afc" "ad" "nfc" "sb";gap:26px}
   .conf.nfc .confhd,.conf.nfc .col h5{text-align:left}
   .conf.nfc .cols3{flex-direction:row}
   .conf.nfc .pair::after{left:auto;right:-11px;border-left:none;border-right:1.5px solid var(--line-2);border-radius:0 6px 6px 0}
@@ -474,6 +475,13 @@ tr.out .logo{opacity:.5}
    of the scroll unmonetised; the slot after them folds away if the list ran out */
 @media(min-width:881px){.adinline.m-only{display:none!important}}
 body.noads .adrail,body.noads .adinline{display:none!important}
+/* laptop sidebar slot under the playoff picture: only where the sidebar exists,
+   the side rails don't, and the screen is tall enough to show card + ad together */
+.adinline.side-ad{display:none;margin:14px 0 0;padding:0;border:none}
+@media(min-width:941px) and (max-width:1659px) and (min-height:900px){.adinline.side-ad{display:flex}}
+/* bracket slot sits between the AFC and NFC brackets once they stack */
+.bk .bk-ad{grid-area:ad}
+.bk .adinline.bk-ad{margin:0}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -561,19 +569,23 @@ body.noads .adrail,body.noads .adinline{display:none!important}
       <div class="games" id="games2"></div>
       <div class="adinline m-only" id="adPicks2"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
       <div class="games" id="games3"></div>
+      <div class="adinline m-only" id="adPicks3"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
     </div>
-    <aside class="seedrail">
-      <h3>Playoff picture <span>· if the season ended now</span></h3>
-      <div id="seeds"></div>
+    <aside class="side">
+      <div class="seedrail">
+        <h3>Playoff picture <span>· if the season ended now</span></h3>
+        <div id="seeds"></div>
+      </div>
+      <div class="adinline side-ad" id="adSide"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
     </aside>
   </div>
 </section>
 
 <section class="panel" id="panel-standings">
   <div class="cols" id="standings">
-    <div id="stAFC"></div>
+    <div><div id="stAFC"></div><div class="adinline m-only" id="adStAFC"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div><div id="stAFCseed"></div></div>
     <div class="adinline m-only" id="adStandings0"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
-    <div id="stNFC"></div>
+    <div><div id="stNFC"></div><div class="adinline m-only" id="adStNFC"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div><div id="stNFCseed"></div></div>
   </div>
   <div class="adinline" id="adStandings"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
   <section class="draft" id="draft"></section>
@@ -591,7 +603,12 @@ body.noads .adrail,body.noads .adinline{display:none!important}
     <span class="hint">PNG · ready to post</span>
   </div>
   <div id="poNotice"></div>
-  <div id="poBody"></div>
+  <div id="poBody"><div class="bk">
+    <div class="conf afc" id="bkAFC"></div>
+    <div class="adinline m-only bk-ad" id="adBracket"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
+    <div class="sbcol" id="bkSB"></div>
+    <div class="conf nfc" id="bkNFC"></div>
+  </div></div>
   <div class="adinline" id="adPlayoffs"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
 </section>
 
@@ -643,6 +660,8 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 
     <h3>Seeding and the bracket</h3>
     <p>The four division winners take seeds 1–4 by record; the next three clubs take seeds 5–7. The 1 seed has a bye. Wild Card weekend is <code>2v7</code>, <code>3v6</code>, <code>4v5</code>. In the Divisional round the 1 seed hosts the lowest surviving seed and the other two meet. The higher seed hosts every game through the Conference Championship. Super Bowl LXI is at a neutral site — SoFi Stadium, Feb. 14, 2027.</p>
+
+    <div class="adinline m-only" id="adRules2"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
 
     <h3>Strength of victory and schedule</h3>
     <p>Strength of victory is the combined winning percentage of every opponent you beat, counted once per win. Strength of schedule is the combined winning percentage of every opponent you played. Both use records from your own picks, so they shift as you fill in the board.</p>
@@ -1509,9 +1528,9 @@ function gameCard(g, withWeek){
 }
 
 /* The list is split into parts around ad slots that never re-render
-   (after card 5 everywhere; after card 11 on phones only).
+   (after card 4 everywhere; after card 9 and at the end on phones only).
    cards: [{html, day}] in display order. */
-const AD_BREAKS = [5, 11];
+const AD_BREAKS = [4, 9];   // every week has 13+ games, so the last part always has 4+
 function putGames(cards){
   const parts = ['', '', ''];
   let last = '';
@@ -1688,8 +1707,7 @@ function renderStandings(){
         <tbody>${rows}</tbody></table></div>`;
     }).join('');
     const hunt = C.wilds.slice(3);
-    return `<div><h3 class="conftitle">${cf}</h3>${tables}
-      <div class="tcard"><table><caption>${cf} seeding</caption>
+    $('#st' + cf + 'seed').innerHTML = `<div class="tcard"><table><caption>${cf} seeding</caption>
       <thead><tr><th></th><th>Team</th><th>W-L</th><th>Pct</th><th>Conf</th><th>How</th></tr></thead><tbody>
       ${C.seeds.map((t,i)=>`<tr><td>${i+1}</td>
         <td class="team">${logo(t)}${t}</td>
@@ -1699,7 +1717,8 @@ function renderStandings(){
         <td class="team">${logo(t)}${t}</td>
         <td>${fmtRec(R[t].ov)}</td><td>${fmtPct(R[t].pct)}</td><td>${fmtRec(R[t].conf)}</td>
         <td class="how">Out</td></tr>`).join('')}
-      </tbody></table></div></div>`;
+      </tbody></table></div>`;
+    return `<h3 class="conftitle">${cf}</h3>${tables}`;
   })(); });
 
   const log = TBLOG;
@@ -1748,7 +1767,7 @@ function confBracket(cf){
   const cc = `<div class="col"><h5>${cf} Final<span class="rd"> · Jan 31</span></h5><div class="colbody">
       <div class="single">${slot(matchup(b.ccId, b.cc, so))}</div>
     </div></div>`;
-  return `<div class="conf ${cf.toLowerCase()}"><h4 class="confhd">${cf}</h4><div class="cols3">${wc}${dv}${cc}</div></div>`;
+  return `<h4 class="confhd">${cf}</h4><div class="cols3">${wc}${dv}${cc}</div>`;
 }
 
 function renderPlayoffs(){
@@ -1763,13 +1782,16 @@ function renderPlayoffs(){
     ? `<div class="champ">${logo(sb.win, 'logo big')}<div class="k">Your champion</div>
          <div class="v">${esc(TEAMS[sb.win].c)} ${esc(TEAMS[sb.win].n)}</div></div>`
     : `<div class="champ wait"><div class="k">Champion</div><div class="v">${sb.teams ? 'Pick the Super Bowl winner' : 'Pick the conference champions'}</div></div>`;
-  const sbCol = `<div class="sbcol"><div class="colbody"><div class="sbslot">
+  const sbCol = `<div class="colbody"><div class="sbslot">
       <div class="sbhead"><b>Super Bowl LXI</b><span>SoFi Stadium · Feb 14, 2027</span></div>
       ${matchup('sb', sb.teams, sbSeed)}
       ${champ}
-    </div></div></div>`;
+    </div></div>`;
 
-  $('#poBody').innerHTML = `<div class="bk">${confBracket('AFC')}${sbCol}${confBracket('NFC')}</div>`;
+  // only the three bracket blocks re-render; the ad between them stays put
+  $('#bkAFC').innerHTML = confBracket('AFC');
+  $('#bkSB').innerHTML = sbCol;
+  $('#bkNFC').innerHTML = confBracket('NFC');
 }
 
 /* ==========================================================
@@ -1927,7 +1949,7 @@ function toast(msg){
 const IMG = {
   W:1600, P:48, CW:176, G:28, SBW:280, H:600, ROW:34,
   bg:'#FFFFFF', line:'#E4E7EC', line2:'#D5DAE1', surface:'#F7F8FA',
-  ink:'#101828', dim:'#475467', faint:'#8A94A6', accent:'#1D4ED8', accentInk:'#1E40AF', soft:'#EFF4FF'
+  ink:'#08204F', dim:'#475467', faint:'#8A94A6', accent:'#1059FC', accentInk:'#0A45CC', soft:'#EDF3FF'
 };
 const LOGO_IMG = {};
 function loadLogos(){
