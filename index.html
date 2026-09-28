@@ -559,14 +559,17 @@ tr.out .logo{opacity:.5}
 .pohead .acts{margin-left:auto!important;width:auto!important;flex:none}
 @media(max-width:620px){.pohead h2{font-size:26px}}
 
-@media(min-width:1440px) and (max-width:1659px){:root:not(:has(body.noads)){--wrap:1040px}}
+/* with the rails showing, the page takes whatever the rails leave (up to its
+   usual 1240px): 400px = two 160px rails, 16px gaps to the page and ~24px
+   to the window edges */
+@media(min-width:1440px){:root:not(:has(body.noads)){--wrap:min(1240px, calc(100vw - 400px))}}
 /* ---------- ads ----------
    Every slot sits outside the parts of the page that re-render on a pick,
    has its size reserved before anything loads (no content jumping), and
    is kept well clear of tap targets.
 
-   Wide screens (1440px+): side rails in the empty margins. From 1440 to
-   1659px the page narrows to 1040px so the rails fit beside it. Up to three
+   Wide screens (1440px+): side rails in the empty margins. Below ~1640px
+   the page narrows to fit between them, so they sit near the window edges. Up to three
    units per side, each in its own ~1150px stretch of page and pinned while
    that stretch scrolls by — so each is actually on screen for a while.
    Short pages simply clip the lower ones, which then never load.
