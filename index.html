@@ -437,7 +437,6 @@ tr.out .logo{opacity:.5}
 .sheet p,.sheet .mbody{font-size:14px;color:var(--ink-2);margin:0 0 18px;line-height:1.5}
 .sheet .mbody .howto{margin:0}
 .sheet .mact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
-#mAlt{border-color:var(--line-2);color:var(--ink)}
 /* phones: full-width stacked choices, Cancel at the bottom (iOS action-sheet style) */
 @media(max-width:480px){
   .sheet .mact{flex-direction:column-reverse;align-items:stretch}
@@ -509,6 +508,31 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 /* bracket slot sits between the AFC and NFC brackets once they stack */
 .bk .bk-ad{grid-area:ad}
 .bk .adinline.bk-ad{margin:0}
+
+/* ---------- dropdown menu (Clear) ---------- */
+.popwrap{position:relative;display:inline-flex}
+.popmenu{position:absolute;top:calc(100% + 8px);right:0;z-index:40;min-width:200px;padding:6px;
+  display:flex;flex-direction:column;border-radius:14px;
+  background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(18px) saturate(1.7);backdrop-filter:blur(18px) saturate(1.7);
+  border:1px solid rgba(8,32,79,.08);box-shadow:0 18px 44px rgba(8,32,79,.16),0 2px 8px rgba(8,32,79,.06);
+  transform-origin:top right;opacity:0;visibility:hidden;pointer-events:none;
+  transform:translateY(-6px) scale(.86);filter:blur(3px);
+  transition:opacity .16s var(--ease),transform .2s var(--ease),filter .16s var(--ease),visibility 0s linear .2s}
+.popmenu.open{opacity:1;visibility:visible;pointer-events:auto;transform:none;filter:none;
+  transition:opacity .22s var(--ease),transform .5s var(--spring),filter .3s var(--ease),visibility 0s}
+.popmenu.measure{visibility:hidden;transition:none;transform:none;filter:none}
+.popmenu.open>*{animation:piIn .4s var(--ease) both;animation-delay:calc(var(--i) * 45ms + 70ms)}
+@keyframes piIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+.pi{display:flex;align-items:center;width:100%;text-align:left;background:none;border:none;border-radius:9px;
+  padding:10px 12px;font-size:14px;font-weight:500;color:var(--ink);cursor:pointer;white-space:nowrap;
+  transition:background-color .15s var(--ease),transform .15s var(--ease)}
+@media(hover:hover){.pi:not(:disabled):hover{background:var(--surface-2)}.pi.warn:hover{background:#FEF2F2}}
+.pi:active{transform:scale(.98)}
+.pi:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.pi.warn{color:var(--bad)}
+.pi:disabled{color:var(--ink-3);opacity:.55;cursor:default}
+.psep{height:1px;background:var(--line);margin:4px 8px}
+#btnClearWk[aria-expanded="true"]{background:var(--surface-2);color:var(--ink)}
 
 /* ---------- motion ---------- */
 @keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
@@ -622,7 +646,10 @@ body.noads .adrail,body.noads .adinline{display:none!important}
         <div class="acts">
           <button class="btn ghost" id="btnHome" title="Pick the favourite in every game left this week">Favorites</button>
           <button class="btn ghost" id="btnRand" title="Coin flip every game left this week">Random</button>
-          <button class="btn ghost" id="btnClearWk" title="Clear your picks for unplayed games this week">Clear</button>
+          <span class="popwrap">
+            <button class="btn ghost" id="btnClearWk" aria-haspopup="menu" aria-expanded="false" aria-controls="clearMenu">Clear</button>
+            <div class="popmenu" id="clearMenu" role="menu" aria-label="Clear picks"></div>
+          </span>
           <button class="btn ghost share" id="btnShareWk" title="Share an image of these picks">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
             <span>Share</span></button>
@@ -760,7 +787,6 @@ body.noads .adrail,body.noads .adinline{display:none!important}
     <div id="mBody" class="mbody"></div>
     <div class="mact">
       <button class="btn" id="mNo"></button>
-      <button class="btn" id="mAlt" hidden></button>
       <button class="btn danger" id="mYes"></button>
     </div>
   </div>
@@ -2085,21 +2111,43 @@ $('#teamPick').addEventListener('click', e=>{
   S.team = b.dataset.team; renderWeek(); store.write();
 });
 // clearing regular-season picks reshuffles the seeds, so the bracket is cleared with them
-$('#btnClearWk').addEventListener('click', async ()=>{
+/* Clear opens a small menu anchored to the button: this week (or team) / everything */
+const clearMenu = $('#clearMenu');
+function closeClearMenu(){
+  if(!clearMenu.classList.contains('open')) return;
+  clearMenu.classList.remove('open');
+  $('#btnClearWk').setAttribute('aria-expanded', 'false');
+}
+function openClearMenu(){
   const team = S.mode === 'team';
-  const scope = team ? `${TEAMS[S.team].n} picks` : `Week ${S.week}`;
   const mine = openGames().filter(g => S.picks[g.i]).length;
-  const total = Object.keys(S.picks).length + Object.keys(S.po).length;
-  if(!total){ toast('No picks to clear.'); return; }
-  const choice = await ask({
-    title: 'Clear picks',
-    body: 'Your bracket is cleared too, since the seeds will change. Final scores aren’t affected.',
-    alt: mine ? `Clear ${scope}` : null,
-    yes: 'Clear all picks',
-    no: 'Cancel'
-  });
-  if(!choice) return;
-  if(choice === 'alt'){
+  if(!Object.keys(S.picks).length && !Object.keys(S.po).length){ toast('No picks to clear.'); return; }
+  clearMenu.innerHTML = `
+    <button class="pi" role="menuitem" data-clear="scope" style="--i:0"${mine ? '' : ' disabled'}>
+      ${team ? 'Clear ' + esc(TEAMS[S.team].n) + ' picks' : 'Clear Week ' + S.week}</button>
+    <div class="psep" style="--i:1"></div>
+    <button class="pi warn" role="menuitem" data-clear="all" style="--i:2">Clear all picks</button>`;
+  // keep it on screen: anchor to the button's right edge, nudge in if it would overflow
+  clearMenu.style.right = '0px';
+  clearMenu.classList.add('measure');
+  const r = clearMenu.getBoundingClientRect();
+  if(r.left < 12) clearMenu.style.right = (r.left - 12) + 'px';
+  clearMenu.classList.remove('measure');
+  void clearMenu.offsetWidth;
+  clearMenu.classList.add('open');
+  $('#btnClearWk').setAttribute('aria-expanded', 'true');
+  const first = clearMenu.querySelector('.pi:not(:disabled)');
+  if(first) first.focus({preventScroll:true});
+}
+$('#btnClearWk').addEventListener('click', e=>{
+  e.stopPropagation();
+  clearMenu.classList.contains('open') ? closeClearMenu() : openClearMenu();
+});
+clearMenu.addEventListener('click', e=>{
+  const b = e.target.closest('[data-clear]'); if(!b || b.disabled) return;
+  const team = S.mode === 'team';
+  closeClearMenu();
+  if(b.dataset.clear === 'scope'){
     openGames().forEach(g => delete S.picks[g.i]);
     S.po = {};
     render();
@@ -2110,6 +2158,8 @@ $('#btnClearWk').addEventListener('click', async ()=>{
     toast('All picks cleared.');
   }
 });
+document.addEventListener('click', e=>{ if(!e.target.closest('.popwrap')) closeClearMenu(); });
+window.addEventListener('resize', closeClearMenu);
 let scrollRaf = 0;
 window.addEventListener('scroll', ()=>{
   if(scrollRaf) return;
@@ -2120,16 +2170,13 @@ window.addEventListener('scroll', ()=>{
    DIALOG + TOAST
    ========================================================== */
 let askResolve = null;
-/* resolves true (yes), false (no / dismissed) or 'alt' (the optional middle choice) */
-function ask({title, body, html, yes, no, alt}){
+function ask({title, body, html, yes, no}){
   $('#mTitle').textContent = title;
   if(html){ $('#mBody').innerHTML = html; } else { $('#mBody').textContent = body; }
   $('#mBody').hidden = !html && !body;
   $('#mYes').textContent = yes || 'Confirm';
   $('#mNo').textContent  = no  || 'Cancel';
   $('#mNo').hidden = no === null;
-  $('#mAlt').hidden = !alt;
-  if(alt) $('#mAlt').textContent = alt;
   $('#mYes').classList.toggle('danger', !html);
   $('#mYes').classList.toggle('primary', !!html);
   const m = $('#modal');
@@ -2147,7 +2194,6 @@ function closeAsk(v){
 }
 $('#mYes').addEventListener('click', ()=>closeAsk(true));
 $('#mNo').addEventListener('click', ()=>closeAsk(false));
-$('#mAlt').addEventListener('click', ()=>closeAsk('alt'));
 $('#modal').addEventListener('click', e=>{ if(e.target.id === 'modal') closeAsk(false); });
 
 let toastT = null;
@@ -2580,6 +2626,7 @@ window.addEventListener('appinstalled', ()=>{ $('#btnInstall').hidden = true; to
 
 document.addEventListener('keydown', e=>{
   // Escape first, so it works from anywhere including a focused field
+  if(e.key === 'Escape' && clearMenu.classList.contains('open')){ closeClearMenu(); $('#btnClearWk').focus(); return; }
   if(e.key === 'Escape' && !$('#modal').hidden){ closeAsk(false); return; }
   if(!$('#modal').hidden) return;
   const t = e.target;
