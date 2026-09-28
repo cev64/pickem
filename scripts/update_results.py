@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
-"""Pull 2026 NFL regular-season results into data/results.json.
+"""Pull 2026 NFL regular-season results (and point spreads) into data/results.json.
 
-Source: ESPN's public scoreboard feed (free, no API key). Runs from the
-GitHub Action in .github/workflows/update-results.yml, or by hand:
+Source: ESPN's public scoreboard feed (free, no API key), which also carries
+sportsbook lines for upcoming games. Runs from the GitHub Action in
+.github/workflows/update-results.yml, or by hand:
 
-    python scripts/update_results.py            # all 18 weeks
+    python scripts/update_results.py              # scores, all 18 weeks
+    python scripts/update_results.py --odds       # scores + refresh spreads
     python scripts/update_results.py --weeks 3 4
+
+Spreads are only refreshed with --odds (the Action passes it on Tuesdays,
+once the new week's lines are up). Other runs keep the last saved line, so a
+finished game keeps the line it was last listed at.
 
 The file is only rewritten when a game actually changed, so the Action
 doesn't commit every time it wakes up.
@@ -60,6 +66,24 @@ def score(c):
         return None
 
 
+def parse_line(comp):
+    """Spread and total from the first sportsbook listed, or None."""
+    for o in comp.get("odds") or []:
+        at, ht = o.get("awayTeamOdds") or {}, o.get("homeTeamOdds") or {}
+        fav = "a" if at.get("favorite") else "h" if ht.get("favorite") else None
+        try:
+            spread = abs(float(o["spread"])) if o.get("spread") is not None else None
+        except (TypeError, ValueError):
+            spread = None
+        if spread is None and fav is None:
+            continue
+        line = {"fav": fav if spread else None, "sp": spread or 0}
+        if o.get("overUnder") is not None:
+            line["ou"] = o["overUnder"]
+        return line
+    return None
+
+
 def parse_week(week, payload):
     games = []
     for ev in payload.get("events", []):
@@ -81,6 +105,9 @@ def parse_week(week, payload):
             state = "pre"
 
         g = {"w": week, "a": a, "h": h, "kick": ev.get("date"), "st": state}
+        line = parse_line(comp)
+        if line and state == "pre":
+            g["line"] = line
         if state in ("in", "post"):
             g["as"], g["hs"] = score(ac), score(hc)
         if state == "in":
@@ -115,10 +142,12 @@ def load_existing():
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--weeks", type=int, nargs="*", help="only refresh these weeks")
+    ap.add_argument("--odds", action="store_true", help="also refresh point spreads")
     args = ap.parse_args()
     weeks = args.weeks or list(range(1, WEEKS + 1))
 
     old = load_existing()
+    old_lines = {(g["w"], g["a"], g["h"]): g["line"] for g in old.get("games", []) if g.get("line")}
     by_week = {}
     for g in old.get("games", []):
         by_week.setdefault(g["w"], []).append(g)
@@ -126,7 +155,15 @@ def main():
     failed = 0
     for w in weeks:
         try:
-            by_week[w] = parse_week(w, fetch(w))
+            fresh = parse_week(w, fetch(w))
+            for g in fresh:
+                key = (g["w"], g["a"], g["h"])
+                if not args.odds or "line" not in g:
+                    # keep the saved line; only --odds runs replace it
+                    g.pop("line", None)
+                    if key in old_lines:
+                        g["line"] = old_lines[key]
+            by_week[w] = fresh
             done = sum(1 for g in by_week[w] if g["st"] == "post")
             print(f"week {w:2}: {len(by_week[w])} games, {done} final")
         except Exception as e:  # keep what we had for this week
@@ -151,7 +188,8 @@ def main():
     with open(OUT, "w") as f:
         json.dump(out, f, separators=(",", ":"))
         f.write("\n")
-    print(f"wrote {len(games)} games, {sum(g['st'] == 'post' for g in games)} final")
+    print(f"wrote {len(games)} games, {sum(g['st'] == 'post' for g in games)} final, "
+          f"{sum('line' in g for g in games)} with spreads")
 
 
 if __name__ == "__main__":

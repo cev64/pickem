@@ -8,7 +8,14 @@ on:
     - cron: "*/20 0-5 * * 0,1,2,5"
     # Everything else: every two hours, to catch stat corrections and schedule flexes
     - cron: "17 */2 * * *"
+    # Tuesday 11:05am ET: new week's point spreads are posted
+    - cron: "5 15 * * 2"
   workflow_dispatch:
+    inputs:
+      odds:
+        description: "Also refresh point spreads"
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -29,7 +36,14 @@ jobs:
           python-version: "3.12"
 
       - name: Fetch results
-        run: python scripts/update_results.py
+        env:
+          ODDS: ${{ github.event.schedule == '5 15 * * 2' || inputs.odds == true }}
+        run: |
+          if [ "$ODDS" = "true" ]; then
+            python scripts/update_results.py --odds
+          else
+            python scripts/update_results.py
+          fi
 
       - name: Commit if changed
         run: |

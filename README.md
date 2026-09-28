@@ -26,9 +26,17 @@ two hours otherwise, and commits only when a score actually changed. Pages
 redeploys on each commit.
 
 In the app, finished games are filled in and locked, standings start from the
-real season, and you pick the rest. Picks you made before a game are graded
-(**picks correct**). The site opens on the current week: the first week with
+real season, and you pick the rest. The site opens on the current week: the first week with
 games still to play, rolling over Tuesday morning after Monday night football.
+
+### Point spreads
+
+The same script saves the sportsbook point spread and over/under for every
+upcoming game (from the same ESPN feed). Lines are refreshed on the Tuesday run
+(`--odds`), once the new week's numbers are posted; other runs keep the saved
+line. Game cards show them, and **Favorites** picks the favoured side of every
+game left in a week. Run *Update game results* by hand from the Actions tab to
+refresh lines any time.
 
 Scheduled workflows only run from the default branch, so the Action starts once
 this is merged to `main`. Run it by hand from the Actions tab (*Run workflow*),
@@ -63,7 +71,7 @@ The old caches get deleted on the next visit and the new files load.
 ## Using it
 
 **Games** — click a team to pick it. *Tie* sets a drawn game. Arrow keys move
-between weeks. *Home teams* and *Random* fill the unplayed games of a week in
+between weeks. *Favorites* and *Random* fill the unplayed games of a week in
 one go. Finished games show the final score and can't be changed.
 
 **Games → By team** — pick one team's whole season at once, with *Win out* /
@@ -103,6 +111,13 @@ the nine international games and every bye week. Week 16, 17 and 18 kickoff
 times were still TBD at release; the matchups themselves are final, which is all
 this app needs.
 
+## Team logos
+
+`logos/` holds the official team logos, which are NFL trademarks. Setting
+`USE_LOGOS = false` in `index.html` swaps every logo — on the page and in the
+shared bracket image — for a round badge in the team's colour with its
+abbreviation, no other changes needed.
+
 ## Ads (Google AdSense)
 
 Ad slots are placed so they can't slow the app down or get in the way:
@@ -111,9 +126,13 @@ Ad slots are placed so they can't slow the app down or get in the way:
   160×600 units per side. Each sits in its own ~1150px stretch of the page and
   stays pinned while that stretch scrolls by, so each one is actually seen.
   Short pages (like Playoffs) just show one; the rest never load.
-- **Phones, tablets, laptops:** at most one 300×250 per tab, at a natural
-  break — after the first five games, between the standings and the draft
-  order, and below the bracket. Never above the fold, never sticky, never a
+- **Tablets and laptops:** one 300×250 per tab at a natural break.
+- **Phones (≤880px):** in-feed 300×250s sized to the page: two in a week's
+  games (after games 5 and 11), three on the long Standings page (between
+  AFC and NFC, before the draft order, before the tiebreakers), one below the
+  bracket and one mid-way through Rules. That keeps ads at roughly 10–16% of
+  each page's height, under the 30% mobile ad-density ceiling Google enforces
+  via the Better Ads Standards. Never above the fold, never sticky, never a
   pop-up, and kept clear of the pick buttons to avoid accidental taps.
 - Every slot has its size reserved up front (nothing jumps), sits outside the
   parts of the page that re-render when you pick (an ad is never reloaded by a
