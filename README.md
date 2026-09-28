@@ -76,6 +76,12 @@ Everything uses relative paths, so it works from any subdirectory.
   *Standings* shortcuts; `#playoffs`, `#standings` and `#rules` links open
   those tabs directly.
 
+`icons/logo-master.png` is the full-size logo (1254px, background cleaned,
+mark centred); every icon is generated from it: rounded tiles for
+desktop/Android (`icon-*.png`), full-bleed for iOS (`apple-touch-icon*.png`),
+maskable with the mark inside Android's safe circle, and bolder, tighter-cropped
+favicons (`favicon-16/32.png`) so the strokes survive at tab size.
+
 After changing icons, bump `VERSION` in `sw.js`. iOS caches home-screen icons
 hard, so an already-installed iPhone copy may need removing and re-adding to
 pick up a new icon.

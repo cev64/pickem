@@ -1,6 +1,6 @@
 /* Bracketeer — service worker.
    Bump VERSION whenever you change index.html so installed apps update. */
-const VERSION = 'v1.7.0';
+const VERSION = 'v1.8.0';
 const SHELL   = 'bracketeer-shell-'   + VERSION;
 const RUNTIME = 'bracketeer-runtime-' + VERSION;
 
@@ -14,6 +14,7 @@ const ASSETS = [
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
   './icons/favicon-32.png',
+  './icons/favicon-16.png',
   './data/results.json'
   // team logos are off by default (USE_LOGOS in index.html); if switched on
   // they're cached on first use by the same-origin rule below
