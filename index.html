@@ -169,14 +169,20 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
   position:relative;z-index:1;transition:color .25s var(--ease),transform .18s var(--ease)}
 .seg button[aria-pressed="true"]{color:var(--ink)}
 .seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.teampick{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px 6px;margin:0 0 14px;padding:10px;border:1px solid var(--line);border-radius:var(--radius);background:#fff}
+.teampick{position:relative;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px 6px;margin:0 0 14px;padding:10px;border:1px solid var(--line);border-radius:var(--radius);background:#fff}
 .teampick .dv{display:flex;flex-direction:column;gap:4px;align-items:stretch}
 .teampick .dl{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--ink-3);text-align:center;white-space:nowrap}
 /* every button uses the same fixed tracks (badge | 3-letter label), centred as a
    block, so the circles line up down each division whatever the label width */
 .teampick button{display:grid;grid-template-columns:24px 30px;align-items:center;justify-content:center;justify-items:start;column-gap:6px;background:none;border:1.5px solid transparent;border-radius:8px;padding:4px 2px;cursor:pointer;font-size:11.5px;font-weight:600;color:var(--ink-2)}
 @media(hover:hover){.teampick button:hover{background:var(--surface)}}
-.teampick button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.teampick button{position:relative;z-index:1}
+.teampick button[aria-pressed="true"]{color:var(--accent-ink)}
+.teampick button[aria-pressed="true"]:hover{background:none}
+/* the selected-team highlight glides between cells */
+.tp-ind{position:absolute;top:0;left:0;border-radius:8px;border:1.5px solid var(--accent);background:var(--accent-soft);
+  pointer-events:none;z-index:0;will-change:transform}
+.tp-ind.ready{transition:transform .5s var(--ease),width .5s var(--ease),height .5s var(--ease)}
 .teampick button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .teampick .logo{width:24px;height:24px}
 @media(max-width:620px){.teampick{gap:4px 2px;padding:8px 4px}.teampick button .tl{display:none}.teampick button{grid-template-columns:26px}.teampick .logo{width:26px;height:26px}}
@@ -507,6 +513,29 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 @keyframes rowIn{from{background-color:transparent;box-shadow:inset 0 0 0 var(--accent)}}
 @keyframes settle{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes bump{40%{transform:scale(1.12)}to{transform:scale(1)}}
+
+@keyframes tpIn{from{opacity:0;transform:scale(.55)}to{opacity:1;transform:none}}
+@keyframes rollInUp{from{opacity:0;transform:translateY(55%);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes rollOutUp{to{opacity:0;transform:translateY(-55%);filter:blur(6px)}}
+@keyframes rollInDown{from{opacity:0;transform:translateY(-55%);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes rollOutDown{to{opacity:0;transform:translateY(55%);filter:blur(6px)}}
+
+/* By team: the picker drops in and the 32 teams ripple in corner to corner */
+.teampick.enter{animation:riseIn .45s var(--ease) both}
+.teampick.enter button{animation:tpIn .55s var(--spring) both;animation-delay:calc(var(--n) * 32ms + 60ms)}
+.teampick.enter .tp-ind{animation:fadeIn .4s var(--ease) both;animation-delay:.35s}
+.teampick.enter .dl{animation:fadeIn .4s var(--ease) both}
+.rail.enter{animation:riseIn .45s var(--ease) both}
+/* week / team title roll */
+#wkTitle{position:relative;display:inline-block}
+#wkTitle>span{display:inline-block}
+#wkTitle .r-out{position:absolute;left:0;top:0;white-space:nowrap;pointer-events:none}
+#wkTitle .r-in.up{animation:rollInUp .5s var(--ease) both}
+#wkTitle .r-out.up{animation:rollOutUp .38s var(--ease) both}
+#wkTitle .r-in.down{animation:rollInDown .5s var(--ease) both}
+#wkTitle .r-out.down{animation:rollOutDown .38s var(--ease) both}
+#wkLogo.swap .logo{animation:ckPop .55s var(--spring) both}
+#wkMeta.swap,#wkPill.swap{animation:fadeIn .45s var(--ease) both}
 
 /* first paint and every tab change: content fades up into place */
 .summary{animation:riseIn .55s var(--ease) both}
@@ -1430,6 +1459,8 @@ let VIEW = null, BR = null;
 function render(){
   VIEW = computeAll();
   BR = buildBracket(VIEW.conf);
+  const seedsBefore = measure($('#seeds'));
+  const standBefore = measure($('#panel-standings'));
   renderSummary();
   renderRail();
   renderWeek();
@@ -1437,6 +1468,58 @@ function render(){
   renderStandings();
   renderPlayoffs();
   store.write();
+  shuffle($('#seeds'), seedsBefore);
+  if(standBefore){ shuffle($('#panel-standings'), standBefore); rememberStandings(); }
+}
+
+/* ==========================================================
+   SHUFFLE (FLIP): rows slide from where they were to where they are now
+   ========================================================== */
+const REDUCE = matchMedia('(prefers-reduced-motion: reduce)');
+const EASE = 'cubic-bezier(.22,1,.36,1)';
+/* where every keyed row sits on screen right now (null if not visible) */
+function measure(root){
+  if(!root || !root.offsetParent || REDUCE.matches) return null;
+  const m = new Map();
+  root.querySelectorAll('[data-k]').forEach(el => m.set(el.dataset.k, el.getBoundingClientRect().top));
+  return m;
+}
+function slideRow(el, dy, delay = 0){
+  el.animate([{transform:`translateY(${dy}px)`}, {transform:'none'}],
+    {duration: 650, easing: EASE, delay, fill:'backwards'});
+  el.animate([{backgroundColor:'rgba(16,89,252,.12)'}, {backgroundColor:'rgba(16,89,252,0)'}],
+    {duration: 1400, easing: 'ease-out', delay});
+}
+function shuffle(root, before){
+  if(!before) return;
+  root.querySelectorAll('[data-k]').forEach(el => {
+    const was = before.get(el.dataset.k);
+    if(was === undefined){   // newly on the list (e.g. into the playoff picture)
+      el.animate([{opacity:0, transform:'translateY(6px)'}, {opacity:1, transform:'none'}], {duration: 450, easing: EASE});
+      return;
+    }
+    const dy = was - el.getBoundingClientRect().top;
+    if(Math.abs(dy) > 1) slideRow(el, dy);
+  });
+}
+/* The Standings tab is usually hidden while you pick, so remember its order
+   and replay the moves the next time it's opened. */
+let standSeen = null;
+function standingsOrder(){
+  const m = new Map();
+  $('#panel-standings').querySelectorAll('tbody').forEach((tb, ti) =>
+    [...tb.children].forEach((tr, ri) => { if(tr.dataset.k) m.set(tr.dataset.k, [ti, ri]); }));
+  return m;
+}
+function rememberStandings(){ standSeen = standingsOrder(); }
+function replayStandings(){
+  const was = standSeen; rememberStandings();
+  if(!was || REDUCE.matches) return;
+  $('#panel-standings').querySelectorAll('tbody').forEach((tb, ti) => [...tb.children].forEach((tr, ri) => {
+    const o = was.get(tr.dataset.k); if(!o) return;
+    if(o[0] === ti && o[1] !== ri) slideRow(tr, (o[1] - ri) * tr.offsetHeight, 140);
+    else if(o[0] !== ti) tr.animate([{opacity:0}, {opacity:1}], {duration: 500, easing: EASE, delay: 140});
+  }));
 }
 
 const decided = g => !!outcome(g.i);
@@ -1590,10 +1673,31 @@ function putGames(cards){
   });
 }
 
+/* title swap: the old line rolls away, the new one rolls in (up when moving
+   forward, down when going back) */
+function rollText(el, text, dir){
+  const old = el.dataset.t;
+  if(old === text) return;
+  el.dataset.t = text;
+  if(old == null || REDUCE.matches){ el.innerHTML = `<span>${esc(text)}</span>`; return; }
+  el.innerHTML = `<span class="r-out ${dir}" aria-hidden="true">${esc(old)}</span><span class="r-in ${dir}">${esc(text)}</span>`;
+  clearTimeout(el._rt);
+  el._rt = setTimeout(()=>{ if(el.dataset.t === text) el.innerHTML = `<span>${esc(text)}</span>`; }, 650);
+}
+function refresh(el){ el.classList.remove('swap'); void el.offsetWidth; el.classList.add('swap'); }
+let lastMode = null, lastWeek = null, lastTeam = null;
 function renderWeek(){
   const key = `${S.mode}|${S.mode === 'team' ? S.team : S.week}`;
   gamesEnter = key !== gamesKey; gamesKey = key;
   const team = S.mode === 'team';
+  const modeChanged = lastMode !== null && lastMode !== S.mode;
+  if(gamesEnter && lastMode !== null){ refresh($('#wkMeta')); refresh($('#wkPill')); }
+  if(modeChanged){
+    const tp = $('#teamPick'), rail = $('#rail');
+    tp.classList.remove('enter'); rail.classList.remove('enter');
+    requestAnimationFrame(()=>{ (team ? tp : rail).classList.add('enter'); });
+  }
+  lastMode = S.mode;
   document.querySelectorAll('#modeSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === S.mode));
   $('#rail').hidden = team;
   $('#teamPick').hidden = !team;
@@ -1605,7 +1709,8 @@ function renderWeek(){
   $('#wkLogo').innerHTML = '';
 
   const w = S.week, gs = byWeek[w].slice();
-  $('#wkTitle').textContent = 'Week ' + w;
+  rollText($('#wkTitle'), 'Week ' + w, lastWeek !== null && w < lastWeek ? 'down' : 'up');
+  lastWeek = w; lastTeam = null;
 
   const allFinal = gs.every(g => isFinal(g.i));
   const pill = $('#wkPill');
@@ -1634,18 +1739,38 @@ function renderWeek(){
 }
 
 function renderTeamPicker(){
-  $('#teamPick').innerHTML = DIVS.map(d => `<div class="dv">
+  const box = $('#teamPick');
+  if(!box.querySelector('button')){
+    box.innerHTML = '<span class="tp-ind" aria-hidden="true"></span>' + DIVS.map((d, col) => `<div class="dv">
       <div class="dl">${d.replace('North','N').replace('South','S').replace('East','E').replace('West','W')}</div>
-      ${divTeams(d).map(t => `<button data-team="${t}" aria-pressed="${S.team===t}" title="${esc(TEAMS[t].c + ' ' + TEAMS[t].n)}">
+      ${divTeams(d).map((t, row) => `<button data-team="${t}" style="--n:${col + row}" title="${esc(TEAMS[t].c + ' ' + TEAMS[t].n)}">
         ${logo(t)}<span class="tl">${t}</span></button>`).join('')}
     </div>`).join('');
+  }
+  box.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.team === S.team));
+  placeTeamInd();
+}
+function placeTeamInd(){
+  const box = $('#teamPick'), ind = box.querySelector('.tp-ind'), on = box.querySelector('button[aria-pressed="true"]');
+  if(!ind || !on || !box.offsetParent) return;
+  // exact sub-pixel geometry, relative to the picker's padding box
+  const b = box.getBoundingClientRect(), r = on.getBoundingClientRect();
+  ind.style.width = r.width + 'px'; ind.style.height = r.height + 'px';
+  ind.style.transform = `translate(${r.left - b.left - box.clientLeft}px, ${r.top - b.top - box.clientTop}px)`;
+  if(!ind.classList.contains('ready')) requestAnimationFrame(()=>requestAnimationFrame(()=>ind.classList.add('ready')));
 }
 
 function renderTeam(){
   const t = S.team, T = TEAMS[t];
   renderTeamPicker();
-  $('#wkLogo').innerHTML = logo(t);
-  $('#wkTitle').textContent = T.c + ' ' + T.n;
+  const order = DIVS.flatMap(divTeams);
+  const dir = lastTeam && order.indexOf(t) < order.indexOf(lastTeam) ? 'down' : 'up';
+  if(t !== lastTeam){
+    $('#wkLogo').innerHTML = logo(t);
+    if(lastMode !== null) refresh($('#wkLogo'));
+  }
+  rollText($('#wkTitle'), T.c + ' ' + T.n, dir);
+  lastTeam = t; lastWeek = null;
   const gs = GAMES.filter(g => g.a === t || g.h === t);
   const pill = $('#wkPill');
   pill.hidden = false; pill.className = 'pill'; pill.textContent = T.dv;
@@ -1668,7 +1793,7 @@ function renderTeam(){
 }
 
 function seedRow(t, i){
-  return `<div class="seedrow${i===0?' bye':''}">
+  return `<div class="seedrow${i===0?' bye':''}" data-k="p-${t}">
     <span class="n">${i+1}</span>${logo(t)}
     <span class="tm">${t}</span><span class="rc">${fmtRec(R[t].ov)}</span></div>`;
 }
@@ -1713,7 +1838,7 @@ function renderDraft(){
   const d = draftOrder();
   const table = (rows, off) => `<div class="tcard"><table>
     <thead><tr><th>Pick</th><th>Team</th><th>W-L</th><th>SOS</th><th class="stc">Status</th></tr></thead>
-    <tbody>${rows.map(({t, note, po}, i) => `<tr class="${po ? 'po' : ''}">
+    <tbody>${rows.map(({t, note, po}, i) => `<tr class="${po ? 'po' : ''}" data-k="x-${t}">
       <td>${off + i + 1}</td>
       <td class="team">${logo(t)}${esc(TEAMS[t].n)}</td>
       <td>${fmtRec(R[t].ov)}</td><td>${fmtPct(R[t].sos)}</td>
@@ -1734,7 +1859,7 @@ function renderStandings(){
         const si = seedIdx(t);
         const tag = si > -1 && si < 4 ? `<span class="tag z">${si+1}</span>`
                   : si > -1 ? `<span class="tag x">${si+1}</span>` : '';
-        return `<tr>
+        return `<tr data-k="d-${t}">
           <td>${i+1}</td>
           <td class="team">${logo(t)}${t}${tag}</td>
           <td>${fmtRec(r.ov)}</td><td>${fmtPct(r.pct)}</td>
@@ -1749,11 +1874,11 @@ function renderStandings(){
     const hunt = C.wilds.slice(3);
     $('#st' + cf + 'seed').innerHTML = `<div class="tcard"><table><caption>${cf} seeding</caption>
       <thead><tr><th></th><th>Team</th><th>W-L</th><th>Pct</th><th>Conf</th><th>How</th></tr></thead><tbody>
-      ${C.seeds.map((t,i)=>`<tr><td>${i+1}</td>
+      ${C.seeds.map((t,i)=>`<tr data-k="s-${t}"><td>${i+1}</td>
         <td class="team">${logo(t)}${t}</td>
         <td>${fmtRec(R[t].ov)}</td><td>${fmtPct(R[t].pct)}</td><td>${fmtRec(R[t].conf)}</td>
         <td class="how">${i===0?'Bye · Division':(i<4?'Division':'Wild card')}</td></tr>`).join('')}
-      ${hunt.map((t,i)=>`<tr class="out"><td>${i+8}</td>
+      ${hunt.map((t,i)=>`<tr class="out" data-k="s-${t}"><td>${i+8}</td>
         <td class="team">${logo(t)}${t}</td>
         <td>${fmtRec(R[t].ov)}</td><td>${fmtPct(R[t].pct)}</td><td>${fmtRec(R[t].conf)}</td>
         <td class="how">Out</td></tr>`).join('')}
@@ -1856,7 +1981,7 @@ function placeInd(box){
   ind.style.transform = `translateX(${on.offsetLeft}px)`;
   if(!ind.classList.contains('ready')) requestAnimationFrame(()=>requestAnimationFrame(()=>ind.classList.add('ready')));
 }
-const placeAllInd = () => { placeInd($('nav.tabs')); placeInd($('#modeSeg')); };
+const placeAllInd = () => { placeInd($('nav.tabs')); placeInd($('#modeSeg')); placeTeamInd(); };
 let indRaf = 0;
 window.addEventListener('resize', ()=>{ cancelAnimationFrame(indRaf); indRaf = requestAnimationFrame(placeAllInd); });
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(placeAllInd);
@@ -1871,6 +1996,7 @@ function showTab(name, push){
   if(push) history.replaceState(null, '', name === 'picks' ? location.pathname + location.search : '#' + name);
   curTab = name;
   placeAllInd();
+  if(name === 'standings') replayStandings();
 }
 document.querySelectorAll('.tab').forEach(b=>{
   b.addEventListener('click', ()=>{
@@ -2490,6 +2616,7 @@ function loadAds(){
 }
 
 render();
+rememberStandings();
 placeAllInd();
 loadResults();
 loadAds();
