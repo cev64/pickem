@@ -1,0 +1,48 @@
+name: Update game results
+
+on:
+  schedule:
+    # Game windows (UTC): Sunday afternoon + Saturday late season,
+    # then Thursday/Sunday/Monday night games which finish after midnight UTC.
+    - cron: "*/20 16-23 * * 0,6"
+    - cron: "*/20 0-5 * * 0,1,2,5"
+    # Everything else: every two hours, to catch stat corrections and schedule flexes
+    - cron: "17 */2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-results
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch results
+        run: python scripts/update_results.py
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- data/results.json && git ls-files --error-unmatch data/results.json >/dev/null 2>&1; then
+            echo "No result changes."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/results.json
+          git commit -m "Update game results"
+          for i in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push && exit 0
+            sleep $((i * 5))
+          done
+          exit 1

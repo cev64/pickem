@@ -11,7 +11,29 @@ index.html              the whole app — markup, styles, schedule, engine
 manifest.webmanifest    PWA metadata (name, icons, colours, start URL)
 sw.js                   service worker: offline cache for the app shell
 icons/                  app icons, including maskable versions for Android
+logos/                  team logos, one PNG per team abbreviation
+data/results.json       real scores and finals, refreshed automatically
+scripts/update_results.py   pulls results from ESPN's free public scoreboard
+.github/workflows/update-results.yml   runs that script on a schedule
 ```
+
+## Live results
+
+`scripts/update_results.py` reads ESPN's public scoreboard feed (no API key,
+standard library only) and writes `data/results.json`. The **Update game
+results** GitHub Action runs it every 20 minutes during game windows and every
+two hours otherwise, and commits only when a score actually changed. Pages
+redeploys on each commit.
+
+In the app, finished games are filled in and locked, standings start from the
+real season, and you pick the rest. Picks you made before a game are graded
+(**picks correct**). The site opens on the current week: the first week with
+games still to play, rolling over Tuesday morning after Monday night football.
+
+Scheduled workflows only run from the default branch, so the Action starts once
+this is merged to `main`. Run it by hand from the Actions tab (*Run workflow*),
+or locally with `python scripts/update_results.py`. In the repo's Settings →
+Actions → General, workflow permissions must allow **Read and write**.
 
 Everything uses relative paths, so it works from any subdirectory.
 
@@ -40,8 +62,9 @@ The old caches get deleted on the next visit and the new files load.
 
 ## Using it
 
-**Games** — click a team to pick it. `TIE` sets a drawn game. Arrow keys move
-between weeks. *Home teams* and *Coin flip week* fill a week in one go.
+**Games** — click a team to pick it. *Tie* sets a drawn game. Arrow keys move
+between weeks. *Home teams* and *Random* fill the unplayed games of a week in
+one go. Finished games show the final score and can't be changed.
 
 **Standings** — division tables and 1–7 seeding for each conference, with every
 tiebreaker that fired listed underneath and explained.
@@ -54,8 +77,8 @@ system share sheet directly.
 
 ## Saving
 
-Picks save to `localStorage` automatically. **Save file** downloads a JSON copy —
-use that to move a board between devices, or before clearing. **Clear all** asks
+Picks save to `localStorage` automatically. **Board ▾ → Save picks to file** downloads a JSON copy —
+use that to move a board between devices, or before clearing. **Clear all picks** asks
 first and tells you how much you're about to lose.
 
 ## Known limitation
