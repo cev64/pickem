@@ -129,9 +129,10 @@ resets the bracket, since changing picks reshuffles the seeds.
 
 ## Saving
 
-Picks save to `localStorage` automatically. the **download** button (top right) **→ Save picks to file** downloads a JSON copy —
-use that to move a board between devices, or before clearing. **Clear all picks** asks
-first and tells you how much you're about to lose.
+Picks save to `localStorage` automatically, so they're there when you come back
+on the same device and browser. There's no file export or cross-device sync for
+now — that's planned to come back with accounts/login. *Clear* on the Games tab
+resets a week (and the bracket); *Clear* on the Playoffs tab resets the bracket.
 
 ## Known limitation
 
