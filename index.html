@@ -207,14 +207,18 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .wkbar.mag .wk-ind.ready{transition:transform .18s var(--ease)}
 /* while the wheel moves the disc keeps up with the centre line; the spring is for taps */
 .wkbar.lens.scrolling .wk-ind.ready{transition:transform .22s var(--ease)}
-/* touch wheel. The end padding lets the first and last weeks reach the centre
-   line. It's set in px (--edge, from layoutRail): a % padding counts as zero
-   when Safari and Firefox size the max-content track, so the track came out
-   too narrow and week 18 could never be centred there. */
+/* touch wheel. Spacers at both ends let the first and last weeks reach the
+   centre line. They're real flex items, not the track's padding: Safari can
+   size the max-content track from the rings rather than the 58px slots, which
+   leaves it too narrow, and padding past overflowing items isn't scrollable,
+   so week 18 could never be centred. A spacer always counts toward the
+   scrollable area, whatever width the track comes out at. Their width is in
+   px (--edge, from setRailEdge) with a % fallback. */
 .wkbar.lens .rail{scroll-snap-type:x mandatory}
-.wkbar.lens .rail-track{--ring:42px;--padT:16px;padding-inline:var(--edge, calc(50% - 29px))}
+.wkbar.lens .rail-track{--ring:42px;--padT:16px;padding-inline:0}
+.wkbar.lens .rail-track::before,.wkbar.lens .rail-track::after{content:'';flex:0 0 var(--edge, calc(50% - 29px));width:var(--edge, calc(50% - 29px))}
 .wkbar.lens.stuck .rail-track{--ring:32px;--padT:12px;--padB:18px}
-.wkbar.lens .wk{flex:0 0 58px}
+.wkbar.lens .wk{flex:0 0 58px;width:58px}
 .wkbar.lens .wk-in{transition:none}
 /* arrows: mouse users, only when the weeks don't all fit */
 .wk-arrow{position:absolute;top:calc(var(--padT, 14px) + 4px);width:30px;height:30px;border-radius:50%;border:1px solid var(--line);
