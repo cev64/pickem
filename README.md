@@ -11,16 +11,26 @@ index.html              the whole app — markup, styles, schedule, engine
 manifest.webmanifest    PWA metadata (name, icons, colours, start URL)
 sw.js                   service worker: offline cache for the app shell
 icons/                  app icons, including maskable versions for Android
-logos/                  team logos, one PNG per team abbreviation
+logos/                  team logos (off by default — see Team logos)
 data/results.json       real scores and finals, refreshed automatically
-scripts/update_results.py   pulls results from ESPN's free public scoreboard
+scripts/update_results.py   pulls scores and spreads from the nflverse data set
 .github/workflows/update-results.yml   runs that script on a schedule
 ```
 
-## Live results
+## Results
 
-`scripts/update_results.py` reads ESPN's public scoreboard feed (no API key,
-standard library only) and writes `data/results.json`. The **Update game
+`scripts/update_results.py` reads the schedules file from
+[nflverse](https://github.com/nflverse/nflverse-data) — a free, public,
+documented NFL data set published under **CC BY 4.0**, so it can be used on a
+commercial site as long as it's credited (the page footer and the bracket
+image both do). No API key, standard library only; one CSV covers the whole
+season. It writes `data/results.json`.
+
+There is no free *official* NFL API — the league's own feeds are licensed to
+partners only — so nflverse is the most established openly licensed source.
+It isn't live: finals land after games end (and an in-progress game shows as
+*In progress* with no score), which suits a board built around picking the
+games that haven't been played. The **Update game
 results** GitHub Action runs it every 20 minutes during game windows and every
 two hours otherwise, and commits only when a score actually changed. Pages
 redeploys on each commit.
@@ -31,8 +41,8 @@ games still to play, rolling over Tuesday morning after Monday night football.
 
 ### Point spreads
 
-The same script saves the sportsbook point spread and over/under for every
-upcoming game (from the same ESPN feed). Lines are refreshed on the Tuesday run
+The same script saves the point spread and over/under for upcoming games from
+the same nflverse file, which carries lines for the current and next week. Lines are refreshed on the Tuesday run
 (`--odds`), once the new week's numbers are posted; other runs keep the saved
 line. Game cards show them, and **Favorites** picks the favoured side of every
 game left in a week. Run *Update game results* by hand from the Actions tab to
@@ -111,12 +121,17 @@ the nine international games and every bye week. Week 16, 17 and 18 kickoff
 times were still TBD at release; the matchups themselves are final, which is all
 this app needs.
 
-## Team logos
+## Team logos and colours
 
-`logos/` holds the official team logos, which are NFL trademarks. Setting
-`USE_LOGOS = false` in `index.html` swaps every logo — on the page and in the
-shared bracket image — for a round badge in the team's colour with its
-abbreviation, no other changes needed.
+Logos are **off** by default (`USE_LOGOS = false` in `index.html`): the team
+logos in `logos/` are NFL trademarks. Instead every team shows as a round
+badge filled with its official primary colour and ringed in its official
+secondary colour (`k` and `k2` in `TEAMS`, taken from each club's brand
+palette), with the abbreviation in white or near-black, whichever has more
+contrast. Small badges that sit next to the team's name drop the text.
+
+Setting `USE_LOGOS = true` switches the page and the shared bracket image to
+the logo images, no other changes needed.
 
 ## Ads (Google AdSense)
 

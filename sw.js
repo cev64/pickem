@@ -1,6 +1,6 @@
 /* Pick 'Em — service worker.
    Bump VERSION whenever you change index.html so installed apps update. */
-const VERSION = 'v1.4.0';
+const VERSION = 'v1.5.0';
 const SHELL   = 'pickem-shell-'   + VERSION;
 const RUNTIME = 'pickem-runtime-' + VERSION;
 
@@ -14,10 +14,9 @@ const ASSETS = [
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
   './icons/favicon-32.png',
-  './data/results.json',
-  ...['ARI','ATL','BAL','BUF','CAR','CHI','CIN','CLE','DAL','DEN','DET','GB','HOU','IND','JAX','KC',
-      'LAC','LAR','LV','MIA','MIN','NE','NO','NYG','NYJ','PHI','PIT','SEA','SF','TB','TEN','WAS']
-      .map(t => `./logos/${t}.png`)
+  './data/results.json'
+  // team logos are off by default (USE_LOGOS in index.html); if switched on
+  // they're cached on first use by the same-origin rule below
 ];
 
 self.addEventListener('install', e => {

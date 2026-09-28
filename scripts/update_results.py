@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """Pull 2026 NFL regular-season results (and point spreads) into data/results.json.
 
-Source: ESPN's public scoreboard feed (free, no API key), which also carries
-sportsbook lines for upcoming games. Runs from the GitHub Action in
-.github/workflows/update-results.yml, or by hand:
+Source: the nflverse schedules dataset — a free, public, documented NFL data
+set published under CC BY 4.0 (https://github.com/nflverse/nflverse-data).
+No API key. One small CSV covers the whole season: kickoff times, final
+scores, overtime, and the betting spread and total for the current and next
+week. The site credits nflverse, as the license requires.
 
-    python scripts/update_results.py              # scores, all 18 weeks
+Runs from the GitHub Action in .github/workflows/update-results.yml, or by hand:
+
+    python scripts/update_results.py              # scores
     python scripts/update_results.py --odds       # scores + refresh spreads
-    python scripts/update_results.py --weeks 3 4
 
 Spreads are only refreshed with --odds (the Action passes it on Tuesdays,
 once the new week's lines are up). Other runs keep the last saved line, so a
@@ -17,22 +20,24 @@ The file is only rewritten when a game actually changed, so the Action
 doesn't commit every time it wakes up.
 """
 import argparse
+import csv
+import io
 import json
 import os
 import sys
 import time
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 SEASON = 2026
-WEEKS = 18
-URL = ("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
-       "?dates={season}&seasontype=2&week={week}&limit=100")
+URL = "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv"
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "results.json")
+EASTERN = ZoneInfo("America/New_York")   # nflverse kickoff times are US Eastern
 
-# ESPN abbreviations that differ from the ones the app uses
-ABBR = {"WSH": "WAS", "JAC": "JAX", "LA": "LAR"}
+# nflverse abbreviations that differ from the ones the app uses
+ABBR = {"LA": "LAR", "WSH": "WAS", "JAC": "JAX"}
 
 TEAMS = {
     "ARI", "ATL", "BAL", "BUF", "CAR", "CHI", "CIN", "CLE", "DAL", "DEN", "DET",
@@ -41,93 +46,66 @@ TEAMS = {
 }
 
 
-def fetch(week, tries=4):
-    url = URL.format(season=SEASON, week=week)
-    # Leave the default Python User-Agent alone: ESPN's CDN answers 403 to
-    # custom agents and to anything pretending to be a browser.
-    req = urllib.request.Request(url)
+def fetch(tries=4):
     for attempt in range(tries):
         try:
-            with urllib.request.urlopen(req, timeout=30) as r:
-                return json.load(r)
-        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
+            with urllib.request.urlopen(URL, timeout=60) as r:
+                return r.read().decode("utf-8")
+        except (urllib.error.URLError, TimeoutError) as e:
             client_err = isinstance(e, urllib.error.HTTPError) and 400 <= e.code < 500 and e.code != 429
             if client_err or attempt == tries - 1:
                 raise
             wait = 2 ** (attempt + 1)
-            print(f"  week {week}: {e} — retrying in {wait}s", file=sys.stderr)
+            print(f"  {e} — retrying in {wait}s", file=sys.stderr)
             time.sleep(wait)
 
 
-def score(c):
+def num(v, kind=float):
     try:
-        return int(c.get("score"))
-    except (TypeError, ValueError):
+        return kind(v) if v not in ("", "NA", None) else None
+    except ValueError:
         return None
 
 
-def parse_line(comp):
-    """Spread and total from the first sportsbook listed, or None."""
-    for o in comp.get("odds") or []:
-        at, ht = o.get("awayTeamOdds") or {}, o.get("homeTeamOdds") or {}
-        fav = "a" if at.get("favorite") else "h" if ht.get("favorite") else None
-        try:
-            spread = abs(float(o["spread"])) if o.get("spread") is not None else None
-        except (TypeError, ValueError):
-            spread = None
-        if spread is None and fav is None:
-            continue
-        line = {"fav": fav if spread else None, "sp": spread or 0}
-        if o.get("overUnder") is not None:
-            line["ou"] = o["overUnder"]
-        return line
-    return None
+def kickoff(day, clock):
+    """'2026-09-27', '13:00' (Eastern) -> '2026-09-27T17:00Z'"""
+    try:
+        local = datetime.strptime(f"{day} {clock or '13:00'}", "%Y-%m-%d %H:%M").replace(tzinfo=EASTERN)
+    except ValueError:
+        return None
+    return local.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%MZ")
 
 
-def parse_week(week, payload):
+def parse(text, now):
     games = []
-    for ev in payload.get("events", []):
-        comp = ev["competitions"][0]
-        side = {}
-        for c in comp["competitors"]:
-            ab = c["team"]["abbreviation"]
-            side[c["homeAway"]] = (ABBR.get(ab, ab), c)
-        if "home" not in side or "away" not in side:
+    for r in csv.DictReader(io.StringIO(text)):
+        if r.get("season") != str(SEASON) or r.get("game_type") != "REG":
             continue
-        (a, ac), (h, hc) = side["away"], side["home"]
+        a, h = ABBR.get(r["away_team"], r["away_team"]), ABBR.get(r["home_team"], r["home_team"])
         if a not in TEAMS or h not in TEAMS:
-            print(f"  week {week}: unknown team {a} or {h}, skipped", file=sys.stderr)
+            print(f"  unknown team {a} or {h}, skipped", file=sys.stderr)
             continue
-
-        st = ev["status"]["type"]
-        state = st.get("state", "pre")  # pre | in | post
-        if st.get("name") in ("STATUS_POSTPONED", "STATUS_CANCELED"):
-            state = "pre"
-
-        g = {"w": week, "a": a, "h": h, "kick": ev.get("date"), "st": state}
-        line = parse_line(comp)
-        if line and state == "pre":
-            g["line"] = line
-        if state in ("in", "post"):
-            g["as"], g["hs"] = score(ac), score(hc)
-        if state == "in":
-            g["clock"] = st.get("shortDetail")
-        if state == "post":
-            if ac.get("winner"):
-                g["win"] = "a"
-            elif hc.get("winner"):
-                g["win"] = "h"
-            elif g["as"] is not None and g["as"] == g["hs"]:
-                g["win"] = "t"
-            elif g["as"] is not None and g["hs"] is not None:
-                g["win"] = "a" if g["as"] > g["hs"] else "h"
-            else:
-                g["st"] = "pre"  # final with no scores: don't trust it
-            detail = st.get("shortDetail") or ""
-            if "OT" in detail:
+        g = {"w": int(r["week"]), "a": a, "h": h, "kick": kickoff(r["gameday"], r["gametime"])}
+        a_s, h_s = num(r["away_score"], int), num(r["home_score"], int)
+        if a_s is not None and h_s is not None:
+            g["st"] = "post"
+            g["as"], g["hs"] = a_s, h_s
+            g["win"] = "a" if a_s > h_s else "h" if h_s > a_s else "t"
+            if r.get("overtime") == "1":
                 g["ot"] = True
+        else:
+            # this data set has no live scores: a game that has kicked off but
+            # has no final yet is shown as in progress
+            k = datetime.strptime(g["kick"], "%Y-%m-%dT%H:%MZ").replace(tzinfo=timezone.utc) if g["kick"] else None
+            g["st"] = "in" if k and k <= now < k + timedelta(hours=5) else "pre"
+            # spread_line is from the home side: positive = home favoured
+            sp, ou = num(r.get("spread_line")), num(r.get("total_line"))
+            if sp is not None:
+                g["line"] = {"fav": "h" if sp > 0 else "a" if sp < 0 else None, "sp": abs(sp)}
+                if ou is not None:
+                    g["line"]["ou"] = ou
         games.append(g)
-    games.sort(key=lambda g: (g["kick"] or "", g["a"]))
+    games.sort(key=lambda g: (g["w"], g["kick"] or "", g["a"]))
     return games
 
 
@@ -141,38 +119,26 @@ def load_existing():
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--weeks", type=int, nargs="*", help="only refresh these weeks")
     ap.add_argument("--odds", action="store_true", help="also refresh point spreads")
     args = ap.parse_args()
-    weeks = args.weeks or list(range(1, WEEKS + 1))
 
     old = load_existing()
     old_lines = {(g["w"], g["a"], g["h"]): g["line"] for g in old.get("games", []) if g.get("line")}
-    by_week = {}
-    for g in old.get("games", []):
-        by_week.setdefault(g["w"], []).append(g)
 
-    failed = 0
-    for w in weeks:
-        try:
-            fresh = parse_week(w, fetch(w))
-            for g in fresh:
-                key = (g["w"], g["a"], g["h"])
-                if not args.odds or "line" not in g:
-                    # keep the saved line; only --odds runs replace it
-                    g.pop("line", None)
-                    if key in old_lines:
-                        g["line"] = old_lines[key]
-            by_week[w] = fresh
-            done = sum(1 for g in by_week[w] if g["st"] == "post")
-            print(f"week {w:2}: {len(by_week[w])} games, {done} final")
-        except Exception as e:  # keep what we had for this week
-            failed += 1
-            print(f"week {w:2}: FAILED ({e}); keeping previous data", file=sys.stderr)
+    try:
+        games = parse(fetch(), datetime.now(timezone.utc))
+    except Exception as e:
+        sys.exit(f"fetch failed ({e}) — leaving results.json alone")
+    if len(games) < 200:
+        sys.exit(f"only {len(games)} games in the feed — looks wrong, leaving results.json alone")
 
-    games = [g for w in sorted(by_week) for g in by_week[w]]
-    if failed == len(weeks):
-        sys.exit("every request failed — leaving results.json alone")
+    for g in games:
+        key = (g["w"], g["a"], g["h"])
+        fresh = g.pop("line", None)
+        if g["st"] == "pre" and args.odds and fresh:
+            g["line"] = fresh
+        elif key in old_lines:
+            g["line"] = old_lines[key]   # keep the saved line; only --odds runs replace it
 
     if games == old.get("games"):
         print("no changes")
@@ -180,7 +146,7 @@ def main():
 
     out = {
         "season": SEASON,
-        "source": "ESPN public scoreboard",
+        "source": "nflverse (CC BY 4.0)",
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "games": games,
     }

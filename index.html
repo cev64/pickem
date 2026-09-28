@@ -186,8 +186,15 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 }
 .pickbtn:hover{background:var(--surface-2)}
 .logo{width:34px;height:34px;object-fit:contain;flex:none}
-.badge{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-size:9.5px;font-weight:700;letter-spacing:-.02em;line-height:1}
-#wkLogo .badge{font-size:13px}
+/* text scales with whatever size the badge is drawn at */
+.badge{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-weight:700;letter-spacing:-.03em;line-height:1;
+  box-shadow:inset 0 0 0 2px var(--ring);container-type:size}
+.badge>span{font-size:27cqw}
+.badge>span.s2{font-size:33cqw}
+.badge{vertical-align:middle}
+/* small badges always sit next to the team's name, so they're just the colours */
+@container (max-width:25px){.badge>span{display:none}}
+td.team .logo.badge{vertical-align:middle;margin-top:-2px}
 .pickbtn .who{display:flex;flex-direction:column;min-width:0;line-height:1.2}
 .pickbtn .who b{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pickbtn .who span{font-size:12px;color:var(--ink-3)}
@@ -345,7 +352,6 @@ tr.out .logo{opacity:.5}
 .sbhead span{font-size:11.5px;color:var(--ink-3)}
 .champ{position:absolute;left:-10px;right:-10px;top:calc(50% + 62px);text-align:center;padding:14px 8px;border-radius:var(--radius);background:var(--surface)}
 .champ .logo{width:56px;height:56px;object-fit:contain}
-.champ .badge{font-size:15px}
 .champ .k{font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--ink-3);text-transform:uppercase;margin-top:4px}
 .champ .v{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:.03em;text-transform:uppercase;line-height:1.1;margin-top:2px}
 .champ.wait .v{font-size:15px;color:var(--ink-3);font-family:var(--body);font-weight:500;text-transform:none;letter-spacing:0}
@@ -387,6 +393,10 @@ tr.out .logo{opacity:.5}
 .rules p{font-size:14px;color:var(--ink-2);margin:0 0 10px}
 .rules code{font-size:12.5px;background:var(--surface-2);padding:1px 5px;border-radius:4px;color:var(--ink)}
 .dead{color:var(--ink-3)}
+
+/* ---------- footer ---------- */
+.credits{margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-3);line-height:1.6}
+.credits a{color:var(--ink-2)}
 
 /* ---------- modal ---------- */
 .modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(16,24,40,.45);backdrop-filter:blur(2px)}
@@ -619,12 +629,18 @@ body.noads .adrail,body.noads .adinline{display:none!important}
     <p>Games that have been played are filled in automatically with the final score and locked, so the standings and seeds always start from the real season. You pick whatever's left. Results refresh every few minutes on game days.</p>
 
     <h3>Point spreads</h3>
-    <p>Upcoming games show the sportsbook point spread and over/under, updated every Tuesday when the new week's lines come out — a quick read on who's favoured. <b>Favorites</b> picks the favoured side of every game left in the week (home team when the line is a pick ’em). Lines are for reference only.</p>
+    <p>Upcoming games show the betting point spread and over/under (from nflverse), updated every Tuesday when the new week's lines come out — a quick read on who's favoured. <b>Favorites</b> picks the favoured side of every game left in the week (home team when the line is a pick ’em). Lines are for reference only.</p>
 
     <h3>Saving</h3>
     <p>Picks save automatically in this browser when it allows it. <b>Board ▾ → Save picks to file</b> downloads a JSON copy you can reload later or move to another device — the reliable option if you're doing this in more than one sitting.</p>
   </div>
 </section>
+
+<footer class="credits">
+  Schedule, scores and point spreads from <a href="https://github.com/nflverse/nflverse-data" target="_blank" rel="noopener">nflverse</a>
+  (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>).
+  Not affiliated with or endorsed by the NFL or any team. Lines are for reference only.
+</footer>
 
 </div>
 </div>
@@ -646,54 +662,62 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 /* ==========================================================
    TEAMS
    ========================================================== */
+/* k / k2: each club's official primary and secondary colours, as listed in
+   its brand palette (via teamcolorcodes.com). */
 const TEAMS = {
-  BUF:{c:'Buffalo',n:'Bills',cf:'AFC',dv:'AFC East',k:'#00338D'},
-  MIA:{c:'Miami',n:'Dolphins',cf:'AFC',dv:'AFC East',k:'#008E97'},
-  NE:{c:'New England',n:'Patriots',cf:'AFC',dv:'AFC East',k:'#0A2342'},
-  NYJ:{c:'New York',n:'Jets',cf:'AFC',dv:'AFC East',k:'#1C7C54'},
-  BAL:{c:'Baltimore',n:'Ravens',cf:'AFC',dv:'AFC North',k:'#5B4B9E'},
-  CIN:{c:'Cincinnati',n:'Bengals',cf:'AFC',dv:'AFC North',k:'#FB4F14'},
-  CLE:{c:'Cleveland',n:'Browns',cf:'AFC',dv:'AFC North',k:'#FF6A13'},
-  PIT:{c:'Pittsburgh',n:'Steelers',cf:'AFC',dv:'AFC North',k:'#FFB612'},
-  HOU:{c:'Houston',n:'Texans',cf:'AFC',dv:'AFC South',k:'#5A7184'},
-  IND:{c:'Indianapolis',n:'Colts',cf:'AFC',dv:'AFC South',k:'#3C7DC4'},
-  JAX:{c:'Jacksonville',n:'Jaguars',cf:'AFC',dv:'AFC South',k:'#12A19A'},
-  TEN:{c:'Tennessee',n:'Titans',cf:'AFC',dv:'AFC South',k:'#4B92DB'},
-  DEN:{c:'Denver',n:'Broncos',cf:'AFC',dv:'AFC West',k:'#FC4C02'},
-  KC:{c:'Kansas City',n:'Chiefs',cf:'AFC',dv:'AFC West',k:'#E31837'},
-  LV:{c:'Las Vegas',n:'Raiders',cf:'AFC',dv:'AFC West',k:'#B8BEC2'},
-  LAC:{c:'Los Angeles',n:'Chargers',cf:'AFC',dv:'AFC West',k:'#0080C6'},
-  DAL:{c:'Dallas',n:'Cowboys',cf:'NFC',dv:'NFC East',k:'#7A90A8'},
-  NYG:{c:'New York',n:'Giants',cf:'NFC',dv:'NFC East',k:'#2A4FA2'},
-  PHI:{c:'Philadelphia',n:'Eagles',cf:'NFC',dv:'NFC East',k:'#1B7A70'},
-  WAS:{c:'Washington',n:'Commanders',cf:'NFC',dv:'NFC East',k:'#A33A2A'},
-  CHI:{c:'Chicago',n:'Bears',cf:'NFC',dv:'NFC North',k:'#C83803'},
-  DET:{c:'Detroit',n:'Lions',cf:'NFC',dv:'NFC North',k:'#0076B6'},
-  GB:{c:'Green Bay',n:'Packers',cf:'NFC',dv:'NFC North',k:'#FFB612'},
-  MIN:{c:'Minnesota',n:'Vikings',cf:'NFC',dv:'NFC North',k:'#8A5FC7'},
-  ATL:{c:'Atlanta',n:'Falcons',cf:'NFC',dv:'NFC South',k:'#C8102E'},
-  CAR:{c:'Carolina',n:'Panthers',cf:'NFC',dv:'NFC South',k:'#0085CA'},
-  NO:{c:'New Orleans',n:'Saints',cf:'NFC',dv:'NFC South',k:'#D3BC8D'},
-  TB:{c:'Tampa Bay',n:'Buccaneers',cf:'NFC',dv:'NFC South',k:'#D50A0A'},
-  ARI:{c:'Arizona',n:'Cardinals',cf:'NFC',dv:'NFC West',k:'#C4364F'},
-  LAR:{c:'Los Angeles',n:'Rams',cf:'NFC',dv:'NFC West',k:'#FFD100'},
-  SF:{c:'San Francisco',n:'49ers',cf:'NFC',dv:'NFC West',k:'#AA0000'},
-  SEA:{c:'Seattle',n:'Seahawks',cf:'NFC',dv:'NFC West',k:'#69BE28'}
+  BUF:{c:'Buffalo',n:'Bills',cf:'AFC',dv:'AFC East',k:'#00338D',k2:'#C60C30'},
+  MIA:{c:'Miami',n:'Dolphins',cf:'AFC',dv:'AFC East',k:'#008E97',k2:'#FC4C02'},
+  NE:{c:'New England',n:'Patriots',cf:'AFC',dv:'AFC East',k:'#002244',k2:'#C60C30'},
+  NYJ:{c:'New York',n:'Jets',cf:'AFC',dv:'AFC East',k:'#125740',k2:'#000000'},
+  BAL:{c:'Baltimore',n:'Ravens',cf:'AFC',dv:'AFC North',k:'#241773',k2:'#000000'},
+  CIN:{c:'Cincinnati',n:'Bengals',cf:'AFC',dv:'AFC North',k:'#FB4F14',k2:'#000000'},
+  CLE:{c:'Cleveland',n:'Browns',cf:'AFC',dv:'AFC North',k:'#311D00',k2:'#FF3C00'},
+  PIT:{c:'Pittsburgh',n:'Steelers',cf:'AFC',dv:'AFC North',k:'#FFB612',k2:'#101820'},
+  HOU:{c:'Houston',n:'Texans',cf:'AFC',dv:'AFC South',k:'#03202F',k2:'#A71930'},
+  IND:{c:'Indianapolis',n:'Colts',cf:'AFC',dv:'AFC South',k:'#002C5F',k2:'#A2AAAD'},
+  JAX:{c:'Jacksonville',n:'Jaguars',cf:'AFC',dv:'AFC South',k:'#101820',k2:'#D7A22A'},
+  TEN:{c:'Tennessee',n:'Titans',cf:'AFC',dv:'AFC South',k:'#0C2340',k2:'#4B92DB'},
+  DEN:{c:'Denver',n:'Broncos',cf:'AFC',dv:'AFC West',k:'#FB4F14',k2:'#002244'},
+  KC:{c:'Kansas City',n:'Chiefs',cf:'AFC',dv:'AFC West',k:'#E31837',k2:'#FFB81C'},
+  LV:{c:'Las Vegas',n:'Raiders',cf:'AFC',dv:'AFC West',k:'#000000',k2:'#A5ACAF'},
+  LAC:{c:'Los Angeles',n:'Chargers',cf:'AFC',dv:'AFC West',k:'#0080C6',k2:'#FFC20E'},
+  DAL:{c:'Dallas',n:'Cowboys',cf:'NFC',dv:'NFC East',k:'#003594',k2:'#041E42'},
+  NYG:{c:'New York',n:'Giants',cf:'NFC',dv:'NFC East',k:'#0B2265',k2:'#A71930'},
+  PHI:{c:'Philadelphia',n:'Eagles',cf:'NFC',dv:'NFC East',k:'#004C54',k2:'#A5ACAF'},
+  WAS:{c:'Washington',n:'Commanders',cf:'NFC',dv:'NFC East',k:'#5A1414',k2:'#FFB612'},
+  CHI:{c:'Chicago',n:'Bears',cf:'NFC',dv:'NFC North',k:'#0B162A',k2:'#C83803'},
+  DET:{c:'Detroit',n:'Lions',cf:'NFC',dv:'NFC North',k:'#0076B6',k2:'#B0B7BC'},
+  GB:{c:'Green Bay',n:'Packers',cf:'NFC',dv:'NFC North',k:'#203731',k2:'#FFB612'},
+  MIN:{c:'Minnesota',n:'Vikings',cf:'NFC',dv:'NFC North',k:'#4F2683',k2:'#FFC62F'},
+  ATL:{c:'Atlanta',n:'Falcons',cf:'NFC',dv:'NFC South',k:'#A71930',k2:'#000000'},
+  CAR:{c:'Carolina',n:'Panthers',cf:'NFC',dv:'NFC South',k:'#0085CA',k2:'#101820'},
+  NO:{c:'New Orleans',n:'Saints',cf:'NFC',dv:'NFC South',k:'#D3BC8D',k2:'#101820'},
+  TB:{c:'Tampa Bay',n:'Buccaneers',cf:'NFC',dv:'NFC South',k:'#D50A0A',k2:'#FF7900'},
+  ARI:{c:'Arizona',n:'Cardinals',cf:'NFC',dv:'NFC West',k:'#97233F',k2:'#000000'},
+  LAR:{c:'Los Angeles',n:'Rams',cf:'NFC',dv:'NFC West',k:'#003594',k2:'#FFA300'},
+  SF:{c:'San Francisco',n:'49ers',cf:'NFC',dv:'NFC West',k:'#AA0000',k2:'#B3995D'},
+  SEA:{c:'Seattle',n:'Seahawks',cf:'NFC',dv:'NFC West',k:'#002244',k2:'#69BE28'}
 };
 const DIVS = ['AFC East','AFC North','AFC South','AFC West','NFC East','NFC North','NFC South','NFC West'];
 const IDS = Object.keys(TEAMS);
 const divTeams = d => IDS.filter(t => TEAMS[t].dv === d);
-/* Team logos are NFL trademarks. Set USE_LOGOS to false to swap every logo
-   (including in the shared bracket image) for a team-colour badge instead. */
-const USE_LOGOS = true;
+/* Team logos are NFL trademarks, so they're off: every team shows as a badge
+   in its official primary colour, ringed in its secondary. Set USE_LOGOS to
+   true to use the images in logos/ instead (page and shared bracket image). */
+const USE_LOGOS = false;
 const logoSrc = t => `logos/${t}.png`;
-function inkOn(hex){   // dark or light text, whichever reads on this colour
-  const n = parseInt(hex.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255;
-  return (r*299 + g*587 + b*114) / 1000 > 150 ? '#101828' : '#fff';
+function lum(hex){      // WCAG relative luminance
+  const n = parseInt(hex.slice(1), 16);
+  const f = v => (v /= 255) <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4;
+  return .2126 * f(n >> 16) + .7152 * f(n >> 8 & 255) + .0722 * f(n & 255);
+}
+function inkOn(hex){    // white or near-black text, whichever has more contrast
+  const L = lum(hex);
+  return (1.05) / (L + .05) >= (L + .05) / (lum('#101828') + .05) ? '#FFFFFF' : '#101828';
 }
 const logo = (t, cls='logo') => USE_LOGOS
   ? `<img class="${cls}" src="${logoSrc(t)}" alt="" loading="lazy" decoding="async">`
-  : `<span class="${cls} badge" style="background:${TEAMS[t].k};color:${inkOn(TEAMS[t].k)}" aria-hidden="true">${t}</span>`;
+  : `<span class="${cls} badge" style="background:${TEAMS[t].k};color:${inkOn(TEAMS[t].k)};--ring:${TEAMS[t].k2}" aria-hidden="true"><span${t.length < 3 ? ' class="s2"' : ''}>${t}</span></span>`;
 
 /* SCHEDULE injected here: [week, away, home, siteOrNull] */
 const SCHEDULE=[
@@ -1430,7 +1454,7 @@ function gameCard(g, withWeek){
 
   let st = '';
   if(fin) st = `<span class="st">Final${res.ot ? '/OT' : ''}</span>`;
-  else if(live) st = `<span class="st live">Live${res.clock ? ' · ' + esc(res.clock) : ''}</span>`;
+  else if(live) st = `<span class="st live">In progress</span>`;
   else if(k) st = `<span class="st">${withWeek ? fmtWhen(k) : fmtTime(k)}</span>`;
   if(withWeek){
     const wk = `<span class="st">Week ${g.w}</span>`;
@@ -1891,7 +1915,10 @@ function drawLogo(c, t, cx, cy, size){
   if(!im){   // colour badge, same as the page when logos are off
     c.save();
     c.fillStyle = TEAMS[t].k; c.beginPath(); c.arc(cx, cy, size/2, 0, Math.PI*2); c.fill();
-    c.fillStyle = inkOn(TEAMS[t].k); c.font = `700 ${Math.round(size*0.34)}px Inter, sans-serif`;
+    const rw = Math.max(1.5, size * 0.07);
+    c.strokeStyle = TEAMS[t].k2; c.lineWidth = rw;
+    c.beginPath(); c.arc(cx, cy, size/2 - rw/2, 0, Math.PI*2); c.stroke();
+    c.fillStyle = inkOn(TEAMS[t].k); c.font = `700 ${Math.round(size * (t.length < 3 ? 0.36 : 0.29))}px Inter, sans-serif`;
     track(c, 0); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(t, cx, cy + 1);
     c.restore();
     return;
@@ -2079,7 +2106,7 @@ async function buildBracketImage(){
   const fy = top + H + 60;
   c.fillStyle = IMG.line; c.fillRect(P, fy - 24, W - 2*P, 1);
   c.font = '500 12px Inter, sans-serif'; c.fillStyle = IMG.faint; track(c, 1.3);
-  c.textAlign = 'left'; c.fillText('PICK ’EM ’26 · REAL NFL TIEBREAKERS APPLIED', P, fy);
+  c.textAlign = 'left'; c.fillText('PICK ’EM ’26 · REAL NFL TIEBREAKERS · DATA: NFLVERSE (CC BY 4.0)', P, fy);
   const left = leftToPick();
   c.textAlign = 'right';
   c.fillText(left ? `${left} REGULAR-SEASON GAMES STILL TO PICK` : 'FULL SEASON PICKED', W - P, fy);
