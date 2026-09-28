@@ -355,6 +355,8 @@ td.team .logo.badge{vertical-align:middle;margin-top:-2px}
 .seedgrp{padding:6px 0 8px}
 .seedgrp+.seedgrp{border-top:1px solid var(--line)}
 .seedgrp .lbl{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--ink-3);padding:6px 14px 2px}
+#seeds{position:relative}
+.seedrow.gone{position:absolute;left:0;right:0;pointer-events:none;z-index:1}
 .seedrow{display:flex;align-items:center;gap:9px;padding:4px 14px;font-size:13px}
 .seedrow .n{font-size:11.5px;color:var(--ink-3);width:12px;text-align:right}
 .seedrow .logo{width:20px;height:20px}
@@ -438,7 +440,7 @@ tr.out .logo{opacity:.5}
 .mrow{display:flex;align-items:center;gap:7px;padding:7px 9px;cursor:pointer;
   transition:background-color .25s var(--ease),opacity .3s var(--ease),transform .18s var(--ease);background:none;border:none;width:100%;text-align:left;color:var(--ink);font-size:13.5px;min-height:38px}
 .mrow+.mrow{border-top:1px solid var(--line)}
-@media(hover:hover){.mrow:hover:not(.tbd):not(.fixed){background:var(--surface)}}
+@media(hover:hover){.mrow:hover:not(.tbd):not(.fixed):not(.wait){background:var(--surface)}}
 .mrow .sd{font-size:11px;color:var(--ink-3);width:12px;flex:none;text-align:right}
 .mrow .logo{width:22px;height:22px}
 .mrow .tm{font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -448,7 +450,10 @@ tr.out .logo{opacity:.5}
 .mrow.adv .tm{color:var(--accent-ink)}
 .mrow.adv .rc{color:var(--accent-ink)}
 .mrow.out{opacity:.45}
-.mrow.fixed{cursor:default}
+.mrow.fixed,.mrow.wait{cursor:default}
+/* a row in flight to the next round (see flyRow) */
+.mrow.mfly{position:fixed;z-index:60;margin:0;pointer-events:none;background-color:#fff;border:1px solid var(--line);border-radius:10px;transition:none}
+.mrow.mfly.adv{background-image:linear-gradient(var(--accent-soft),var(--accent-soft))}
 .mrow.tbd{cursor:default;color:var(--ink-3)}
 .mrow.tbd .tm{font-weight:500}
 .mnote{font-size:10.5px;color:var(--ink-3);padding:4px 10px 5px;border-top:1px solid var(--line);background:var(--surface)}
@@ -646,6 +651,7 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 .teampick.enter button{animation:tpIn .55s var(--spring) both;animation-delay:calc(var(--n) * 32ms + 60ms)}
 .teampick.enter .tp-ind{animation:fadeIn .4s var(--ease) both;animation-delay:.35s}
 .teampick.enter .dl{animation:fadeIn .4s var(--ease) both}
+.phpick .teampick.enter{animation:none}
 /* week / team title roll */
 .roller{position:relative;display:inline-block}
 .roller>span{display:inline-block}
@@ -662,6 +668,21 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 .pickhead.stuck.team .phteam{opacity:1;transform:none;filter:none;
   transition:opacity .35s var(--ease) .08s,transform .55s var(--spring) .08s,filter .4s var(--ease) .08s}
 .phteam .logo{width:24px;height:24px}
+button.phteam{background:none;border:none;font-family:inherit;padding:0;cursor:pointer;border-radius:10px}
+.pickhead.stuck.team .phteam{pointer-events:auto}
+.phteam:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.phchev{flex:none;color:var(--ink-3);transition:transform .45s var(--spring),color .25s var(--ease)}
+@media(hover:hover){button.phteam:hover .phchev{color:var(--ink)}}
+.pickhead.picking .phchev{transform:rotate(180deg);color:var(--accent)}
+/* pinned + By team: tapping the team drops the whole team grid out of the card */
+.phpick{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--spring)}
+.phpick>div{overflow:hidden;min-height:0}
+.pickhead.stuck.team.picking .phpick{grid-template-rows:1fr}
+.phpick .teampick{margin:0;border:none;background:transparent;padding:10px 4px 4px;
+  opacity:0;transform:translateY(-8px) scale(.98);filter:blur(4px);transform-origin:top center;
+  transition:opacity .2s var(--ease),transform .3s var(--ease),filter .25s var(--ease)}
+.pickhead.stuck.team.picking .phpick .teampick{opacity:1;transform:none;filter:none;
+  transition:opacity .35s var(--ease) .05s,transform .55s var(--spring) .05s,filter .4s var(--ease) .05s}
 .phteam .phname{overflow:hidden;text-overflow:ellipsis}
 .phteam.ph-mid{flex:1;justify-content:center;overflow:hidden}
 .phteam-below{display:none}
@@ -685,9 +706,8 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 .pickbtn.pop .ck{animation:ckPop .5s var(--spring) both}
 .pickbtn.fade{animation:loseOut .4s var(--ease)}
 .tiebtn.pop{animation:bump .4s var(--spring)}
-/* bracket: picked row fills in, a matchup that just got its teams fades up */
+/* bracket: picked row fills in (the team's flight to the next round is flyRow) */
 .mrow.adv.pop{animation:rowIn .45s var(--ease)}
-.matchup.enter{animation:settle .5s var(--ease) both}
 .champ.enter{animation:settle .6s var(--spring) both}
 .stat b.bump{display:inline-block;animation:bump .45s var(--spring)}
 .teampick button{transition:background-color .25s var(--ease),border-color .25s var(--ease),color .25s var(--ease),transform .18s var(--ease)}
@@ -746,7 +766,7 @@ body.noads .adrail,body.noads .adinline{display:none!important}
             <button data-mode="week" aria-pressed="true"><span class="l-lg">By week</span><span class="l-sm">Week</span></button>
             <button data-mode="team" aria-pressed="false"><span class="l-lg">By team</span><span class="l-sm">Team</span></button>
           </div>
-          <div class="phteam ph-mid" aria-hidden="true"><span class="phlogo"></span><span class="phname roller"></span></div>
+          <button type="button" class="phteam ph-mid" tabindex="-1" aria-expanded="false" aria-controls="phPick" aria-label="Choose a team"><span class="phlogo"></span><span class="phname roller"></span><svg class="phchev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
           <div class="acts" id="pickActs">
             <button class="btn ghost" id="btnHome"></button>
             <button class="btn ghost" id="btnRand"></button>
@@ -758,9 +778,10 @@ body.noads .adrail,body.noads .adinline{display:none!important}
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
           </div>
         </div>
-        <div class="phteam-below" aria-hidden="true"><div>
-          <div class="phteam ph-below"><span class="phlogo"></span><span class="phname roller"></span></div>
+        <div class="phteam-below"><div>
+          <button type="button" class="phteam ph-below" tabindex="-1" aria-expanded="false" aria-controls="phPick" aria-label="Choose a team"><span class="phlogo"></span><span class="phname roller"></span><svg class="phchev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         </div></div>
+        <div class="phpick" id="phPick"><div><div class="teampick" id="phTeamPick"></div></div></div>
         <div class="wkbar" id="wkbar"><div class="wkcap">
           <button class="wk-arrow l" type="button" aria-label="Earlier weeks" tabindex="-1">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
@@ -1569,36 +1590,53 @@ function computeAll(){
 /* ==========================================================
    PLAYOFF BRACKET
    ========================================================== */
+/* Every round fills in as its games are picked. A matchup only takes a pick
+   once both of its teams are known. */
 function buildBracket(conf){
   const B = {};
   ['AFC','NFC'].forEach(cf=>{
     const sd = conf[cf].seeds;             // index 0 => seed 1
-    const seedOf = t => sd.indexOf(t)+1;
+    const seedOf = t => t ? sd.indexOf(t)+1 : 0;
     const wc = [ [sd[1],sd[6]], [sd[2],sd[5]], [sd[3],sd[4]] ];
     const wcIds = wc.map((m,i)=>`${cf}-wc-${i}`);
     const wcWin = wc.map((m,i)=> valid(wcIds[i], m));
-    let dv = null, dvIds = null, dvWin = [null,null];
-    if(wcWin.every(Boolean)){
-      const alive = [sd[0], ...wcWin].sort((a,b)=> seedOf(a)-seedOf(b));
-      dv = [ [alive[0], alive[3]], [alive[1], alive[2]] ];
-      dvIds = dv.map((m,i)=>`${cf}-dv-${i}`);
-      dvWin = dv.map((m,i)=> valid(dvIds[i], m));
-    }
-    let cc = null, ccId = `${cf}-cc`, ccWin = null;
-    if(dvWin.every(Boolean)){
-      cc = dvWin.slice().sort((a,b)=> seedOf(a)-seedOf(b));
-      ccWin = valid(ccId, cc);
-    }
+    const dv = dvPairs(sd[0], wc, wcWin, seedOf);
+    const dvIds = dv.map((m,i)=>`${cf}-dv-${i}`);
+    // reseeding can move a team to the other divisional game: its pick goes with it
+    dvIds.forEach((id, i)=>{
+      const o = dvIds[1-i], t = S.po[o];
+      if(full(dv[i]) && !dv[i].includes(S.po[id]) && t && dv[i].includes(t) && !dv[1-i].includes(t)){
+        S.po[id] = t; delete S.po[o];
+      }
+    });
+    const dvWin = dv.map((m,i)=> valid(dvIds[i], m));
+    const ccId = `${cf}-cc`;
+    let cc = dvWin.slice();
+    if(full(cc)) cc.sort((a,b)=> seedOf(a)-seedOf(b));
+    const ccWin = valid(ccId, cc);
     B[cf] = {seeds:sd, seedOf, wc, wcIds, wcWin, dv, dvIds, dvWin, cc, ccId, ccWin};
   });
-  const sbTeams = (B.AFC.ccWin && B.NFC.ccWin) ? [B.AFC.ccWin, B.NFC.ccWin] : null;
-  const sbWin = sbTeams ? valid('sb', sbTeams) : null;
+  const sbTeams = [B.AFC.ccWin, B.NFC.ccWin];
+  const sbWin = valid('sb', sbTeams);
   return {...B, sb:{id:'sb', teams:sbTeams, win:sbWin}};
 
+  function full(pair){ return !!(pair && pair[0] && pair[1]); }
   function valid(id, pair){
     const p = S.po[id];
-    return (p && pair.includes(p)) ? p : null;
+    return (p && full(pair) && pair.includes(p)) ? p : null;
   }
+}
+/* NFL reseeding: the 1 seed hosts the lowest seed left, the other two meet.
+   Winners are placed as they're picked. The lowest seed picked so far visits
+   the 1 seed unless a game still to pick is sure to send someone lower; the
+   rest meet in the other game. Later picks can reshuffle this. */
+function dvPairs(top, wc, win, seedOf){
+  const known = win.filter(Boolean).sort((a,b)=> seedOf(a)-seedOf(b));
+  const openMin = wc.filter((m,i)=> !win[i]).map(m => Math.min(seedOf(m[0]), seedOf(m[1])));
+  const last = known[known.length - 1];
+  const low = last && openMin.every(x => x < seedOf(last)) ? last : null;
+  const rest = known.filter(t => t !== low);
+  return [[top, low], [rest[0] || null, rest[1] || null]];
 }
 
 /* ==========================================================
@@ -1634,25 +1672,45 @@ const EASE = 'cubic-bezier(.22,1,.36,1)';
 function measure(root){
   if(!root || !root.offsetParent || REDUCE.matches) return null;
   const m = new Map();
-  root.querySelectorAll('[data-k]').forEach(el => m.set(el.dataset.k, el.getBoundingClientRect().top));
+  root.querySelectorAll('[data-k]').forEach(el => m.set(el.dataset.k, {top: el.getBoundingClientRect().top, el}));
   return m;
+}
+/* a moved row washes green if it climbed, red if it dropped */
+const UP_TINT = [21,128,61], DOWN_TINT = [220,38,38];
+function tint(el, rgb, delay = 0, a = .16){
+  el.animate([{backgroundColor:`rgba(${rgb},${a})`}, {backgroundColor:`rgba(${rgb},0)`}],
+    {duration: 1400, easing: 'ease-out', delay});
 }
 function slideRow(el, dy, delay = 0){
   el.animate([{transform:`translateY(${dy}px)`}, {transform:'none'}],
     {duration: 650, easing: EASE, delay, fill:'backwards'});
-  el.animate([{backgroundColor:'rgba(16,89,252,.12)'}, {backgroundColor:'rgba(16,89,252,0)'}],
-    {duration: 1400, easing: 'ease-out', delay});
+  tint(el, dy > 0 ? UP_TINT : DOWN_TINT, delay);
 }
 function shuffle(root, before){
   if(!before) return;
+  const now = new Set();
   root.querySelectorAll('[data-k]').forEach(el => {
+    now.add(el.dataset.k);
     const was = before.get(el.dataset.k);
     if(was === undefined){   // newly on the list (e.g. into the playoff picture)
       el.animate([{opacity:0, transform:'translateY(6px)'}, {opacity:1, transform:'none'}], {duration: 450, easing: EASE});
+      tint(el, UP_TINT);
       return;
     }
-    const dy = was - el.getBoundingClientRect().top;
+    const dy = was.top - el.getBoundingClientRect().top;
     if(Math.abs(dy) > 1) slideRow(el, dy);
+  });
+  // dropped off the list (e.g. out of the playoff picture): its old row sinks away in red
+  const box = root.getBoundingClientRect();
+  before.forEach(({top, el}, k) => {
+    if(now.has(k) || !el.classList.contains('seedrow')) return;
+    const g = el.cloneNode(true);
+    g.removeAttribute('data-k'); g.classList.add('gone');
+    g.style.top = (top - box.top) + 'px';
+    root.appendChild(g);
+    g.animate([{opacity:1, transform:'none', backgroundColor:`rgba(${DOWN_TINT},.18)`},
+               {opacity:0, transform:'translateY(14px)', backgroundColor:`rgba(${DOWN_TINT},0)`}],
+      {duration: 900, easing: EASE}).onfinish = () => g.remove();
   });
 }
 /* The Standings tab is usually hidden while you pick, so remember its order
@@ -1983,7 +2041,10 @@ function renderWeek(){
 }
 
 function renderTeamPicker(){
-  const box = $('#teamPick');
+  ['#teamPick', '#phTeamPick'].forEach(sel => fillTeamPicker($(sel)));
+  placeTeamInd();
+}
+function fillTeamPicker(box){
   if(!box.querySelector('button')){
     box.innerHTML = '<span class="tp-ind" aria-hidden="true"></span>' + DIVS.map((d, col) => `<div class="dv">
       <div class="dl">${d.replace('North','N').replace('South','S').replace('East','E').replace('West','W')}</div>
@@ -1992,15 +2053,21 @@ function renderTeamPicker(){
     </div>`).join('');
   }
   box.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.team === S.team));
-  placeTeamInd();
 }
-function placeTeamInd(){
-  const box = $('#teamPick'), ind = box.querySelector('.tp-ind'), on = box.querySelector('button[aria-pressed="true"]');
+function placeTeamInd(box){
+  if(!box){ placeTeamInd($('#teamPick')); placeTeamInd($('#phTeamPick')); return; }
+  const ind = box.querySelector('.tp-ind'), on = box.querySelector('button[aria-pressed="true"]');
   if(!ind || !on || !box.offsetParent) return;
   // exact sub-pixel geometry, relative to the picker's padding box
-  const b = box.getBoundingClientRect(), r = on.getBoundingClientRect();
-  ind.style.width = r.width + 'px'; ind.style.height = r.height + 'px';
-  ind.style.transform = `translate(${r.left - b.left - box.clientLeft}px, ${r.top - b.top - box.clientTop}px)`;
+  // the pinned card's grid scales and pops in as it opens, so it uses layout offsets
+  if(box.id === 'phTeamPick'){
+    ind.style.width = on.offsetWidth + 'px'; ind.style.height = on.offsetHeight + 'px';
+    ind.style.transform = `translate(${on.offsetLeft}px, ${on.offsetTop}px)`;
+  }else{
+    const b = box.getBoundingClientRect(), r = on.getBoundingClientRect();
+    ind.style.width = r.width + 'px'; ind.style.height = r.height + 'px';
+    ind.style.transform = `translate(${r.left - b.left - box.clientLeft}px, ${r.top - b.top - box.clientTop}px)`;
+  }
   if(!ind.classList.contains('ready')) requestAnimationFrame(()=>requestAnimationFrame(()=>ind.classList.add('ready')));
 }
 
@@ -2142,27 +2209,32 @@ function renderStandings(){
     : `<div class="empty">No ties to break yet — every group is separated on record.</div>`;
 }
 
-let JUST_PO = null, PO_PREV = {}, PO_NEXT = {}, PO_READY = false, CHAMP_PREV = null;
-function mrow(t, seed, picked, id){
+let JUST_PO = null, CHAMP_PREV = null;
+/* bk = the round's key (e.g. AFC-dv): a team's row in each round is tagged so it
+   can fly from one round to the next */
+const bkRound = id => id === 'sb' ? 'sb' : id.replace(/-\d$/, '');
+function mrow(t, seed, picked, id, open){
   if(!t) return `<div class="mrow tbd"><span class="sd"></span><span class="tm">TBD</span></div>`;
   let cls = picked === t ? 'adv' : (picked ? 'out' : '');
   if(picked === t && JUST_PO === id + '|' + t) cls += ' pop';
-  return `<button class="mrow ${cls}" data-po="${id}" data-team="${t}" aria-pressed="${picked===t}"
-      title="${esc(TEAMS[t].c + ' ' + TEAMS[t].n)} · ${fmtRec(R[t].ov)}">
-    <span class="sd">${seed||''}</span>${logo(t)}
+  const inner = `<span class="sd">${seed||''}</span>${logo(t)}
     <span class="tm"><span class="bn-long">${esc(TEAMS[t].n)}</span><span class="bn-short">${t}</span></span>
-    <span class="rc">${fmtRec(R[t].ov)}</span></button>`;
+    <span class="rc">${fmtRec(R[t].ov)}</span>`;
+  const title = `${esc(TEAMS[t].c + ' ' + TEAMS[t].n)} · ${fmtRec(R[t].ov)}`;
+  // opponent still to be decided: shown, but nothing to pick yet
+  if(!open) return `<div class="mrow wait" data-bk="${bkRound(id)}:${t}" title="${title}">${inner}</div>`;
+  return `<button class="mrow ${cls}" data-po="${id}" data-team="${t}" data-bk="${bkRound(id)}:${t}" aria-pressed="${picked===t}"
+      title="${title}">${inner}</button>`;
 }
 /* nothing is highlighted until the user clicks a winner */
 function matchup(id, pair, seedOf){
-  if(!pair) return `<div class="matchup">${mrow(null)}${mrow(null)}</div>`;
-  const picked = S.po[id] && pair.includes(S.po[id]) ? S.po[id] : null;
-  const pk = pair.join('-'); PO_NEXT[id] = pk;
-  const enter = PO_READY && PO_PREV[id] !== pk ? ' enter' : '';
-  return `<div class="matchup${enter}">${mrow(pair[0], seedOf(pair[0]), picked, id)}${mrow(pair[1], seedOf(pair[1]), picked, id)}</div>`;
+  if(!pair) pair = [null, null];
+  const open = !!(pair[0] && pair[1]);
+  const picked = open && S.po[id] && pair.includes(S.po[id]) ? S.po[id] : null;
+  return `<div class="matchup">${mrow(pair[0], seedOf(pair[0]), picked, id, open)}${mrow(pair[1], seedOf(pair[1]), picked, id, open)}</div>`;
 }
-function byeCard(t){
-  return `<div class="matchup"><div class="mrow fixed" title="${esc(TEAMS[t].c + ' ' + TEAMS[t].n)}">
+function byeCard(cf, t){
+  return `<div class="matchup"><div class="mrow fixed" data-bk="${cf}-wc:${t}" title="${esc(TEAMS[t].c + ' ' + TEAMS[t].n)}">
     <span class="sd">1</span>${logo(t)}
     <span class="tm"><span class="bn-long">${esc(TEAMS[t].n)}</span><span class="bn-short">${t}</span></span>
     <span class="rc">${fmtRec(R[t].ov)}</span></div><div class="mnote">First-round bye</div></div>`;
@@ -2173,11 +2245,11 @@ function confBracket(cf){
   const b = BR[cf], so = b.seedOf;
   // wild card column top to bottom: 1 (bye), 4v5, 3v6, 2v7 — wc[] is [2v7, 3v6, 4v5]
   const wc = `<div class="col"><h5>Wild Card</h5><div class="colbody">
-      <div class="pair">${slot(byeCard(b.seeds[0]))}${slot(matchup(b.wcIds[2], b.wc[2], so))}</div>
+      <div class="pair">${slot(byeCard(cf, b.seeds[0]))}${slot(matchup(b.wcIds[2], b.wc[2], so))}</div>
       <div class="pair">${slot(matchup(b.wcIds[1], b.wc[1], so))}${slot(matchup(b.wcIds[0], b.wc[0], so))}</div>
     </div></div>`;
   const dv = `<div class="col"><h5>Divisional</h5><div class="colbody">
-      <div class="pair">${[0,1].map(i => slot(b.dv ? matchup(b.dvIds[i], b.dv[i], so) : matchup(null, null))).join('')}</div>
+      <div class="pair">${[0,1].map(i => slot(matchup(b.dvIds[i], b.dv[i], so))).join('')}</div>
     </div></div>`;
   const cc = `<div class="col"><h5>${cf} Final</h5><div class="colbody">
       <div class="single">${slot(matchup(b.ccId, b.cc, so))}</div>
@@ -2188,8 +2260,7 @@ function confBracket(cf){
 function renderPlayoffs(){
   const sb = BR.sb;
   const sbSeed = t => BR.AFC.seeds.includes(t) ? BR.AFC.seedOf(t) : BR.NFC.seedOf(t);
-  PO_NEXT = {};
-  const champEnter = sb.win && sb.win !== CHAMP_PREV && PO_READY ? ' enter' : '';
+  const champEnter = sb.win && sb.win !== CHAMP_PREV && CHAMP_PREV !== null ? ' enter' : '';
   const champ = sb.win
     ? `<div class="champ${champEnter}">${logo(sb.win, 'logo big')}<div class="k">Your champion</div>
          <div class="v">${esc(TEAMS[sb.win].c)} ${esc(TEAMS[sb.win].n)}</div></div>`
@@ -2207,10 +2278,64 @@ function renderPlayoffs(){
   $('#btnClearPo').hidden = !Object.keys(S.po).length;
 
   // only the three bracket blocks re-render; the ad between them stays put
+  const before = bracketRects();
   $('#bkAFC').innerHTML = confBracket('AFC');
   $('#bkSB').innerHTML = sbCol;
   $('#bkNFC').innerHTML = confBracket('NFC');
-  PO_PREV = PO_NEXT; CHAMP_PREV = sb.win; PO_READY = true;
+  flyBracket(before);
+  CHAMP_PREV = sb.win || '';
+}
+/* Bracket motion: a team that just advanced flies from its row to its spot
+   in the next round, and a team that reseeding moved glides to its new game.
+   Cards clip their rows, so the flight is a floating copy of the row. */
+function bracketRects(){
+  const box = $('#poBody');
+  if(!box || !box.offsetParent || REDUCE.matches) return null;
+  const m = new Map();
+  box.querySelectorAll('[data-bk]').forEach(el => m.set(el.dataset.bk, el.getBoundingClientRect()));
+  return m;
+}
+const BK_PREV = {dv:'wc', cc:'dv'};
+function bkSource(before, key){
+  const [round, t] = key.split(':');
+  const from = round === 'sb' ? ['AFC-cc', 'NFC-cc'] : [round.replace(/-(dv|cc)$/, (_, r) => '-' + BK_PREV[r])];
+  for(const r of from) if(r !== round && before.has(r + ':' + t)) return before.get(r + ':' + t);
+  return null;
+}
+function flyBracket(before){
+  if(!before) return;
+  let n = 0;
+  $('#poBody').querySelectorAll('[data-bk]').forEach(el=>{
+    const to = el.getBoundingClientRect(), was = before.get(el.dataset.bk);
+    if(was){
+      if(Math.abs(was.left - to.left) + Math.abs(was.top - to.top) > 2) flyRow(el, was, to, false, n++);
+      return;
+    }
+    const src = bkSource(before, el.dataset.bk);
+    if(src) flyRow(el, src, to, true, n++);
+    else el.animate([{opacity:0}, {opacity:1}], {duration:350, easing:EASE});
+  });
+}
+function flyRow(el, from, to, advance, i){
+  const g = el.cloneNode(true);
+  g.removeAttribute('data-bk'); g.classList.remove('pop'); g.classList.add('mfly');
+  if(advance) g.classList.remove('adv', 'out');
+  Object.assign(g.style, {left: to.left + 'px', top: to.top + 'px', width: to.width + 'px', height: to.height + 'px'});
+  document.body.appendChild(g);
+  el.style.visibility = 'hidden';
+  const dx = from.left - to.left, dy = from.top - to.top;
+  const lift = advance ? Math.min(28, 10 + Math.abs(dx) * .06) : 0;
+  const anim = g.animate([
+    {transform:`translate(${dx}px,${dy}px)`, width: from.width + 'px', boxShadow:'0 1px 2px rgba(8,32,79,.08)'},
+    {transform:`translate(${dx * .45}px,${dy * .5 - lift}px) scale(1.05)`, boxShadow:'0 16px 34px rgba(8,32,79,.24)', offset:.45},
+    {transform:'none', width: to.width + 'px', boxShadow:'0 1px 2px rgba(8,32,79,.08)'}
+  ], {duration: advance ? 620 : 560, easing: EASE, delay: i * 40, fill:'backwards'});
+  const land = () => {
+    g.remove(); el.style.visibility = '';
+    if(advance) el.animate([{backgroundColor:'rgba(16,89,252,.16)', transform:'scale(1.03)'}, {backgroundColor:'rgba(16,89,252,0)', transform:'none'}],
+      {duration: 700, easing: EASE});
+  };
+  anim.onfinish = land; anim.oncancel = land;
 }
 
 /* ==========================================================
@@ -2330,7 +2455,11 @@ wkbar.querySelector('.wk-arrow.l').addEventListener('click', ()=> rail.scrollBy(
 wkbar.querySelector('.wk-arrow.r').addEventListener('click', ()=> rail.scrollBy({left:  rail.clientWidth * .7, behavior:'smooth'}));
 /* pinned controls + wheel: sit right under the header; collapse into a card */
 const pickhead = $('#pickhead'), phcap = pickhead.querySelector('.phcap');
-function setStuck(on){ pickhead.classList.toggle('stuck', on); wkbar.classList.toggle('stuck', on); }
+function setStuck(on){
+  pickhead.classList.toggle('stuck', on); wkbar.classList.toggle('stuck', on);
+  document.querySelectorAll('button.phteam').forEach(b => b.tabIndex = on ? 0 : -1);
+  if(!on && !pickhead.classList.contains('measuring')) setTeamMenu(false);
+}
 /* freeze the group's footprint at its open height. If it's pinned right now,
    measure the open layout with transitions off, then put it back unseen. */
 function measurePickhead(){
@@ -2427,6 +2556,35 @@ $('#teamPick').addEventListener('click', e=>{
   if(b.dataset.team !== S.team) haptic('tap');
   S.team = b.dataset.team; renderWeek(); store.write();
 });
+/* pinned card, By team: the team name opens the full team grid */
+function setTeamMenu(on){
+  if(on === pickhead.classList.contains('picking')) return;
+  pickhead.classList.toggle('picking', on);
+  document.querySelectorAll('button.phteam').forEach(b => b.setAttribute('aria-expanded', on));
+  const box = $('#phTeamPick');
+  if(on){
+    box.classList.remove('enter'); void box.offsetWidth; box.classList.add('enter');
+    clearTimeout(setTeamMenu.t); setTeamMenu.t = setTimeout(()=> box.classList.remove('enter'), 1200);
+    requestAnimationFrame(()=> placeTeamInd(box));
+  }
+}
+document.querySelectorAll('button.phteam').forEach(b => b.addEventListener('click', ()=>{
+  haptic('tap'); setTeamMenu(!pickhead.classList.contains('picking'));
+}));
+$('#phTeamPick').addEventListener('click', e=>{
+  const b = e.target.closest('[data-team]'); if(!b) return;
+  const changed = b.dataset.team !== S.team;
+  haptic('tap');
+  S.team = b.dataset.team; renderWeek(); store.write();
+  setTeamMenu(false);
+  // start the new team's schedule right under the pinned card
+  if(changed){
+    const top = $('#wkTitle').getBoundingClientRect().top + window.scrollY - $('.topbar').offsetHeight - phcap.offsetHeight - 40;
+    if(window.scrollY > top) window.scrollTo({top, behavior: REDUCE.matches ? 'auto' : 'smooth'});
+  }
+});
+document.addEventListener('click', e=>{ if(!e.target.closest('#pickhead')) setTeamMenu(false); });
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape') setTeamMenu(false); });
 // clearing regular-season picks reshuffles the seeds, so the bracket is cleared with them
 /* Clear opens a small menu anchored to the button: this week (or team) / everything */
 const clearMenu = $('#clearMenu');
@@ -2680,7 +2838,7 @@ async function buildBracketImage(){
   });
   track(c, 0);
 
-  const pickOf = (id, pair) => pair && S.po[id] && pair.includes(S.po[id]) ? S.po[id] : null;
+  const pickOf = (id, pair) => pair && pair[0] && pair[1] && S.po[id] && pair.includes(S.po[id]) ? S.po[id] : null;
   const drawConf = (cf, xs, dir) => {
     const b = BR[cf], so = b.seedOf;
     const [xw, xd, xc] = xs;
@@ -2692,8 +2850,7 @@ async function buildBracketImage(){
     joinPair(c, edge(xw), at(4, 2), at(4, 3), dir);
     // divisional
     for(let i = 0; i < 2; i++){
-      const m = b.dv ? b.dv[i] : null;
-      imgCard(c, xd, at(2, i), CW, m, so, m && pickOf(b.dvIds[i], m));
+      imgCard(c, xd, at(2, i), CW, b.dv[i], so, pickOf(b.dvIds[i], b.dv[i]));
     }
     joinPair(c, edge(xd), at(2, 0), at(2, 1), dir);
     // conference final, then a stub into the Super Bowl
