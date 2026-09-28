@@ -355,6 +355,8 @@ td.team .logo.badge{vertical-align:middle;margin-top:-2px}
 .seedgrp{padding:6px 0 8px}
 .seedgrp+.seedgrp{border-top:1px solid var(--line)}
 .seedgrp .lbl{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--ink-3);padding:6px 14px 2px}
+#seeds{position:relative}
+.seedrow.gone{position:absolute;left:0;right:0;pointer-events:none;z-index:1}
 .seedrow{display:flex;align-items:center;gap:9px;padding:4px 14px;font-size:13px}
 .seedrow .n{font-size:11.5px;color:var(--ink-3);width:12px;text-align:right}
 .seedrow .logo{width:20px;height:20px}
@@ -649,6 +651,7 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 .teampick.enter button{animation:tpIn .55s var(--spring) both;animation-delay:calc(var(--n) * 32ms + 60ms)}
 .teampick.enter .tp-ind{animation:fadeIn .4s var(--ease) both;animation-delay:.35s}
 .teampick.enter .dl{animation:fadeIn .4s var(--ease) both}
+.phpick .teampick.enter{animation:none}
 /* week / team title roll */
 .roller{position:relative;display:inline-block}
 .roller>span{display:inline-block}
@@ -665,6 +668,21 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 .pickhead.stuck.team .phteam{opacity:1;transform:none;filter:none;
   transition:opacity .35s var(--ease) .08s,transform .55s var(--spring) .08s,filter .4s var(--ease) .08s}
 .phteam .logo{width:24px;height:24px}
+button.phteam{background:none;border:none;font-family:inherit;padding:0;cursor:pointer;border-radius:10px}
+.pickhead.stuck.team .phteam{pointer-events:auto}
+.phteam:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.phchev{flex:none;color:var(--ink-3);transition:transform .45s var(--spring),color .25s var(--ease)}
+@media(hover:hover){button.phteam:hover .phchev{color:var(--ink)}}
+.pickhead.picking .phchev{transform:rotate(180deg);color:var(--accent)}
+/* pinned + By team: tapping the team drops the whole team grid out of the card */
+.phpick{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--spring)}
+.phpick>div{overflow:hidden;min-height:0}
+.pickhead.stuck.team.picking .phpick{grid-template-rows:1fr}
+.phpick .teampick{margin:0;border:none;background:transparent;padding:10px 4px 4px;
+  opacity:0;transform:translateY(-8px) scale(.98);filter:blur(4px);transform-origin:top center;
+  transition:opacity .2s var(--ease),transform .3s var(--ease),filter .25s var(--ease)}
+.pickhead.stuck.team.picking .phpick .teampick{opacity:1;transform:none;filter:none;
+  transition:opacity .35s var(--ease) .05s,transform .55s var(--spring) .05s,filter .4s var(--ease) .05s}
 .phteam .phname{overflow:hidden;text-overflow:ellipsis}
 .phteam.ph-mid{flex:1;justify-content:center;overflow:hidden}
 .phteam-below{display:none}
@@ -748,7 +766,7 @@ body.noads .adrail,body.noads .adinline{display:none!important}
             <button data-mode="week" aria-pressed="true"><span class="l-lg">By week</span><span class="l-sm">Week</span></button>
             <button data-mode="team" aria-pressed="false"><span class="l-lg">By team</span><span class="l-sm">Team</span></button>
           </div>
-          <div class="phteam ph-mid" aria-hidden="true"><span class="phlogo"></span><span class="phname roller"></span></div>
+          <button type="button" class="phteam ph-mid" tabindex="-1" aria-expanded="false" aria-controls="phPick" aria-label="Choose a team"><span class="phlogo"></span><span class="phname roller"></span><svg class="phchev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
           <div class="acts" id="pickActs">
             <button class="btn ghost" id="btnHome"></button>
             <button class="btn ghost" id="btnRand"></button>
@@ -760,9 +778,10 @@ body.noads .adrail,body.noads .adinline{display:none!important}
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
           </div>
         </div>
-        <div class="phteam-below" aria-hidden="true"><div>
-          <div class="phteam ph-below"><span class="phlogo"></span><span class="phname roller"></span></div>
+        <div class="phteam-below"><div>
+          <button type="button" class="phteam ph-below" tabindex="-1" aria-expanded="false" aria-controls="phPick" aria-label="Choose a team"><span class="phlogo"></span><span class="phname roller"></span><svg class="phchev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         </div></div>
+        <div class="phpick" id="phPick"><div><div class="teampick" id="phTeamPick"></div></div></div>
         <div class="wkbar" id="wkbar"><div class="wkcap">
           <button class="wk-arrow l" type="button" aria-label="Earlier weeks" tabindex="-1">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
@@ -1653,25 +1672,45 @@ const EASE = 'cubic-bezier(.22,1,.36,1)';
 function measure(root){
   if(!root || !root.offsetParent || REDUCE.matches) return null;
   const m = new Map();
-  root.querySelectorAll('[data-k]').forEach(el => m.set(el.dataset.k, el.getBoundingClientRect().top));
+  root.querySelectorAll('[data-k]').forEach(el => m.set(el.dataset.k, {top: el.getBoundingClientRect().top, el}));
   return m;
+}
+/* a moved row washes green if it climbed, red if it dropped */
+const UP_TINT = [21,128,61], DOWN_TINT = [220,38,38];
+function tint(el, rgb, delay = 0, a = .16){
+  el.animate([{backgroundColor:`rgba(${rgb},${a})`}, {backgroundColor:`rgba(${rgb},0)`}],
+    {duration: 1400, easing: 'ease-out', delay});
 }
 function slideRow(el, dy, delay = 0){
   el.animate([{transform:`translateY(${dy}px)`}, {transform:'none'}],
     {duration: 650, easing: EASE, delay, fill:'backwards'});
-  el.animate([{backgroundColor:'rgba(16,89,252,.12)'}, {backgroundColor:'rgba(16,89,252,0)'}],
-    {duration: 1400, easing: 'ease-out', delay});
+  tint(el, dy > 0 ? UP_TINT : DOWN_TINT, delay);
 }
 function shuffle(root, before){
   if(!before) return;
+  const now = new Set();
   root.querySelectorAll('[data-k]').forEach(el => {
+    now.add(el.dataset.k);
     const was = before.get(el.dataset.k);
     if(was === undefined){   // newly on the list (e.g. into the playoff picture)
       el.animate([{opacity:0, transform:'translateY(6px)'}, {opacity:1, transform:'none'}], {duration: 450, easing: EASE});
+      tint(el, UP_TINT);
       return;
     }
-    const dy = was - el.getBoundingClientRect().top;
+    const dy = was.top - el.getBoundingClientRect().top;
     if(Math.abs(dy) > 1) slideRow(el, dy);
+  });
+  // dropped off the list (e.g. out of the playoff picture): its old row sinks away in red
+  const box = root.getBoundingClientRect();
+  before.forEach(({top, el}, k) => {
+    if(now.has(k) || !el.classList.contains('seedrow')) return;
+    const g = el.cloneNode(true);
+    g.removeAttribute('data-k'); g.classList.add('gone');
+    g.style.top = (top - box.top) + 'px';
+    root.appendChild(g);
+    g.animate([{opacity:1, transform:'none', backgroundColor:`rgba(${DOWN_TINT},.18)`},
+               {opacity:0, transform:'translateY(14px)', backgroundColor:`rgba(${DOWN_TINT},0)`}],
+      {duration: 900, easing: EASE}).onfinish = () => g.remove();
   });
 }
 /* The Standings tab is usually hidden while you pick, so remember its order
@@ -2002,7 +2041,10 @@ function renderWeek(){
 }
 
 function renderTeamPicker(){
-  const box = $('#teamPick');
+  ['#teamPick', '#phTeamPick'].forEach(sel => fillTeamPicker($(sel)));
+  placeTeamInd();
+}
+function fillTeamPicker(box){
   if(!box.querySelector('button')){
     box.innerHTML = '<span class="tp-ind" aria-hidden="true"></span>' + DIVS.map((d, col) => `<div class="dv">
       <div class="dl">${d.replace('North','N').replace('South','S').replace('East','E').replace('West','W')}</div>
@@ -2011,15 +2053,21 @@ function renderTeamPicker(){
     </div>`).join('');
   }
   box.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.team === S.team));
-  placeTeamInd();
 }
-function placeTeamInd(){
-  const box = $('#teamPick'), ind = box.querySelector('.tp-ind'), on = box.querySelector('button[aria-pressed="true"]');
+function placeTeamInd(box){
+  if(!box){ placeTeamInd($('#teamPick')); placeTeamInd($('#phTeamPick')); return; }
+  const ind = box.querySelector('.tp-ind'), on = box.querySelector('button[aria-pressed="true"]');
   if(!ind || !on || !box.offsetParent) return;
   // exact sub-pixel geometry, relative to the picker's padding box
-  const b = box.getBoundingClientRect(), r = on.getBoundingClientRect();
-  ind.style.width = r.width + 'px'; ind.style.height = r.height + 'px';
-  ind.style.transform = `translate(${r.left - b.left - box.clientLeft}px, ${r.top - b.top - box.clientTop}px)`;
+  // the pinned card's grid scales and pops in as it opens, so it uses layout offsets
+  if(box.id === 'phTeamPick'){
+    ind.style.width = on.offsetWidth + 'px'; ind.style.height = on.offsetHeight + 'px';
+    ind.style.transform = `translate(${on.offsetLeft}px, ${on.offsetTop}px)`;
+  }else{
+    const b = box.getBoundingClientRect(), r = on.getBoundingClientRect();
+    ind.style.width = r.width + 'px'; ind.style.height = r.height + 'px';
+    ind.style.transform = `translate(${r.left - b.left - box.clientLeft}px, ${r.top - b.top - box.clientTop}px)`;
+  }
   if(!ind.classList.contains('ready')) requestAnimationFrame(()=>requestAnimationFrame(()=>ind.classList.add('ready')));
 }
 
@@ -2407,7 +2455,11 @@ wkbar.querySelector('.wk-arrow.l').addEventListener('click', ()=> rail.scrollBy(
 wkbar.querySelector('.wk-arrow.r').addEventListener('click', ()=> rail.scrollBy({left:  rail.clientWidth * .7, behavior:'smooth'}));
 /* pinned controls + wheel: sit right under the header; collapse into a card */
 const pickhead = $('#pickhead'), phcap = pickhead.querySelector('.phcap');
-function setStuck(on){ pickhead.classList.toggle('stuck', on); wkbar.classList.toggle('stuck', on); }
+function setStuck(on){
+  pickhead.classList.toggle('stuck', on); wkbar.classList.toggle('stuck', on);
+  document.querySelectorAll('button.phteam').forEach(b => b.tabIndex = on ? 0 : -1);
+  if(!on && !pickhead.classList.contains('measuring')) setTeamMenu(false);
+}
 /* freeze the group's footprint at its open height. If it's pinned right now,
    measure the open layout with transitions off, then put it back unseen. */
 function measurePickhead(){
@@ -2504,6 +2556,35 @@ $('#teamPick').addEventListener('click', e=>{
   if(b.dataset.team !== S.team) haptic('tap');
   S.team = b.dataset.team; renderWeek(); store.write();
 });
+/* pinned card, By team: the team name opens the full team grid */
+function setTeamMenu(on){
+  if(on === pickhead.classList.contains('picking')) return;
+  pickhead.classList.toggle('picking', on);
+  document.querySelectorAll('button.phteam').forEach(b => b.setAttribute('aria-expanded', on));
+  const box = $('#phTeamPick');
+  if(on){
+    box.classList.remove('enter'); void box.offsetWidth; box.classList.add('enter');
+    clearTimeout(setTeamMenu.t); setTeamMenu.t = setTimeout(()=> box.classList.remove('enter'), 1200);
+    requestAnimationFrame(()=> placeTeamInd(box));
+  }
+}
+document.querySelectorAll('button.phteam').forEach(b => b.addEventListener('click', ()=>{
+  haptic('tap'); setTeamMenu(!pickhead.classList.contains('picking'));
+}));
+$('#phTeamPick').addEventListener('click', e=>{
+  const b = e.target.closest('[data-team]'); if(!b) return;
+  const changed = b.dataset.team !== S.team;
+  haptic('tap');
+  S.team = b.dataset.team; renderWeek(); store.write();
+  setTeamMenu(false);
+  // start the new team's schedule right under the pinned card
+  if(changed){
+    const top = $('#wkTitle').getBoundingClientRect().top + window.scrollY - $('.topbar').offsetHeight - phcap.offsetHeight - 40;
+    if(window.scrollY > top) window.scrollTo({top, behavior: REDUCE.matches ? 'auto' : 'smooth'});
+  }
+});
+document.addEventListener('click', e=>{ if(!e.target.closest('#pickhead')) setTeamMenu(false); });
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape') setTeamMenu(false); });
 // clearing regular-season picks reshuffles the seeds, so the bracket is cleared with them
 /* Clear opens a small menu anchored to the button: this week (or team) / everything */
 const clearMenu = $('#clearMenu');
