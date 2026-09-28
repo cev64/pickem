@@ -166,7 +166,9 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
   mask-image:linear-gradient(90deg,transparent 0,#000 var(--fl),#000 calc(100% - var(--fr)),transparent 100%)}
 .rail::-webkit-scrollbar{display:none}
 /* generous inner padding: magnified rings and the disc's shadow never get clipped */
-.rail-track{--ring:38px;--padT:14px;--padB:14px;--dot:5px;position:relative;display:flex;min-width:100%;
+/* max-content: the track grows to hold every week, so its end padding stays
+   scrollable (otherwise the last weeks can never reach the wheel's centre) */
+.rail-track{--ring:38px;--padT:14px;--padB:14px;--dot:5px;position:relative;display:flex;width:max-content;min-width:100%;
   padding:var(--padT) 8px var(--padB);
   transition:--ring .55s var(--spring),--padT .55s var(--spring),--padB .55s var(--spring),--dot .3s var(--ease)}
 .wkbar.stuck .rail-track{--ring:30px;--padT:8px;--padB:17px;--dot:0px}
