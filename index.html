@@ -146,13 +146,19 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 /* The picker pins under the header while you scroll the week and collapses
    into a frosted capsule. Its box in the page never changes height (the
    capsule shrinks inside it), so pinning can't make the page jump. */
-.wkbar{position:sticky;top:var(--hdr,56px);z-index:15;margin:-6px 0 -4px;pointer-events:none}
-.wkcap{position:relative;pointer-events:auto;border-radius:24px;border:1px solid transparent;background-color:rgba(255,255,255,0);
-  transition:background-color .35s var(--ease),border-color .35s var(--ease),box-shadow .45s var(--ease),transform .5s var(--spring)}
-.wkbar.stuck .wkcap{transform:translateY(8px);background-color:rgba(255,255,255,.84);
+/* The controls row + week wheel pin together under the header and collapse
+   into one frosted card. The group's box in the page keeps its open height
+   (the card shrinks inside it), so pinning never makes the page jump. */
+.pickhead{position:sticky;top:var(--hdr,56px);z-index:15;pointer-events:none;margin:0 0 2px}
+.phcap{position:relative;pointer-events:auto;border-radius:22px;border:1px solid transparent;background-color:rgba(255,255,255,0);
+  transition:background-color .35s var(--ease),border-color .35s var(--ease),box-shadow .45s var(--ease),transform .5s var(--spring),padding .5s var(--spring)}
+.pickhead.stuck .phcap{transform:translateY(8px);padding-top:8px;background-color:rgba(255,255,255,.86);
   -webkit-backdrop-filter:blur(18px) saturate(1.7);backdrop-filter:blur(18px) saturate(1.7);
   border-color:rgba(8,32,79,.07);box-shadow:0 10px 30px rgba(8,32,79,.12),0 1px 3px rgba(8,32,79,.06)}
-.wkbar.stuck .rail{border-radius:24px}
+.pickhead.stuck.team .phcap{padding-bottom:8px}
+.pickhead.measuring,.pickhead.measuring *{transition:none!important}
+.wkbar{position:relative;margin:-2px 0 -6px}
+.wkcap{position:relative}
 .rail{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;
   --fl:0px;--fr:0px;
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--fl),#000 calc(100% - var(--fr)),transparent 100%);
@@ -224,12 +230,28 @@ nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);paddi
 .pill.now{background:var(--accent-soft);color:var(--accent-ink)}
 .pill.done{background:var(--ink);color:#fff}
 .weekhead .acts{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
-@media(max-width:620px){.weekhead .acts{margin-left:-12px;width:100%}}
-.wkmeta{font-size:13px;color:var(--ink-3);margin:0 0 16px}
+/* Games tab: the wheel says which week it is, so the heading is just the dates */
+#panel-picks .weekhead{margin:8px 0 2px;gap:8px 10px}
+#panel-picks .weekhead h2{font-family:var(--body);font-size:16px;font-weight:700;letter-spacing:0;text-transform:none;line-height:1.35}
+#panel-picks #wkLogo .logo{width:26px;height:26px}
+.wkmeta{font-size:13px;color:var(--ink-3);margin:0 0 14px}
+.wkmeta:empty{margin:0 0 8px}
 .wkmeta b{color:var(--ink-2);font-weight:500}
 
 /* ---------- mode switch + team picker ---------- */
-.modebar{display:flex;align-items:center;gap:12px;margin:0 0 12px;flex-wrap:wrap}
+.modebar{display:flex;align-items:center;gap:10px;margin:0;flex-wrap:nowrap;padding:0;transition:padding .5s var(--spring)}
+.pickhead.stuck .modebar{padding:0 8px}
+.modebar .acts{margin-left:auto;display:flex;align-items:center;gap:2px;flex:none}
+.btn.iconbtn{display:inline-flex;align-items:center;justify-content:center;padding:6px 9px}
+.l-sm{display:none}
+@media(max-width:620px){
+  .l-lg{display:none}.l-sm{display:inline}
+  .modebar{gap:6px}
+  .modebar .seg button{padding:6px 11px}
+  .modebar .acts .btn{padding:6px 7px;font-size:13px}
+  .modebar .acts .btn.iconbtn{padding:6px 8px}
+}
+@media(max-width:350px){.modebar .acts .btn{padding:6px 5px;font-size:12.5px}.modebar .seg button{padding:6px 8px}}
 .seg{display:inline-flex;background:var(--surface-2);padding:3px;border-radius:10px;gap:2px;position:relative}
 .seg button{background:none;border:none;border-radius:8px;color:var(--ink-2);font-weight:600;font-size:13px;padding:6px 14px;cursor:pointer;
   position:relative;z-index:1;transition:color .25s var(--ease),transform .18s var(--ease)}
@@ -696,36 +718,37 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 <section class="panel on" id="panel-picks">
   <div class="split">
     <div>
-      <div class="modebar">
-        <div class="seg" id="modeSeg" role="group" aria-label="Pick games">
-          <button data-mode="week" aria-pressed="true">By week</button>
-          <button data-mode="team" aria-pressed="false">By team</button>
+      <div id="phSentinel" aria-hidden="true"></div>
+      <div class="pickhead" id="pickhead"><div class="phcap">
+        <div class="modebar">
+          <div class="seg" id="modeSeg" role="group" aria-label="Pick games">
+            <button data-mode="week" aria-pressed="true"><span class="l-lg">By week</span><span class="l-sm">Week</span></button>
+            <button data-mode="team" aria-pressed="false"><span class="l-lg">By team</span><span class="l-sm">Team</span></button>
+          </div>
+          <div class="acts" id="pickActs">
+            <button class="btn ghost" id="btnHome"></button>
+            <button class="btn ghost" id="btnRand"></button>
+            <span class="popwrap">
+            <button class="btn ghost" id="btnClearWk" aria-haspopup="menu" aria-expanded="false" aria-controls="clearMenu">Clear</button>
+            <div class="popmenu" id="clearMenu" role="menu" aria-label="Clear picks"></div>
+          </span>
+            <button class="btn ghost iconbtn" id="btnShareWk" aria-label="Share" title="Share an image of these picks">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
+          </div>
         </div>
-      </div>
-      <div id="wkSentinel" aria-hidden="true"></div>
-      <div class="wkbar" id="wkbar"><div class="wkcap">
-        <button class="wk-arrow l" type="button" aria-label="Earlier weeks" tabindex="-1">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
-        <div class="rail" id="rail" role="tablist" aria-label="Week"></div>
-        <button class="wk-arrow r" type="button" aria-label="Later weeks" tabindex="-1">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+        <div class="wkbar" id="wkbar"><div class="wkcap">
+          <button class="wk-arrow l" type="button" aria-label="Earlier weeks" tabindex="-1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+          <div class="rail" id="rail" role="tablist" aria-label="Week"></div>
+          <button class="wk-arrow r" type="button" aria-label="Later weeks" tabindex="-1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+        </div></div>
       </div></div>
       <div class="teampick" id="teamPick" hidden></div>
       <div class="weekhead">
         <span id="wkLogo"></span>
-        <h2 id="wkTitle">Week 1</h2>
+        <h2 id="wkTitle"></h2>
         <span class="pill" id="wkPill"></span>
-        <div class="acts">
-          <button class="btn ghost" id="btnHome" title="Pick the favourite in every game left this week">Favorites</button>
-          <button class="btn ghost" id="btnRand" title="Coin flip every game left this week">Random</button>
-          <span class="popwrap">
-            <button class="btn ghost" id="btnClearWk" aria-haspopup="menu" aria-expanded="false" aria-controls="clearMenu">Clear</button>
-            <div class="popmenu" id="clearMenu" role="menu" aria-label="Clear picks"></div>
-          </span>
-          <button class="btn ghost share" id="btnShareWk" title="Share an image of these picks">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
-            <span>Share</span></button>
-        </div>
       </div>
       <p class="wkmeta" id="wkMeta"></p>
       <div class="games" id="games"></div>
@@ -1868,6 +1891,10 @@ function rollText(el, text, dir){
   clearTimeout(el._rt);
   el._rt = setTimeout(()=>{ if(el.dataset.t === text) el.innerHTML = `<span>${esc(text)}</span>`; }, 650);
 }
+function setLabel(el, lg, sm){
+  const html = `<span class="l-lg">${lg}</span><span class="l-sm">${sm}</span>`;
+  if(el.innerHTML !== html) el.innerHTML = html;
+}
 function refresh(el){ el.classList.remove('swap'); void el.offsetWidth; el.classList.add('swap'); }
 let lastMode = null, lastWeek = null, lastTeam = null;
 function renderWeek(){
@@ -1888,12 +1915,13 @@ function renderWeek(){
   document.querySelectorAll('#modeSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === S.mode));
   const wasHidden = wkbar.hidden;
   wkbar.hidden = team;
-  if(!team && wasHidden) requestAnimationFrame(relayoutRail);
+  $('#pickhead').classList.toggle('team', team);
+  if(wasHidden !== team) requestAnimationFrame(team ? measurePickhead : relayoutRail);
   $('#teamPick').hidden = !team;
   // no lines out yet for the games left this week -> it's a home-team fill
   const hasLines = !team && byWeek[S.week].some(g => !isFinal(g.i) && RES[g.i] && RES[g.i].line);
-  $('#btnHome').textContent = team ? 'Win out' : (hasLines ? 'Favorites' : 'Home teams');
-  $('#btnRand').textContent = team ? 'Lose out' : 'Random';
+  setLabel($('#btnHome'), ...(team ? ['Win out', 'Win out'] : hasLines ? ['Favorites', 'Favs'] : ['Home teams', 'Home']));
+  setLabel($('#btnRand'), ...(team ? ['Lose out', 'Lose out'] : ['Random', 'Random']));
   $('#btnHome').title = team ? 'Pick this team to win every game left'
     : hasLines ? 'Pick the favourite in every game left this week' : 'Pick the home team in every game left this week';
   $('#btnRand').title = team ? 'Pick this team to lose every game left' : 'Coin flip every game left this week';
@@ -1901,7 +1929,9 @@ function renderWeek(){
   $('#wkLogo').innerHTML = '';
 
   const w = S.week, gs = byWeek[w].slice();
-  rollText($('#wkTitle'), 'Week ' + w, lastWeek !== null && w < lastWeek ? 'down' : 'up');
+  const kicks = gs.map(kickOf).filter(Boolean).sort((a,b)=>a-b);
+  rollText($('#wkTitle'), kicks.length ? `${fmtShort(kicks[0])} – ${fmtShort(kicks[kicks.length-1])}` : 'Week ' + w,
+    lastWeek !== null && w < lastWeek ? 'down' : 'up');
   lastWeek = w; lastTeam = null;
 
   const allFinal = gs.every(g => isFinal(g.i));
@@ -1914,12 +1944,9 @@ function renderWeek(){
   const actionable = gs.some(g => !isFinal(g.i));
   ['#btnHome','#btnRand','#btnClearWk'].forEach(id => $(id).hidden = !actionable);
 
-  const kicks = gs.map(kickOf).filter(Boolean).sort((a,b)=>a-b);
-  const parts = [];
-  if(kicks.length) parts.push(`${fmtShort(kicks[0])} – ${fmtShort(kicks[kicks.length-1])}`);
   const b = byeTeams[w];
-  if(b.length) parts.push(`Bye: ${b.map(t=>`<span class="bye" title="${esc(TEAMS[t].c + ' ' + TEAMS[t].n)}">${logo(t)}${esc(TEAMS[t].n)}</span>`).join(', ')}`);
-  $('#wkMeta').innerHTML = parts.join(' · ');
+  $('#wkMeta').innerHTML = b.length
+    ? `Bye: ${b.map(t=>`<span class="bye" title="${esc(TEAMS[t].c + ' ' + TEAMS[t].n)}">${logo(t)}${esc(TEAMS[t].n)}</span>`).join(', ')}` : '';
 
   // group by kickoff day when we know the times
   if(kicks.length === gs.length){
@@ -2274,14 +2301,20 @@ rail.addEventListener('wheel', e=>{
 }, {passive:false});
 wkbar.querySelector('.wk-arrow.l').addEventListener('click', ()=> rail.scrollBy({left: -rail.clientWidth * .7, behavior:'smooth'}));
 wkbar.querySelector('.wk-arrow.r').addEventListener('click', ()=> rail.scrollBy({left:  rail.clientWidth * .7, behavior:'smooth'}));
-/* pinned picker: sits right under the header; collapses to a capsule once pinned */
-const wkcap = wkbar.querySelector('.wkcap');
-function measureWkbar(){
+/* pinned controls + wheel: sit right under the header; collapse into a card */
+const pickhead = $('#pickhead'), phcap = pickhead.querySelector('.phcap');
+function setStuck(on){ pickhead.classList.toggle('stuck', on); wkbar.classList.toggle('stuck', on); }
+/* freeze the group's footprint at its open height. If it's pinned right now,
+   measure the open layout with transitions off, then put it back unseen. */
+function measurePickhead(){
   document.documentElement.style.setProperty('--hdr', $('.topbar').offsetHeight + 'px');
-  if(!wkbar.classList.contains('stuck') && !wkbar.hidden){
-    wkbar.style.height = '';
-    wkbar.style.height = wkcap.offsetHeight + 'px';   // freeze its footprint at the open size
-  }
+  const stuck = pickhead.classList.contains('stuck');
+  pickhead.classList.add('measuring');
+  if(stuck) setStuck(false);
+  pickhead.style.height = '';
+  pickhead.style.height = phcap.offsetHeight + 'px';
+  if(stuck){ setStuck(true); void phcap.offsetHeight; }
+  requestAnimationFrame(()=>requestAnimationFrame(()=>pickhead.classList.remove('measuring')));
 }
 let stickIO = null;
 function watchStick(){
@@ -2289,16 +2322,16 @@ function watchStick(){
   const hdr = $('.topbar').offsetHeight;
   stickIO = new IntersectionObserver(([e])=>{
     const stuck = !e.isIntersecting && e.boundingClientRect.top < hdr + 1;
-    if(stuck === wkbar.classList.contains('stuck')) return;
-    wkbar.classList.toggle('stuck', stuck);
+    if(stuck === pickhead.classList.contains('stuck')) return;
+    setStuck(stuck);
     // ring sizes animate for ~.55s; keep the disc and centring in step as they do
     const t0 = performance.now();
     const follow = () => { placeWkInd(); railEdges(); if(performance.now() - t0 < 650) requestAnimationFrame(follow); };
     requestAnimationFrame(follow);
   }, {rootMargin: `-${hdr + 1}px 0px 0px 0px`, threshold: 0});
-  stickIO.observe($('#wkSentinel'));
+  stickIO.observe($('#phSentinel'));
 }
-const relayoutRail = () => { layoutRail(); measureWkbar(); centerWeek(S.week, 'auto'); lensUpdate(); placeWkInd(); };
+const relayoutRail = () => { layoutRail(); measurePickhead(); centerWeek(S.week, 'auto'); lensUpdate(); placeWkInd(); placeInd($('#modeSeg')); };
 window.addEventListener('resize', ()=> requestAnimationFrame(watchStick));
 window.addEventListener('resize', ()=> requestAnimationFrame(relayoutRail));
 if(FINE.addEventListener) FINE.addEventListener('change', relayoutRail);
@@ -2955,7 +2988,7 @@ function loadAds(){
 }
 
 render();
-measureWkbar();
+measurePickhead();
 watchStick();
 rememberStandings();
 placeAllInd();

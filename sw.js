@@ -1,6 +1,6 @@
 /* Bracketeer — service worker.
    Bump VERSION whenever you change index.html so installed apps update. */
-const VERSION = 'v2.6.1';
+const VERSION = 'v2.7.0';
 const SHELL   = 'bracketeer-shell-'   + VERSION;
 const RUNTIME = 'bracketeer-runtime-' + VERSION;
 
