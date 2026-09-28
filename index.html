@@ -452,13 +452,11 @@ tr.out .logo{opacity:.5}
 .mrow.out{opacity:.45}
 .mrow.fixed,.mrow.wait{cursor:default}
 /* a row in flight to the next round (see flyRow) */
-/* a team in flight to the next round (see flyRow): just its logo and name */
-.mfly{position:fixed;z-index:60;margin:0;pointer-events:none;display:flex;align-items:center;gap:7px;padding:0 10px;
-  background:#fff;border:1px solid var(--line);border-radius:10px;color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;
-  will-change:transform}
-.mfly.adv{background:var(--accent-soft);color:var(--accent-ink)}
-.mfly .logo{flex:none}
-.mfly span{overflow:hidden;text-overflow:ellipsis}
+/* a team in flight to its spot in the bracket (see flyRow): an exact copy of
+   the row it lands as. Its outline is a shadow, not a border, so the content
+   sits exactly where the row's does. */
+.mrow.mfly{position:fixed;z-index:60;margin:0;pointer-events:none;border:none;border-radius:10px;background-color:#fff;transition:none;will-change:transform,box-shadow}
+.mrow.mfly.adv{background-color:var(--accent-soft)}
 .mrow.tbd{cursor:default;color:var(--ink-3)}
 .mrow.tbd .tm{font-weight:500}
 .mnote{font-size:10.5px;color:var(--ink-3);padding:4px 10px 5px;border-top:1px solid var(--line);background:var(--surface)}
@@ -2321,38 +2319,40 @@ function flyBracket(before){
     else el.animate([{opacity:0}, {opacity:1}], {duration:350, easing:EASE});
   });
 }
+/* The copy is taken from the row where it lands and frozen as that row
+   renders (the column's width decides whether the record shows and which
+   name is used, and a floating copy would lose that), so it carries the same
+   seed, logo, name and record the whole way and the hand-off is invisible. */
+function freezeDisplay(src, dst){
+  dst.style.display = getComputedStyle(src).display;
+  [...src.children].forEach((c, i) => dst.children[i] && freezeDisplay(c, dst.children[i]));
+}
 function flyRow(el, from, to, advance, i){
-  // a fixed-size tile with only the logo and the name as the row shows it, so
-  // nothing inside reflows mid-flight (the row's record and name swaps depend
-  // on its column's width, which a floating copy wouldn't have)
-  const g = document.createElement('div');
-  g.className = 'mfly' + (!advance && el.classList.contains('adv') ? ' adv' : '');
-  const lg = el.querySelector('.logo'), long = el.querySelector('.bn-long'), short = el.querySelector('.bn-short');
-  const name = long && getComputedStyle(long).display === 'none' ? short : long;
-  if(lg){
-    const c = lg.cloneNode(true), sz = lg.getBoundingClientRect().width + 'px';
-    c.style.width = c.style.height = sz; g.appendChild(c);
-  }
-  const nm = document.createElement('span'); nm.textContent = name ? name.textContent : ''; g.appendChild(nm);
-  g.style.fontSize = getComputedStyle(el).fontSize;
+  const g = el.cloneNode(true);
+  freezeDisplay(el, g);
+  g.removeAttribute('data-bk'); g.removeAttribute('data-po'); g.classList.remove('pop'); g.classList.add('mfly');
   Object.assign(g.style, {left: to.left + 'px', top: to.top + 'px', width: to.width + 'px', height: to.height + 'px'});
   document.body.appendChild(g);
   el.style.visibility = 'hidden';
-  const dx = from.left + from.width/2 - (to.left + to.width/2), dy = from.top - to.top;
-  const lift = advance ? Math.min(22, 8 + Math.abs(dx) * .05) : 0;
-  const rest = '0 1px 2px rgba(8,32,79,.08)';
+  const dx = from.left - to.left, dy = from.top - to.top;
+  const lift = advance ? Math.min(20, 8 + Math.abs(dx) * .05) : 0;
+  // a picked row keeps its accent bar through the flight
+  const bar = el.classList.contains('adv') ? 'inset 3px 0 0 #1059FC, ' : '';
+  // the corners it lands with: the card rounds its first and last rows
+  const top = el.previousElementSibling ? 0 : 9, bot = el.nextElementSibling ? 0 : 9;
+  const endR = `${top}px ${top}px ${bot}px ${bot}px`;
+  const sh = (ring, y, blur, a) => `${bar}0 0 0 1px rgba(8,32,79,${ring}), 0 ${y}px ${blur}px rgba(8,32,79,${a})`;
   const anim = g.animate([
-    {transform:`translate(${dx}px,${dy}px)`, boxShadow: rest},
-    {transform:`translate(${dx * .5}px,${dy * .5 - lift}px) scale(1.03)`, boxShadow:'0 14px 30px rgba(8,32,79,.2)', offset:.5},
-    {transform:'none', boxShadow: rest}
-  ], {duration: advance ? 640 : 560, easing: EASE, delay: i * 40, fill:'backwards'});
+    {transform:`translate(${dx}px,${dy}px)`, boxShadow: sh(.1, 1, 2, .06), borderRadius:'10px'},
+    {transform:`translate(${dx * .5}px,${dy * .5 - lift}px) scale(1.03)`, boxShadow: sh(.08, 12, 28, .18), borderRadius:'10px', offset:.5},
+    {transform:'translate(0,0) scale(1)', boxShadow: sh(.07, 3, 8, .08), borderRadius:'10px', offset:.85},
+    // melts into its card: no outline, no lift, the card's corners
+    {transform:'none', boxShadow: sh(0, 0, 0, 0), borderRadius: endR}
+  ], {duration: advance ? 700 : 600, easing: EASE, delay: i * 40, fill:'backwards'});
   let done = false;
   const land = () => {
     if(done) return; done = true;
-    // hand off softly: the row appears underneath and the tile fades off it
-    el.style.visibility = '';
-    g.animate([{opacity:1}, {opacity:0}], {duration: 180, easing: 'ease-out', fill:'forwards'}).onfinish = () => g.remove();
-    if(advance) el.animate([{backgroundColor:'rgba(16,89,252,.14)'}, {backgroundColor:'rgba(16,89,252,0)'}], {duration: 900, easing: 'ease-out'});
+    el.style.visibility = ''; g.remove();
   };
   anim.onfinish = land; anim.oncancel = land;
 }
