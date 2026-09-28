@@ -119,17 +119,20 @@ trades): non-playoff teams by worst record, then playoff teams by the round they
 go out in your bracket, ties broken by strength of schedule.
 
 **Playoffs** — a full bracket: AFC on the left, NFC on the right, Super Bowl in
-the middle. Nothing is picked until you click a team to advance it. **Save bracket image** exports a PNG
-built for sharing; on Android you'll also get **Share bracket**, which opens the
-system share sheet directly.
+the middle. Nothing is picked until you click a team to advance it. **Share**
+(top right, and again under the champion) makes an image of the bracket and
+opens the phone's share sheet (it downloads the image where sharing files isn't
+supported). **Clear** resets just the bracket; *Clear* on the Games tab also
+resets the bracket, since changing picks reshuffles the seeds.
 
 **Rules** — the tiebreaker ladder as implemented.
 
 ## Saving
 
-Picks save to `localStorage` automatically. the **download** button (top right) **→ Save picks to file** downloads a JSON copy —
-use that to move a board between devices, or before clearing. **Clear all picks** asks
-first and tells you how much you're about to lose.
+Picks save to `localStorage` automatically, so they're there when you come back
+on the same device and browser. There's no file export or cross-device sync for
+now — that's planned to come back with accounts/login. *Clear* on the Games tab
+resets a week (and the bracket); *Clear* on the Playoffs tab resets the bracket.
 
 ## Known limitation
 
@@ -185,8 +188,8 @@ Ad slots are placed so they can't slow the app down or get in the way:
   tap), and only loads once the page is idle and the slot is about to scroll
   into view. An empty fill folds away.
 
-Until configured they show dashed placeholders (`ADSENSE.placeholders: false`
-hides them). To switch them on:
+Until AdSense is configured the slots show dashed placeholders
+(`ADSENSE.placeholders: false` hides them). To switch real ads on:
 
 1. Put the site on a domain you own (AdSense won't approve a `github.io`
    address) — GitHub Pages supports custom domains.
