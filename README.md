@@ -28,12 +28,17 @@ season. It writes `data/results.json`.
 
 There is no free *official* NFL API — the league's own feeds are licensed to
 partners only — so nflverse is the most established openly licensed source.
-It isn't live: finals land after games end (and an in-progress game shows as
-*In progress* with no score), which suits a board built around picking the
-games that haven't been played. The **Update game
-results** GitHub Action runs it every 20 minutes during game windows and every
-two hours otherwise, and commits only when a score actually changed. Pages
-redeploys on each commit.
+It isn't live, which suits a board built around picking the games that haven't
+been played. The **Update game results** GitHub Action runs it once a day at
+**8:00 AM Eastern**: every game played since the last run (Thursday, Sunday and
+Monday nights, international mornings) is finalized and locked on everyone's
+board, and the betting lines are refreshed. It commits only when something
+actually changed, and Pages redeploys on each commit.
+
+GitHub schedules in UTC with no daylight saving, so the workflow is triggered
+at both 12:00 and 13:00 UTC and keeps whichever one is 8 AM in New York that
+day (decided from New York's UTC offset, so a late start by GitHub still
+counts). Run it by hand any time from the Actions tab (*Run workflow*).
 
 In the app, finished games are filled in and locked, standings start from the
 real season, and you pick the rest. The site opens on the current week: the first week with
@@ -42,9 +47,9 @@ games still to play, rolling over Tuesday morning after Monday night football.
 ### Point spreads
 
 The same script saves the point spread and over/under for upcoming games from
-the same nflverse file, which carries lines for the current and next week. Lines are refreshed on the Tuesday run
-(`--odds`), once the new week's numbers are posted; other runs keep the saved
-line. Game cards show them, and **Favorites** picks the favoured side of every
+the same nflverse file, which carries lines for the current and next week. The
+daily 8 AM run refreshes them (`--odds`) for every game not yet played, so line
+moves show up each morning; a finished game keeps the last line it had. Game cards show them, and **Favorites** picks the favoured side of every
 game left in a week. Run *Update game results* by hand from the Actions tab to
 refresh lines any time.
 
