@@ -1,8 +1,8 @@
-/* Pick 'Em — service worker.
+/* Bracketeer — service worker.
    Bump VERSION whenever you change index.html so installed apps update. */
-const VERSION = 'v1.5.2';
-const SHELL   = 'pickem-shell-'   + VERSION;
-const RUNTIME = 'pickem-runtime-' + VERSION;
+const VERSION = 'v1.6.0';
+const SHELL   = 'bracketeer-shell-'   + VERSION;
+const RUNTIME = 'bracketeer-runtime-' + VERSION;
 
 const ASSETS = [
   './',

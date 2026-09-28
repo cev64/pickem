@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pick 'Em — 2026 NFL Season Board</title>
+<title>Bracketeer — 2026 NFL Season Board</title>
 <meta name="description" content="Pick every game of the 2026 NFL season, get real NFL tiebreakers applied to the standings, and run your own playoff bracket.">
 <meta name="theme-color" content="#FFFFFF">
 <meta name="color-scheme" content="light">
@@ -14,8 +14,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Pick 'Em">
-<meta property="og:title" content="Pick 'Em — 2026 NFL Season Board">
+<meta name="apple-mobile-web-app-title" content="Bracketeer">
+<meta property="og:title" content="Bracketeer — 2026 NFL Season Board">
 <meta property="og:description" content="Pick all 272 games, then run the bracket.">
 <meta property="og:image" content="icons/social-preview.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -468,7 +468,7 @@ body.noads .adrail,body.noads .adinline{display:none!important}
 <header class="topbar">
   <div class="in">
     <img class="mark" src="icons/icon-192.png" alt="" onerror="this.remove()">
-    <h1>Pick ’Em <span class="yr">’26</span></h1>
+    <h1>Bracket<span class="yr">eer</span></h1>
     <nav class="tabs" role="tablist">
       <button class="tab" role="tab" data-tab="picks" aria-selected="true">Games</button>
       <button class="tab" role="tab" data-tab="standings" aria-selected="false">Standings</button>
@@ -2022,8 +2022,8 @@ async function buildBracketImage(){
   // header
   c.textAlign = 'left'; c.fillStyle = IMG.ink;
   c.font = '700 46px "Barlow Condensed", sans-serif'; track(c, 1.5);
-  c.fillText('PICK ’EM ’26', P, 72);
-  const tw = c.measureText('PICK ’EM ’26').width;
+  c.fillText('BRACKETEER', P, 72);
+  const tw = c.measureText('BRACKETEER').width;
   track(c, 2.2); c.fillStyle = IMG.dim; c.font = '600 14px Inter, sans-serif';
   c.fillText('MY 2026 NFL PLAYOFF BRACKET', P + tw + 20, 66);
   c.textAlign = 'right'; c.fillStyle = IMG.faint; c.font = '500 13px Inter, sans-serif'; track(c, 1.4);
@@ -2108,7 +2108,7 @@ async function buildBracketImage(){
   const fy = top + H + 60;
   c.fillStyle = IMG.line; c.fillRect(P, fy - 24, W - 2*P, 1);
   c.font = '500 12px Inter, sans-serif'; c.fillStyle = IMG.faint; track(c, 1.3);
-  c.textAlign = 'left'; c.fillText('PICK ’EM ’26 · REAL NFL TIEBREAKERS · DATA: NFLVERSE (CC BY 4.0)', P, fy);
+  c.textAlign = 'left'; c.fillText('BRACKETEER · REAL NFL TIEBREAKERS · DATA: NFLVERSE (CC BY 4.0)', P, fy);
   const left = leftToPick();
   c.textAlign = 'right';
   c.fillText(left ? `${left} REGULAR-SEASON GAMES STILL TO PICK` : 'FULL SEASON PICKED', W - P, fy);
@@ -2160,7 +2160,7 @@ $('#btnInstall').addEventListener('click', async ()=>{
   await installEvt.userChoice;
   installEvt = null; $('#btnInstall').hidden = true;
 });
-window.addEventListener('appinstalled', ()=>{ $('#btnInstall').hidden = true; toast('Installed. Look for Pick \u2019Em on your home screen.'); });
+window.addEventListener('appinstalled', ()=>{ $('#btnInstall').hidden = true; toast('Installed. Look for Bracketeer on your home screen.'); });
 
 document.addEventListener('keydown', e=>{
   // Escape first, so it works from anywhere including a focused field

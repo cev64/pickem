@@ -1,4 +1,4 @@
-# Pick 'Em '26
+# Bracketeer
 
 A single-page app for picking all 272 games of the 2026 NFL regular season, then
 running your own playoff bracket. Real NFL tiebreakers decide the standings and

@@ -1,6 +1,6 @@
 {
-  "name": "Pick 'Em — 2026 NFL Season Board",
-  "short_name": "Pick 'Em",
+  "name": "Bracketeer — 2026 NFL Season Board",
+  "short_name": "Bracketeer",
   "description": "Pick every game of the 2026 NFL season, get the real NFL tiebreakers applied to the standings, and run your own playoff bracket.",
   "id": "/pick-em-2026/",
   "start_url": "./",
