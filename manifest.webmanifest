@@ -1,26 +1,105 @@
 {
   "name": "Bracketeer — 2026 NFL Season Board",
   "short_name": "Bracketeer",
-  "description": "Pick every game of the 2026 NFL season, get the real NFL tiebreakers applied to the standings, and run your own playoff bracket.",
+  "description": "Pick the rest of the 2026 NFL season, get real NFL tiebreakers applied to the standings, and build your own playoff bracket.",
   "id": "/pick-em-2026/",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "any",
   "background_color": "#FFFFFF",
   "theme_color": "#FFFFFF",
   "lang": "en-US",
   "dir": "ltr",
-  "categories": ["sports", "entertainment", "utilities"],
+  "categories": [
+    "sports",
+    "entertainment",
+    "utilities"
+  ],
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "Playoff bracket", "short_name": "Bracket", "url": "./#playoffs",
-      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+    {
+      "name": "Playoff bracket",
+      "short_name": "Bracket",
+      "url": "./#playoffs",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Standings",
+      "short_name": "Standings",
+      "url": "./#standings",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "icons/screenshots/games-phone.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Pick every game, week by week"
+    },
+    {
+      "src": "icons/screenshots/bracket-phone.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Build your playoff bracket"
+    },
+    {
+      "src": "icons/screenshots/bracket-wide.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Full playoff bracket"
+    }
   ]
 }

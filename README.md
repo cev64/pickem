@@ -60,8 +60,31 @@ Everything uses relative paths, so it works from any subdirectory.
 1. Push this folder to a repo.
 2. Settings → Pages → Source: **Deploy from a branch**, branch `main`, folder `/ (root)`
    (or `/docs` if you put these files there).
-3. Open the published URL on Android in Chrome. You'll get an **Install app**
-   button in the header, or use Chrome's ⋮ → *Add to Home screen*.
+3. Open the published URL on a phone and tap **Install** in the header.
+
+## Installing as an app
+
+- **Android (Chrome, Edge, Samsung Internet):** **Install** opens the
+  browser's own install sheet, with screenshots from `icons/screenshots/`.
+  Android crops the icon to the device's shape using the maskable icons.
+- **iPhone / iPad:** iOS gives websites no install prompt, so **Install**
+  shows the two taps it takes: Share → *Add to Home Screen* (Safari, or Chrome
+  on iOS 16.4+). The home-screen icon is `icons/apple-touch-icon.png`,
+  full-bleed so iOS can round its corners.
+- Installed, it opens full-screen, respects the notch and home indicator, and
+  works offline. Long-press the icon on Android for *Playoff bracket* and
+  *Standings* shortcuts; `#playoffs`, `#standings` and `#rules` links open
+  those tabs directly.
+
+`icons/logo-master.png` is the full-size logo (1254px, background cleaned,
+mark centred); every icon is generated from it: rounded tiles for
+desktop/Android (`icon-*.png`), full-bleed for iOS (`apple-touch-icon*.png`),
+maskable with the mark inside Android's safe circle, and bolder, tighter-cropped
+favicons (`favicon-16/32.png`) so the strokes survive at tab size.
+
+After changing icons, bump `VERSION` in `sw.js`. iOS caches home-screen icons
+hard, so an already-installed iPhone copy may need removing and re-adding to
+pick up a new icon.
 
 The service worker needs HTTPS, which GitHub Pages provides. Opening
 `index.html` straight off disk still works — you just don't get offline caching
@@ -80,7 +103,8 @@ The old caches get deleted on the next visit and the new files load.
 
 ## Using it
 
-**Games** — click a team to pick it. *Tie* sets a drawn game. Arrow keys move
+**Games** — click a team to pick it. **Share** makes an image of the week (or,
+in *By team*, that team's season) and opens the phone's share sheet. *Tie* sets a drawn game. Arrow keys move
 between weeks. *Favorites* and *Random* fill the unplayed games of a week in
 one go. Finished games show the final score and can't be changed.
 
@@ -103,7 +127,7 @@ system share sheet directly.
 
 ## Saving
 
-Picks save to `localStorage` automatically. **Board ▾ → Save picks to file** downloads a JSON copy —
+Picks save to `localStorage` automatically. the **download** button (top right) **→ Save picks to file** downloads a JSON copy —
 use that to move a board between devices, or before clearing. **Clear all picks** asks
 first and tells you how much you're about to lose.
 
@@ -141,14 +165,21 @@ Ad slots are placed so they can't slow the app down or get in the way:
   160×600 units per side. Each sits in its own ~1150px stretch of the page and
   stays pinned while that stretch scrolls by, so each one is actually seen.
   Short pages (like Playoffs) just show one; the rest never load.
-- **Tablets and laptops:** one 300×250 per tab at a natural break.
-- **Phones (≤880px):** in-feed 300×250s sized to the page: two in a week's
-  games (after games 5 and 11), three on the long Standings page (between
-  AFC and NFC, before the draft order, before the tiebreakers), one below the
-  bracket and one mid-way through Rules. That keeps ads at roughly 10–16% of
-  each page's height, under the 30% mobile ad-density ceiling Google enforces
-  via the Better Ads Standards. Never above the fold, never sticky, never a
-  pop-up, and kept clear of the pick buttons to avoid accidental taps.
+- **Laptops (941–1659px):** one 300×250 per tab at a natural break, plus one
+  under the Playoff picture in the sidebar on screens at least 900px tall
+  (where the card and the ad both fit without scrolling past each other).
+- **Phones (≤880px):** in-feed 300×250s at natural breaks, never above the
+  first screen and kept ~550px+ apart:
+  - *Games:* after games 4 and 9, and before the Playoff picture.
+  - *Standings:* after each conference's division tables, between AFC and
+    NFC, before the draft order and before the tiebreakers.
+  - *Playoffs:* between the AFC and NFC brackets, and below the Super Bowl.
+  - *Rules:* two, between sections.
+
+  That keeps ads at 15–24% of each tab's height, under the 30% mobile
+  ad-density ceiling Google enforces via the Better Ads Standards. Never
+  sticky, never a pop-up, and kept clear of the pick buttons to avoid
+  accidental taps.
 - Every slot has its size reserved up front (nothing jumps), sits outside the
   parts of the page that re-render when you pick (an ad is never reloaded by a
   tap), and only loads once the page is idle and the slot is about to scroll
