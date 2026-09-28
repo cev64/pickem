@@ -1,6 +1,6 @@
 /* Pick 'Em — service worker.
    Bump VERSION whenever you change index.html so installed apps update. */
-const VERSION = 'v1.0.0';
+const VERSION = 'v1.1.0';
 const SHELL   = 'pickem-shell-'   + VERSION;
 const RUNTIME = 'pickem-runtime-' + VERSION;
 
@@ -13,7 +13,11 @@ const ASSETS = [
   './icons/icon-maskable-192.png',
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
-  './icons/favicon-32.png'
+  './icons/favicon-32.png',
+  './data/results.json',
+  ...['ARI','ATL','BAL','BUF','CAR','CHI','CIN','CLE','DAL','DEN','DET','GB','HOU','IND','JAX','KC',
+      'LAC','LAR','LV','MIA','MIN','NE','NO','NYG','NYJ','PHI','PIT','SEA','SF','TB','TEN','WAS']
+      .map(t => `./logos/${t}.png`)
 ];
 
 self.addEventListener('install', e => {
@@ -47,6 +51,21 @@ self.addEventListener('fetch', e => {
         return fresh;
       } catch (err) {
         return (await caches.match('./index.html')) || (await caches.match('./')) || Response.error();
+      }
+    })());
+    return;
+  }
+
+  // live results: always try the network, fall back to the last copy offline
+  if (url.origin === location.origin && url.pathname.endsWith('/data/results.json')) {
+    e.respondWith((async () => {
+      const cache = await caches.open(RUNTIME);
+      try {
+        const fresh = await fetch(req, { cache: 'no-store' });
+        if (fresh.ok) cache.put(req.url.split('?')[0], fresh.clone());
+        return fresh;
+      } catch (err) {
+        return (await cache.match(req.url.split('?')[0])) || (await caches.match('./data/results.json')) || Response.error();
       }
     })());
     return;

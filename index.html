@@ -5,311 +5,346 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pick 'Em — 2026 NFL Season Board</title>
 <meta name="description" content="Pick every game of the 2026 NFL season, get real NFL tiebreakers applied to the standings, and run your own playoff bracket.">
-<meta name="theme-color" content="#0C1A14">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="color-scheme" content="light">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32">
 <link rel="icon" href="icons/icon-512.png" sizes="512x512">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Pick 'Em">
 <meta property="og:title" content="Pick 'Em — 2026 NFL Season Board">
 <meta property="og:description" content="Pick all 272 games, then run the bracket.">
 <meta property="og:image" content="icons/social-preview.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --turf:#0C1A14;
-  --turf-2:#12241C;
-  --turf-3:#182F25;
-  --line:#24463A;
-  --chalk:#E9F1EB;
-  --chalk-2:#9DB3A7;
-  --chalk-3:#6B8377;
-  --amber:#F5A524;
-  --amber-dim:#8A5F14;
-  --teal:#45B8A4;
-  --flag:#E05A47;
-  --radius:3px;
-  --display:'Barlow Condensed','Oswald','Arial Narrow',sans-serif;
-  --body:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  --mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+  --bg:#FFFFFF;
+  --surface:#F7F8FA;
+  --surface-2:#EEF1F5;
+  --line:#E4E7EC;
+  --line-2:#D5DAE1;
+  --ink:#101828;
+  --ink-2:#475467;
+  --ink-3:#8A94A6;
+  --accent:#1D4ED8;
+  --accent-ink:#1E40AF;
+  --accent-soft:#EFF4FF;
+  --good:#15803D;
+  --bad:#DC2626;
+  --live:#DC2626;
+  --radius:12px;
+  --radius-sm:8px;
+  --shadow:0 1px 2px rgba(16,24,40,.05);
+  --shadow-lg:0 12px 32px rgba(16,24,40,.14);
+  --display:'Barlow Condensed','Arial Narrow',sans-serif;
+  --body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0;padding:0}
 body{
-  background:var(--turf);
-  color:var(--chalk);
-  font-family:var(--body);
-  font-size:14px;
-  line-height:1.45;
-  -webkit-font-smoothing:antialiased;
-  min-height:100vh;
+  background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;min-height:100vh;font-variant-numeric:tabular-nums;
 }
-/* yard-line ruling: the one texture motif */
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background-image:repeating-linear-gradient(90deg,rgba(233,241,235,.045) 0 1px,transparent 1px 64px);
-  mask-image:linear-gradient(180deg,rgba(0,0,0,.9),rgba(0,0,0,.25) 40%,rgba(0,0,0,.1));
-  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.9),rgba(0,0,0,.25) 40%,rgba(0,0,0,.1));
-}
-.wrap{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 18px 80px}
+button{font-family:inherit}
+.wrap{max-width:1240px;margin:0 auto;padding:0 16px 80px}
 
 /* ---------- header ---------- */
-header{padding:26px 0 14px;border-bottom:1px solid var(--line)}
-.brandrow{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
-h1{
-  font-family:var(--display);font-weight:700;font-size:clamp(28px,4.6vw,46px);
-  letter-spacing:.06em;text-transform:uppercase;margin:0;line-height:.95;
+.topbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:saturate(1.4) blur(8px);border-bottom:1px solid var(--line)}
+.topbar .in{max-width:1240px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.mark{width:34px;height:34px;border-radius:8px;flex:none}
+h1{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:.03em;text-transform:uppercase;margin:0;line-height:1}
+h1 .yr{color:var(--accent)}
+nav.tabs{display:flex;gap:2px;margin-left:18px;background:var(--surface-2);padding:3px;border-radius:10px}
+.tab{background:none;border:none;border-radius:8px;color:var(--ink-2);font-weight:600;font-size:13.5px;padding:6px 14px;cursor:pointer;transition:.12s}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(16,24,40,.12)}
+.headmeta{margin-left:auto;display:flex;gap:8px;align-items:center}
+@media(max-width:760px){
+  .topbar .in{flex-wrap:wrap;row-gap:8px}
+  nav.tabs{order:3;margin-left:0;width:100%}
+  .tab{flex:1;padding:7px 4px}
 }
-h1 .yr{color:var(--amber)}
-.tagline{font-size:12px;color:var(--chalk-3);letter-spacing:.14em;text-transform:uppercase;font-family:var(--display);font-weight:600;padding-bottom:5px}
-.headmeta{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;padding-bottom:4px}
+
 .btn{
-  font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:.08em;text-transform:uppercase;
-  background:transparent;color:var(--chalk-2);border:1px solid var(--line);
-  padding:6px 12px;border-radius:var(--radius);cursor:pointer;transition:.14s;
+  font-weight:500;font-size:13px;background:#fff;color:var(--ink-2);border:1px solid var(--line-2);
+  padding:6px 12px;border-radius:var(--radius-sm);cursor:pointer;transition:.12s;white-space:nowrap;
 }
-.btn:hover{color:var(--chalk);border-color:var(--chalk-3);background:var(--turf-2)}
-.btn:focus-visible,.tab:focus-visible,.notch:focus-visible,.pickbtn:focus-visible,.tiebtn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-.btn.warn:hover{color:var(--flag);border-color:var(--flag)}
+.btn:hover{color:var(--ink);background:var(--surface)}
+.btn:focus-visible,.tab:focus-visible,.notch:focus-visible,.pickbtn:focus-visible,.tiebtn:focus-visible,.mrow:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-ink)}
+.btn.danger{color:var(--bad);border-color:#F3C1C1}
+.btn.danger:hover{background:#FEF2F2}
+.btn.ghost{border-color:transparent;background:none}
+.btn.ghost:hover{background:var(--surface-2)}
 
-/* ---------- progress ---------- */
-.progress{display:flex;align-items:center;gap:14px;padding:12px 0 0;flex-wrap:wrap}
-.bar{flex:1;min-width:180px;height:6px;background:var(--turf-3);border-radius:99px;overflow:hidden}
-.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--amber-dim),var(--amber));transition:width .3s}
-.pcount{font-family:var(--mono);font-size:12px;color:var(--chalk-2);white-space:nowrap}
-.pcount b{color:var(--chalk);font-weight:600}
+/* board menu */
+.menu{position:relative}
+.menu summary{list-style:none}
+.menu summary::-webkit-details-marker{display:none}
+.menu .pop{position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow-lg);padding:6px;min-width:180px;display:flex;flex-direction:column;z-index:30}
+.menu .pop button{background:none;border:none;text-align:left;padding:8px 10px;border-radius:6px;font-size:13.5px;color:var(--ink);cursor:pointer}
+.menu .pop button:hover{background:var(--surface)}
+.menu .pop button.warn{color:var(--bad)}
+.menu .pop hr{border:none;border-top:1px solid var(--line);margin:4px 2px}
 
-/* ---------- tabs ---------- */
-nav.tabs{display:flex;gap:2px;margin:18px 0 0;border-bottom:1px solid var(--line)}
-.tab{
-  font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:.1em;text-transform:uppercase;
-  background:none;border:none;border-bottom:2px solid transparent;color:var(--chalk-3);
-  padding:9px 16px;cursor:pointer;transition:.14s;
-}
-.tab:hover{color:var(--chalk-2)}
-.tab[aria-selected="true"]{color:var(--chalk);border-bottom-color:var(--amber)}
-.panel{display:none;padding-top:22px}
+/* ---------- summary strip ---------- */
+.summary{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:18px 0 4px}
+.stat{display:flex;flex-direction:column}
+.stat b{font-size:20px;font-weight:700;line-height:1.1}
+.stat span{font-size:12px;color:var(--ink-3)}
+.stat.acc b{color:var(--accent)}
+.bar{flex:1;min-width:200px;height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%;transition:width .3s}
+.bar .f{background:var(--ink)}
+.bar .p{background:var(--accent)}
+.updated{font-size:12px;color:var(--ink-3);width:100%;margin-top:-6px}
+.updated .livedot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--live);margin-right:5px;vertical-align:1px;animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.35}}
+
+.panel{display:none;padding-top:14px}
 .panel.on{display:block}
 
 /* ---------- layout ---------- */
-.split{display:grid;grid-template-columns:1fr 300px;gap:26px;align-items:start}
-@media(max-width:900px){.split{grid-template-columns:1fr}}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:28px;align-items:start}
+@media(max-width:940px){.split{grid-template-columns:minmax(0,1fr)}}
 
-/* ---------- week rail (signature) ---------- */
-.rail{display:flex;gap:0;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;background:var(--turf-2)}
+/* ---------- week rail ---------- */
+.rail{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 10px;margin:0 -2px 8px;scrollbar-width:thin;scroll-snap-type:x proximity}
 .notch{
-  flex:1;min-width:0;background:none;border:none;border-right:1px solid var(--line);
-  padding:8px 2px 6px;cursor:pointer;color:var(--chalk-3);position:relative;transition:.14s;
-  font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.04em;
+  flex:1 0 44px;min-width:44px;background:#fff;border:1px solid var(--line);border-radius:10px;
+  padding:6px 0 8px;cursor:pointer;color:var(--ink-2);position:relative;transition:.12s;scroll-snap-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:1px;overflow:hidden;
 }
-.notch:last-child{border-right:none}
-.notch:hover{background:var(--turf-3);color:var(--chalk-2)}
-.notch .fill{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--amber-dim);transform-origin:left;transition:transform .3s}
-.notch.done{color:var(--chalk-2)}
-.notch.done .fill{background:var(--teal)}
-.notch[aria-current="true"]{background:var(--turf-3);color:var(--chalk)}
-.notch[aria-current="true"]::after{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:var(--amber)}
+.notch .l{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.notch .n{font-size:15px;font-weight:700}
+.notch:hover{border-color:var(--line-2);background:var(--surface)}
+.notch .fill{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--line);}
+.notch .fill i{display:block;height:100%;background:var(--accent);transform-origin:left;transition:transform .3s}
+.notch.final .fill i{background:var(--ink)}
+.notch.now::before{content:'';position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.notch[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.notch[aria-current="true"] .l{color:rgba(255,255,255,.65)}
+.notch[aria-current="true"].now::before{background:#fff}
 
 /* ---------- week head ---------- */
-.weekhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:14px}
-.weekhead h2{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:.06em;text-transform:uppercase;margin:0}
-.weekhead .sub{font-size:12px;color:var(--chalk-3);font-family:var(--mono)}
+.weekhead{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;margin:6px 0 4px}
+.weekhead h2{font-family:var(--display);font-weight:700;font-size:32px;letter-spacing:.02em;text-transform:uppercase;margin:0;line-height:1}
+.pill{font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--surface-2);color:var(--ink-2)}
+.pill.now{background:var(--accent-soft);color:var(--accent-ink)}
+.pill.done{background:var(--ink);color:#fff}
 .weekhead .acts{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
-.byes{font-size:12px;color:var(--chalk-3);margin:-4px 0 14px;font-family:var(--mono)}
-.byes b{color:var(--chalk-2);font-weight:500}
+@media(max-width:620px){.weekhead .acts{margin-left:-12px;width:100%}}
+.wkmeta{font-size:13px;color:var(--ink-3);margin:0 0 16px}
+.wkmeta b{color:var(--ink-2);font-weight:500}
 
-/* ---------- game rows ---------- */
-.games{display:flex;flex-direction:column;gap:6px}
-.game{
-  display:grid;grid-template-columns:1fr 72px 1fr;gap:6px;align-items:stretch;
-  background:var(--turf-2);border:1px solid var(--line);border-radius:var(--radius);padding:6px;
-}
-.game.settled{border-color:#2C5647}
+/* ---------- games ---------- */
+.games{display:flex;flex-direction:column;gap:10px}
+.dayhead{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:10px 2px -2px}
+.dayhead:first-child{margin-top:0}
+.game{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:10px 10px 10px}
+.game .meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3);padding:0 4px 8px}
+.game .meta .st{font-weight:600;color:var(--ink-2)}
+.game .meta .st.live{color:var(--live)}
+.game .meta .st.live::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--live);margin-right:5px;vertical-align:1px;animation:pulse 1.6s infinite}
+.game .meta .res{margin-left:auto;font-weight:600;font-size:11.5px;padding:2px 8px;border-radius:99px}
+.res.ok{background:#ECFDF3;color:var(--good)}
+.res.no{background:#FEF2F2;color:var(--bad)}
+.res.none{background:var(--surface-2);color:var(--ink-3)}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 54px minmax(0,1fr);gap:8px;align-items:stretch}
 .pickbtn{
-  display:flex;align-items:center;gap:10px;text-align:left;width:100%;
-  background:var(--turf-3);border:1px solid transparent;border-radius:2px;
-  padding:9px 11px;cursor:pointer;color:var(--chalk-2);transition:.12s;min-height:52px;
+  display:flex;align-items:center;gap:10px;text-align:left;width:100%;min-width:0;
+  background:var(--surface);border:1.5px solid transparent;border-radius:10px;
+  padding:8px 12px;cursor:pointer;color:var(--ink);transition:.12s;min-height:58px;
 }
-.pickbtn:hover{background:#1E3A2E;color:var(--chalk)}
-.pickbtn .swatch{width:4px;align-self:stretch;border-radius:2px;flex:none}
-.pickbtn .abbr{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:.04em;min-width:44px}
-.pickbtn .nm{font-size:12px;line-height:1.2;overflow:hidden}
-.pickbtn .nm i{display:block;font-style:normal;color:var(--chalk-3);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
-.pickbtn .rec{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--chalk-3);white-space:nowrap}
-.pickbtn.win{background:#1C3A2E;color:var(--chalk);border-color:var(--amber);box-shadow:inset 0 0 0 1px rgba(245,165,36,.25)}
-.pickbtn.win .rec{color:var(--amber)}
-.pickbtn.lose{opacity:.42}
+.pickbtn:hover{background:var(--surface-2)}
+.logo{width:34px;height:34px;object-fit:contain;flex:none}
+.pickbtn .who{display:flex;flex-direction:column;min-width:0;line-height:1.2}
+.pickbtn .who b{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pickbtn .who span{font-size:12px;color:var(--ink-3)}
+.pickbtn .sc{margin-left:auto;font-size:22px;font-weight:700;color:var(--ink-3)}
+.pickbtn.win{background:var(--accent-soft);border-color:var(--accent)}
+.pickbtn.win .who b{color:var(--accent-ink)}
+.pickbtn .ck{margin-left:auto;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;display:none;align-items:center;justify-content:center;flex:none}
+.pickbtn.win .ck{display:flex}
+.pickbtn.lose{opacity:.5}
 .right .pickbtn{flex-direction:row-reverse;text-align:right}
-.right .pickbtn .rec{margin-left:0;margin-right:auto}
-.mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-.vs{font-family:var(--display);font-size:13px;letter-spacing:.1em;color:var(--chalk-3);text-transform:uppercase}
-.tiebtn{
-  font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;background:none;border:1px solid var(--line);
-  color:var(--chalk-3);border-radius:2px;padding:2px 6px;cursor:pointer;transition:.12s;
-}
-.tiebtn:hover{border-color:var(--chalk-3);color:var(--chalk-2)}
-.tiebtn.on{background:var(--amber);border-color:var(--amber);color:#12241C;font-weight:600}
-.site{grid-column:1/-1;font-size:10.5px;font-family:var(--mono);color:var(--chalk-3);padding:2px 4px 0;letter-spacing:.04em}
+.right .pickbtn .who{align-items:flex-end}
+.right .pickbtn .sc,.right .pickbtn .ck{margin-left:0;margin-right:auto}
+/* final games: read-only */
+.game.final .pickbtn{cursor:default;background:var(--surface)}
+.game.final .pickbtn.won{background:#fff;border-color:var(--line-2)}
+.game.final .pickbtn.won .sc{color:var(--ink)}
+.game.final .pickbtn.lost{opacity:.55}
+.game.final .pickbtn.lost .who b{font-weight:500}
+.game.live .pickbtn .sc{color:var(--ink)}
+.mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.vs{font-size:12px;color:var(--ink-3);font-weight:600}
+.tiebtn{font-size:11px;font-weight:600;background:#fff;border:1px solid var(--line-2);color:var(--ink-3);border-radius:6px;padding:2px 7px;cursor:pointer;transition:.12s}
+.tiebtn:hover{color:var(--ink);border-color:var(--ink-3)}
+.tiebtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
 @media(max-width:620px){
-  .game{grid-template-columns:1fr 56px 1fr;padding:5px;gap:4px}
-  .pickbtn{padding:8px;gap:7px;min-height:48px}
-  .pickbtn .nm{display:none}
-  .pickbtn .abbr{font-size:17px;min-width:38px}
+  .row{grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr);gap:6px}
+  .pickbtn{padding:8px;gap:8px;min-height:54px}
+  .logo{width:28px;height:28px}
+  .pickbtn .who b{font-size:13.5px}
+  .pickbtn .who .nm-long{display:none}
+  .pickbtn .sc{font-size:19px}
 }
+@media(min-width:621px){.pickbtn .who .nm-short{display:none}}
 
 /* ---------- seed rail ---------- */
-.seedrail{position:sticky;top:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--turf-2);overflow:hidden}
-.seedrail h3{
-  font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:.12em;text-transform:uppercase;
-  margin:0;padding:10px 12px;background:var(--turf-3);border-bottom:1px solid var(--line);color:var(--chalk-2);
-}
-.seedgrp{padding:6px 0 10px}
-.seedgrp .lbl{font-family:var(--display);font-size:13px;letter-spacing:.16em;color:var(--amber);padding:8px 12px 4px;text-transform:uppercase;font-weight:600}
-.seedrow{display:flex;align-items:center;gap:9px;padding:4px 12px;font-size:12.5px;transition:.2s}
-.seedrow .n{font-family:var(--mono);font-size:11px;color:var(--chalk-3);width:14px}
-.seedrow .sw{width:3px;height:15px;border-radius:2px;flex:none}
-.seedrow .tm{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.03em}
-.seedrow .rc{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--chalk-2)}
-.seedrow.bye .tm{color:var(--amber)}
-.seedgrp hr{border:none;border-top:1px dashed var(--line);margin:7px 12px}
+.seedrail{position:sticky;top:78px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;overflow:hidden;box-shadow:var(--shadow)}
+.seedrail h3{font-size:13px;font-weight:600;margin:0;padding:12px 14px;border-bottom:1px solid var(--line);color:var(--ink)}
+.seedrail h3 span{font-weight:400;color:var(--ink-3)}
+.seedgrp{padding:6px 0 8px}
+.seedgrp+.seedgrp{border-top:1px solid var(--line)}
+.seedgrp .lbl{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--ink-3);padding:6px 14px 2px}
+.seedrow{display:flex;align-items:center;gap:9px;padding:4px 14px;font-size:13px}
+.seedrow .n{font-size:11.5px;color:var(--ink-3);width:12px;text-align:right}
+.seedrow .logo{width:20px;height:20px}
+.seedrow .tm{font-weight:600}
+.seedrow .rc{margin-left:auto;font-size:12px;color:var(--ink-2)}
+.seedrow.bye .n{color:var(--accent);font-weight:700}
+.seedgrp hr{border:none;border-top:1px dashed var(--line);margin:5px 14px}
+@media(max-width:940px){.seedrail{position:static}}
 
 /* ---------- standings ---------- */
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:26px}
-@media(max-width:860px){.cols{grid-template-columns:1fr}}
-.conftitle{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 12px;padding-bottom:6px;border-bottom:2px solid var(--amber)}
-table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px}
-caption{
-  font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--chalk-2);text-align:left;padding:0 0 5px;
-}
-th{
-  font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--chalk-3);
-  font-weight:500;text-align:right;padding:0 6px 5px;border-bottom:1px solid var(--line);
-}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+@media(max-width:880px){.cols{grid-template-columns:1fr}}
+.cols>div{min-width:0}
+.conftitle{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:.04em;text-transform:uppercase;margin:0 0 10px}
+.tcard{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+caption{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--line)}
+th{font-size:11px;font-weight:600;color:var(--ink-3);text-align:right;padding:8px 8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
 th:first-child,th:nth-child(2){text-align:left}
-td{padding:6px;border-bottom:1px solid rgba(36,70,58,.5);font-family:var(--mono);font-size:12px;text-align:right;color:var(--chalk-2)}
-td:first-child{text-align:left;color:var(--chalk-3);width:18px}
-td.team{text-align:left;font-family:var(--display);font-weight:600;font-size:15.5px;letter-spacing:.03em;color:var(--chalk)}
-tr.lead td.team{color:var(--amber)}
-tr.lead td:first-child{color:var(--amber)}
-td.team .dot{display:inline-block;width:3px;height:12px;border-radius:2px;margin-right:7px;vertical-align:-1px}
-.tag{font-family:var(--mono);font-size:9px;letter-spacing:.08em;padding:1px 4px;border-radius:2px;margin-left:6px;vertical-align:1px}
-.tag.z{background:var(--amber);color:#12241C}
-.tag.x{background:var(--turf-3);color:var(--teal);border:1px solid var(--teal)}
+td{padding:7px 8px;border-bottom:1px solid var(--line);font-size:12.5px;text-align:right;color:var(--ink-2);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+td:first-child{text-align:left;color:var(--ink-3);width:22px}
+td.team{text-align:left;font-weight:600;color:var(--ink)}
+td.team .logo{width:20px;height:20px;vertical-align:-5px;margin-right:8px}
+tr.out td.team{color:var(--ink-3);font-weight:500}
+tr.out .logo{opacity:.5}
+.tag{font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;margin-left:6px;vertical-align:1px}
+.tag.z{background:var(--ink);color:#fff}
+.tag.x{background:var(--accent-soft);color:var(--accent-ink)}
+.how{font-size:10.5px;letter-spacing:.04em;color:var(--ink-3)}
 
 /* ---------- tiebreak log ---------- */
-.logbox{border:1px solid var(--line);border-radius:var(--radius);background:var(--turf-2);padding:14px 16px;margin-top:8px}
-.logbox h4{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 10px;color:var(--chalk-2)}
-.logitem{font-size:12.5px;padding:5px 0;border-bottom:1px solid rgba(36,70,58,.5);display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
+.logbox{border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-top:8px}
+.logbox h4{font-size:14px;font-weight:600;margin:0 0 8px}
+.logitem{font-size:13px;padding:7px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
 .logitem:last-child{border-bottom:none}
-.logitem .step{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--amber);text-transform:uppercase;white-space:nowrap}
-.logitem .txt{color:var(--chalk-2);flex:1;min-width:200px}
-.logitem .txt b{color:var(--chalk);font-weight:600}
-.flipbtn{font-family:var(--mono);font-size:10px;background:none;border:1px solid var(--flag);color:var(--flag);border-radius:2px;padding:1px 6px;cursor:pointer}
-.flipbtn:hover{background:var(--flag);color:var(--turf)}
-.empty{color:var(--chalk-3);font-size:12.5px;font-style:italic}
+.logitem .step{font-size:11px;font-weight:600;color:var(--accent-ink);background:var(--accent-soft);padding:1px 7px;border-radius:99px;white-space:nowrap}
+.logitem .txt{color:var(--ink-2);flex:1;min-width:200px}
+.logitem .txt b{color:var(--ink);font-weight:600}
+.flipbtn{font-size:11px;font-weight:600;background:#fff;border:1px solid var(--line-2);color:var(--ink-2);border-radius:6px;padding:2px 8px;cursor:pointer}
+.flipbtn:hover{border-color:var(--ink-3);color:var(--ink)}
+.empty{color:var(--ink-3);font-size:13px}
 
 /* ---------- bracket ---------- */
-.bracket{margin-bottom:34px}
-.bracket .bhead{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 12px;color:var(--chalk-2)}
-.rounds{display:grid;grid-template-columns:repeat(3,minmax(190px,1fr));gap:14px}
+.bracket{margin-bottom:30px}
+.bracket .bhead{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:.04em;text-transform:uppercase;margin:0 0 10px}
+.rounds{display:grid;grid-template-columns:repeat(3,minmax(200px,1fr));gap:16px}
 @media(max-width:760px){.rounds{grid-template-columns:1fr}}
-.round h5{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--chalk-3);margin:0 0 8px;font-weight:500}
-.matchup{border:1px solid var(--line);border-radius:var(--radius);background:var(--turf-2);margin-bottom:10px;overflow:hidden}
-.mrow{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;transition:.12s;background:none;border:none;width:100%;text-align:left;color:var(--chalk-2);font-family:inherit}
+.round h5{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+.matchup{border:1px solid var(--line);border-radius:10px;background:#fff;margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow)}
+.mrow{display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;transition:.12s;background:none;border:none;width:100%;text-align:left;color:var(--ink);font-size:14px}
 .mrow+.mrow{border-top:1px solid var(--line)}
-.mrow:hover:not(.tbd){background:var(--turf-3);color:var(--chalk)}
-.mrow .sd{font-family:var(--mono);font-size:10px;color:var(--chalk-3);width:14px;flex:none}
-.mrow .sw{width:3px;height:16px;border-radius:2px;flex:none}
-.mrow .tm{font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:.03em}
-.mrow .rc{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--chalk-3)}
-.mrow.adv{background:#1C3A2E;color:var(--chalk);box-shadow:inset 2px 0 0 var(--amber)}
-.mrow.adv .tm{color:var(--amber)}
-.mrow.out{opacity:.4}
-.mrow.tbd{cursor:default;color:var(--chalk-3);font-style:italic;font-size:12px;padding:11px 10px}
-.mnote{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--chalk-3);padding:4px 10px 6px;border-top:1px dashed var(--line);text-transform:uppercase}
-.sb{max-width:420px;margin:0 auto;border:1px solid var(--amber);border-radius:var(--radius);background:var(--turf-2);overflow:hidden}
-.sb .bhead{background:var(--amber);color:#0C1A14;margin:0;padding:8px 12px;font-size:18px}
-.champ{text-align:center;padding:22px 16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--turf-2);margin-top:18px}
-.champ .k{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--chalk-3);text-transform:uppercase}
-.champ .v{font-family:var(--display);font-weight:700;font-size:clamp(26px,6vw,44px);letter-spacing:.06em;text-transform:uppercase;color:var(--amber);line-height:1.1;margin-top:6px}
-.notice{border-left:2px solid var(--amber);background:var(--turf-2);padding:10px 14px;font-size:12.5px;color:var(--chalk-2);margin-bottom:20px;border-radius:0 var(--radius) var(--radius) 0}
-.notice b{color:var(--chalk)}
+.mrow:hover:not(.tbd):not(.fixed){background:var(--surface)}
+.mrow .sd{font-size:11.5px;color:var(--ink-3);width:14px;flex:none;text-align:right}
+.mrow .logo{width:24px;height:24px}
+.mrow .tm{font-weight:600}
+.mrow .rc{margin-left:auto;font-size:12px;color:var(--ink-3)}
+.mrow.adv{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.mrow.adv .tm{color:var(--accent-ink)}
+.mrow.out{opacity:.45}
+.mrow.fixed{cursor:default}
+.mrow.tbd{cursor:default;color:var(--ink-3);font-size:13px;padding:13px 12px}
+.mnote{font-size:11px;color:var(--ink-3);padding:5px 12px 7px;border-top:1px solid var(--line);background:var(--surface)}
+.sb{max-width:440px;margin:0 auto;border:1.5px solid var(--ink);border-radius:var(--radius);background:#fff;overflow:hidden}
+.sb .bhead{background:var(--ink);color:#fff;margin:0;padding:8px 14px;font-size:20px}
+.champ{text-align:center;padding:24px 16px;border-radius:var(--radius);background:var(--surface);margin-top:18px}
+.champ img{width:72px;height:72px;object-fit:contain}
+.champ .k{font-size:12px;font-weight:600;letter-spacing:.1em;color:var(--ink-3);text-transform:uppercase;margin-top:6px}
+.champ .v{font-family:var(--display);font-weight:700;font-size:clamp(28px,6vw,44px);letter-spacing:.03em;text-transform:uppercase;line-height:1.1;margin-top:4px}
+.notice{background:var(--surface);border:1px solid var(--line);padding:10px 14px;font-size:13px;color:var(--ink-2);margin-bottom:18px;border-radius:10px}
+.notice b{color:var(--ink)}
 
 /* ---------- rules ---------- */
 .rules{max-width:760px}
-.rules h3{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.1em;text-transform:uppercase;margin:26px 0 8px;color:var(--amber)}
+.rules h3{font-size:17px;font-weight:700;margin:26px 0 8px}
 .rules h3:first-child{margin-top:0}
 .rules ol{padding-left:20px;margin:0 0 10px}
-.rules li{margin-bottom:3px;font-size:13px;color:var(--chalk-2)}
-.rules p{font-size:13px;color:var(--chalk-2);margin:0 0 10px}
-.rules code{font-family:var(--mono);font-size:11.5px;background:var(--turf-3);padding:1px 5px;border-radius:2px;color:var(--chalk)}
-.dead{color:var(--chalk-3)}
-
-/* ---------- brand mark ---------- */
-.mark{width:44px;height:44px;border-radius:9px;flex:none;align-self:center}
-@media(max-width:520px){.mark{width:36px;height:36px}}
+.rules li{margin-bottom:3px;font-size:14px;color:var(--ink-2)}
+.rules p{font-size:14px;color:var(--ink-2);margin:0 0 10px}
+.rules code{font-size:12.5px;background:var(--surface-2);padding:1px 5px;border-radius:4px;color:var(--ink)}
+.dead{color:var(--ink-3)}
 
 /* ---------- modal ---------- */
-.modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;
-  background:rgba(6,14,10,.78);backdrop-filter:blur(3px)}
+.modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(16,24,40,.45);backdrop-filter:blur(2px)}
 .modal[hidden]{display:none}
-.sheet{background:var(--turf-2);border:1px solid var(--line);border-radius:5px;max-width:420px;width:100%;
-  padding:22px 24px 20px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
-.sheet h4{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px}
-.sheet p{font-size:13.5px;color:var(--chalk-2);margin:0 0 18px;line-height:1.5}
+.sheet{background:#fff;border-radius:14px;max-width:420px;width:100%;padding:22px 24px 20px;box-shadow:var(--shadow-lg)}
+.sheet h4{font-size:18px;font-weight:700;margin:0 0 8px}
+.sheet p{font-size:14px;color:var(--ink-2);margin:0 0 18px;line-height:1.5}
 .sheet .mact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
-.btn.danger{border-color:var(--flag);color:var(--flag)}
-.btn.danger:hover{background:var(--flag);color:var(--turf);border-color:var(--flag)}
-.btn.primary{border-color:var(--amber);color:var(--amber)}
-.btn.primary:hover{background:var(--amber);color:var(--turf);border-color:var(--amber)}
+.sheet .btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
 
 /* ---------- toast ---------- */
-.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);z-index:60;
-  background:var(--turf-3);border:1px solid var(--teal);color:var(--chalk);border-radius:4px;
-  padding:10px 18px;font-size:13px;opacity:0;pointer-events:none;transition:.22s}
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);z-index:60;background:var(--ink);color:#fff;border-radius:10px;padding:10px 18px;font-size:13.5px;opacity:0;pointer-events:none;transition:.22s;box-shadow:var(--shadow-lg)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
 /* ---------- share bar ---------- */
 .sharebar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
-.sharebar .hint{font-size:12px;color:var(--chalk-3);font-family:var(--mono)}
+.sharebar .hint{font-size:12px;color:var(--ink-3)}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
-<div class="wrap">
 
-<header>
-  <div class="brandrow">
+<header class="topbar">
+  <div class="in">
     <img class="mark" src="icons/icon-192.png" alt="" onerror="this.remove()">
     <h1>Pick ’Em <span class="yr">’26</span></h1>
-    <span class="tagline">272 games · 18 weeks · one bracket</span>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="picks" aria-selected="true">Games</button>
+      <button class="tab" role="tab" data-tab="standings" aria-selected="false">Standings</button>
+      <button class="tab" role="tab" data-tab="playoffs" aria-selected="false">Playoffs</button>
+      <button class="tab" role="tab" data-tab="rules" aria-selected="false">Rules</button>
+    </nav>
     <div class="headmeta">
       <button class="btn primary" id="btnInstall" hidden>Install app</button>
-      <button class="btn" id="btnExport">Save file</button>
-      <button class="btn" id="btnImport">Load file</button>
-      <button class="btn warn" id="btnReset">Clear all</button>
+      <details class="menu" id="menu">
+        <summary class="btn" aria-label="Board options">Board ▾</summary>
+        <div class="pop">
+          <button id="btnExport">Save picks to file</button>
+          <button id="btnImport">Load picks from file</button>
+          <hr>
+          <button class="warn" id="btnReset">Clear all picks</button>
+        </div>
+      </details>
     </div>
-  </div>
-  <div class="progress">
-    <div class="bar"><span id="pbar" style="width:0%"></span></div>
-    <div class="pcount"><b id="pdone">0</b> / 272 games picked · <b id="pweeks">0</b>/18 weeks complete</div>
   </div>
 </header>
 
-<nav class="tabs" role="tablist">
-  <button class="tab" role="tab" data-tab="picks" aria-selected="true">Games</button>
-  <button class="tab" role="tab" data-tab="standings" aria-selected="false">Standings</button>
-  <button class="tab" role="tab" data-tab="playoffs" aria-selected="false">Playoffs</button>
-  <button class="tab" role="tab" data-tab="rules" aria-selected="false">Rules</button>
-</nav>
+<div class="wrap">
+
+<div class="summary">
+  <div class="stat"><b id="sFinal">0</b><span>games final</span></div>
+  <div class="stat acc"><b id="sPicked">0</b><span>your picks</span></div>
+  <div class="stat"><b id="sLeft">272</b><span>left to pick</span></div>
+  <div class="stat" id="sAccWrap" hidden><b id="sAcc">–</b><span>picks correct</span></div>
+  <div class="bar" title="Final · Picked · Left"><i class="f" id="barF"></i><i class="p" id="barP"></i></div>
+  <div class="updated" id="updated"></div>
+</div>
 
 <section class="panel on" id="panel-picks">
   <div class="split">
@@ -317,18 +352,18 @@ td.team .dot{display:inline-block;width:3px;height:12px;border-radius:2px;margin
       <div class="rail" id="rail"></div>
       <div class="weekhead">
         <h2 id="wkTitle">Week 1</h2>
-        <span class="sub" id="wkSub"></span>
+        <span class="pill" id="wkPill"></span>
         <div class="acts">
-          <button class="btn" id="btnHome">Home teams</button>
-          <button class="btn" id="btnRand">Coin flip week</button>
-          <button class="btn warn" id="btnClearWk">Clear week</button>
+          <button class="btn ghost" id="btnHome" title="Pick every home team for the games left this week">Home teams</button>
+          <button class="btn ghost" id="btnRand" title="Coin flip every game left this week">Random</button>
+          <button class="btn ghost" id="btnClearWk" title="Clear your picks for unplayed games this week">Clear</button>
         </div>
       </div>
-      <div class="byes" id="byes"></div>
+      <p class="wkmeta" id="wkMeta"></p>
       <div class="games" id="games"></div>
     </div>
     <aside class="seedrail">
-      <h3>Playoff picture</h3>
+      <h3>Playoff picture <span>· if the season ended now</span></h3>
       <div id="seeds"></div>
     </aside>
   </div>
@@ -402,8 +437,11 @@ td.team .dot{display:inline-block;width:3px;height:12px;border-radius:2px;margin
     <h3>Strength of victory and schedule</h3>
     <p>Strength of victory is the combined winning percentage of every opponent you beat, counted once per win. Strength of schedule is the combined winning percentage of every opponent you played. Both use records from your own picks, so they shift as you fill in the board.</p>
 
+    <h3>Real results</h3>
+    <p>Games that have been played are filled in automatically with the final score and locked, so the standings and seeds always start from the real season. You pick whatever's left. If you picked a game before it was played, it's marked right or wrong and counted in <b>picks correct</b>. Results refresh every few minutes on game days.</p>
+
     <h3>Saving</h3>
-    <p>Picks save automatically in this browser when it allows it. <b>Save file</b> downloads a JSON copy you can reload later or move to another device — the reliable option if you're doing this in more than one sitting.</p>
+    <p>Picks save automatically in this browser when it allows it. <b>Board ▾ → Save picks to file</b> downloads a JSON copy you can reload later or move to another device — the reliable option if you're doing this in more than one sitting.</p>
   </div>
 </section>
 
@@ -463,6 +501,8 @@ const TEAMS = {
 const DIVS = ['AFC East','AFC North','AFC South','AFC West','NFC East','NFC North','NFC South','NFC West'];
 const IDS = Object.keys(TEAMS);
 const divTeams = d => IDS.filter(t => TEAMS[t].dv === d);
+const logoSrc = t => `logos/${t}.png`;
+const logo = (t, cls='logo') => `<img class="${cls}" src="${logoSrc(t)}" alt="" loading="lazy" decoding="async">`;
 
 /* SCHEDULE injected here: [week, away, home, siteOrNull] */
 const SCHEDULE=[
@@ -772,6 +812,66 @@ const store = {
 })();
 
 /* ==========================================================
+   REAL RESULTS  (data/results.json, kept fresh by a GitHub Action)
+   ========================================================== */
+let RES = {};           // game index -> {st:'pre'|'in'|'post', as, hs, win, kick, clock, ot}
+let RES_UPDATED = null;
+const gameKey = {};
+GAMES.forEach(g => { gameKey[`${g.w}|${g.a}|${g.h}`] = g.i; });
+
+function applyResults(data){
+  const out = {};
+  (data && data.games || []).forEach(r=>{
+    let gi = gameKey[`${r.w}|${r.a}|${r.h}`], swap = false;
+    if(gi === undefined){ gi = gameKey[`${r.w}|${r.h}|${r.a}`]; swap = true; }
+    if(gi === undefined) return;
+    const x = Object.assign({}, r);
+    if(swap){ // home/away listed the other way round: flip to match our schedule
+      [x.as, x.hs] = [r.hs, r.as];
+      if(r.win === 'a') x.win = 'h'; else if(r.win === 'h') x.win = 'a';
+    }
+    out[gi] = x;
+  });
+  RES = out;
+  RES_UPDATED = data && data.updated ? new Date(data.updated) : null;
+}
+const isFinal = gi => !!(RES[gi] && RES[gi].st === 'post' && RES[gi].win);
+const isLive  = gi => !!(RES[gi] && RES[gi].st === 'in');
+/* the result that counts: the real one if the game is over, otherwise your pick */
+const outcome = gi => isFinal(gi) ? RES[gi].win : S.picks[gi];
+
+/* weeks turn over on Tuesday morning (US), after Monday night football */
+const SEASON_START = Date.UTC(2026, 8, 8, 10);   // Tue Sep 8 2026, 6am ET
+function calendarWeek(now = Date.now()){
+  return Math.max(1, Math.min(WEEKS, Math.floor((now - SEASON_START) / (7*864e5)) + 1));
+}
+function resultsWeek(){
+  if(!Object.keys(RES).length) return 1;
+  for(let w=1; w<=WEEKS; w++) if(!byWeek[w].every(g => isFinal(g.i))) return w;
+  return WEEKS;
+}
+/* first week that still has games to play: once week 3 is in the books, open on week 4 */
+const currentWeek = () => Math.max(calendarWeek(), resultsWeek());
+
+const RES_KEY = 'nfl2026.results.v1';
+try{ const c = localStorage.getItem(RES_KEY); if(c) applyResults(JSON.parse(c)); }catch(e){}
+
+let userMovedWeek = false;
+S.week = currentWeek();
+
+async function loadResults(){
+  try{
+    const r = await fetch('data/results.json', {cache:'no-cache'});
+    if(!r.ok) return;
+    const data = await r.json();
+    applyResults(data);
+    try{ localStorage.setItem(RES_KEY, JSON.stringify(data)); }catch(e){}
+    if(!userMovedWeek) S.week = currentWeek();
+    render();
+  }catch(e){ /* offline or opened from disk: picks still work */ }
+}
+
+/* ==========================================================
    RECORDS
    ========================================================== */
 function pct(r){ const n = r.w + r.l + r.t; return n ? (r.w + r.t*0.5)/n : 0; }
@@ -786,7 +886,7 @@ function buildRecords(){
   const rec = {};
   IDS.forEach(t => rec[t] = {ov:Z(), gs:[]});
   GAMES.forEach(g=>{
-    const p = S.picks[g.i];
+    const p = outcome(g.i);
     if(!p) return;
     let ra, rh;
     if(p==='a'){ ra='W'; rh='L'; }
@@ -1035,14 +1135,14 @@ function buildBracket(conf){
    RENDER
    ========================================================== */
 const $ = s => document.querySelector(s);
-const esc = s => String(s).replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 let VIEW = null, BR = null;
 
 function render(){
   VIEW = computeAll();
   BR = buildBracket(VIEW.conf);
-  renderProgress();
+  renderSummary();
   renderRail();
   renderWeek();
   renderSeedRail();
@@ -1051,60 +1151,163 @@ function render(){
   store.write();
 }
 
-function weekDone(w){ return byWeek[w].every(g => S.picks[g.i]); }
+const decided = g => !!outcome(g.i);
+const leftToPick = () => GAMES.filter(g => !decided(g)).length;
 
-function renderProgress(){
-  const done = GAMES.filter(g => S.picks[g.i]).length;
-  $('#pbar').style.width = (done/GAMES.length*100).toFixed(1)+'%';
-  $('#pdone').textContent = done;
-  let wk = 0; for(let w=1;w<=WEEKS;w++) if(weekDone(w)) wk++;
-  $('#pweeks').textContent = wk;
+function ago(d){
+  const m = Math.round((Date.now() - d) / 60000);
+  if(m < 1) return 'just now';
+  if(m < 60) return m + ' min ago';
+  const h = Math.round(m / 60);
+  if(h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago');
+  return d.toLocaleDateString(undefined, {month:'short', day:'numeric'});
+}
+
+function renderSummary(){
+  const fin = GAMES.filter(g => isFinal(g.i)).length;
+  const picked = GAMES.filter(g => !isFinal(g.i) && S.picks[g.i]).length;
+  const left = GAMES.length - fin - picked;
+  $('#sFinal').textContent = fin;
+  $('#sPicked').textContent = picked;
+  $('#sLeft').textContent = left;
+  $('#barF').style.width = (fin / GAMES.length * 100).toFixed(2) + '%';
+  $('#barP').style.width = (picked / GAMES.length * 100).toFixed(2) + '%';
+
+  const graded = GAMES.filter(g => isFinal(g.i) && S.picks[g.i]);
+  const right = graded.filter(g => S.picks[g.i] === RES[g.i].win).length;
+  $('#sAccWrap').hidden = !graded.length;
+  $('#sAcc').textContent = `${right}/${graded.length}`;
+
+  const live = GAMES.some(g => isLive(g.i));
+  $('#updated').innerHTML = RES_UPDATED
+    ? `${live ? '<span class="livedot"></span>Games in progress · ' : ''}Results updated ${ago(RES_UPDATED)}`
+    : '';
 }
 
 function renderRail(){
-  $('#rail').innerHTML = Array.from({length:WEEKS},(_,i)=>{
-    const w = i+1;
-    const n = byWeek[w].length, d = byWeek[w].filter(g=>S.picks[g.i]).length;
-    return `<button class="notch${d===n?' done':''}" data-w="${w}" aria-current="${S.week===w}" title="Week ${w} — ${d}/${n} picked">
-      ${String(w).padStart(2,'0')}<span class="fill" style="transform:scaleX(${(d/n).toFixed(3)})"></span></button>`;
+  const now = currentWeek();
+  const rail = $('#rail');
+  rail.innerHTML = Array.from({length:WEEKS},(_,i)=>{
+    const w = i+1, gs = byWeek[w];
+    const d = gs.filter(decided).length;
+    const allFinal = gs.every(g => isFinal(g.i));
+    const cls = ['notch', allFinal ? 'final' : '', w === now ? 'now' : ''].join(' ');
+    const tip = allFinal ? 'all games final' : `${gs.length - d} left to pick`;
+    return `<button class="${cls}" data-w="${w}" aria-current="${S.week===w}" title="Week ${w} — ${tip}">
+      <span class="l">Wk</span><span class="n">${w}</span>
+      <span class="fill"><i style="transform:scaleX(${(d/gs.length).toFixed(3)})"></i></span></button>`;
   }).join('');
+  const on = rail.querySelector('[aria-current="true"]');
+  if(on) rail.scrollLeft = on.offsetLeft - rail.clientWidth/2 + on.offsetWidth/2;
 }
 
-function chip(t, side, gi, picked){
-  const T = TEAMS[t], r = R[t].ov;
+const CHECK = '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function teamLabel(t){
+  const T = TEAMS[t];
+  return `${logo(t)}
+    <span class="who">
+      <b><span class="nm-long">${esc(T.n)}</span><span class="nm-short">${t}</span></b>
+      <span><span class="nm-long">${esc(T.c)} · </span>${fmtRec(R[t].ov)}</span>
+    </span>`;
+}
+
+function chip(g, side, picked){
+  const t = side === 'a' ? g.a : g.h;
+  const res = RES[g.i];
+  const score = res && (res.st === 'in' || res.st === 'post') && res[side+'s'] != null
+    ? `<span class="sc">${res[side+'s']}</span>` : '';
+  if(isFinal(g.i)){
+    const cls = res.win === side ? 'won' : (res.win === 't' ? '' : 'lost');
+    return `<div class="pickbtn ${cls}">${teamLabel(t)}${score}</div>`;
+  }
   const cls = picked === side ? 'win' : (picked ? 'lose' : '');
-  return `<button class="pickbtn ${cls}" data-g="${gi}" data-p="${side}">
-    <span class="swatch" style="background:${T.k}"></span>
-    <span class="abbr">${t}</span>
-    <span class="nm">${esc(T.n)}<i>${esc(T.c)}</i></span>
-    <span class="rec">${fmtRec(r)}</span>
+  return `<button class="pickbtn ${cls}" data-g="${g.i}" data-p="${side}" aria-pressed="${picked===side}"
+      aria-label="Pick ${esc(TEAMS[t].c + ' ' + TEAMS[t].n)}">
+    ${teamLabel(t)}${score || `<span class="ck">${CHECK}</span>`}
   </button>`;
 }
 
-function renderWeek(){
-  const w = S.week;
-  $('#wkTitle').textContent = 'Week ' + w;
-  const n = byWeek[w].length, d = byWeek[w].filter(g=>S.picks[g.i]).length;
-  $('#wkSub').textContent = `${d}/${n} picked`;
-  const b = byeTeams[w];
-  $('#byes').innerHTML = b.length ? `Bye: <b>${b.map(t=>esc(TEAMS[t].n)).join(' · ')}</b>` : '';
-  $('#games').innerHTML = byWeek[w].map(g=>{
-    const p = S.picks[g.i];
-    return `<div class="game${p?' settled':''}">
-      ${chip(g.a,'a',g.i,p)}
+const fmtTime = d => d.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit', timeZoneName:'short'});
+const fmtDay  = d => d.toLocaleDateString(undefined, {weekday:'long', month:'short', day:'numeric'});
+const fmtShort = d => d.toLocaleDateString(undefined, {month:'short', day:'numeric'});
+const kickOf = g => RES[g.i] && RES[g.i].kick ? new Date(RES[g.i].kick) : null;
+
+function gameCard(g){
+  const res = RES[g.i], fin = isFinal(g.i), live = isLive(g.i);
+  const p = fin ? null : S.picks[g.i];
+  const k = kickOf(g);
+
+  let st = '';
+  if(fin) st = `<span class="st">Final${res.ot ? '/OT' : ''}</span>`;
+  else if(live) st = `<span class="st live">Live${res.clock ? ' · ' + esc(res.clock) : ''}</span>`;
+  else if(k) st = `<span class="st">${fmtTime(k)}</span>`;
+
+  let badge = '';
+  if(fin){
+    const mine = S.picks[g.i];
+    const pickName = x => x === 't' ? 'a tie' : TEAMS[x === 'a' ? g.a : g.h].n;
+    if(mine) badge = mine === res.win
+      ? `<span class="res ok">✓ You picked ${esc(pickName(mine))}</span>`
+      : `<span class="res no">✗ You picked ${esc(pickName(mine))}</span>`;
+  }
+  const site = g.site ? `<span>${esc(g.site)}</span>` : '';
+
+  return `<div class="game${fin ? ' final' : ''}${live ? ' live' : ''}">
+    <div class="meta">${st}${st && site ? '<span>·</span>' : ''}${site}${badge}</div>
+    <div class="row">
+      ${chip(g, 'a', p)}
       <div class="mid">
-        <span class="vs">${g.site ? 'vs' : 'at'}</span>
-        <button class="tiebtn${p==='t'?' on':''}" data-g="${g.i}" data-p="t">TIE</button>
+        <span class="vs">${g.site ? 'vs' : '@'}</span>
+        ${fin ? (res.win === 't' ? '<span class="vs">Tie</span>' : '')
+              : `<button class="tiebtn${p==='t'?' on':''}" data-g="${g.i}" data-p="t" aria-pressed="${p==='t'}">Tie</button>`}
       </div>
-      <div class="right" style="display:contents">${chip(g.h,'h',g.i,p)}</div>
-      ${g.site ? `<div class="site">Neutral site — ${esc(g.site)} · ${esc(TEAMS[g.h].n)} designated home</div>` : ''}
-    </div>`;
-  }).join('');
+      <div class="right" style="display:contents">${chip(g, 'h', p)}</div>
+    </div>
+  </div>`;
 }
 
-function seedRow(t, i, label){
+function renderWeek(){
+  const w = S.week, gs = byWeek[w].slice();
+  $('#wkTitle').textContent = 'Week ' + w;
+
+  const left = gs.filter(g => !decided(g)).length;
+  const allFinal = gs.every(g => isFinal(g.i));
+  const pill = $('#wkPill');
+  pill.hidden = false;
+  if(allFinal){ pill.className = 'pill done'; pill.textContent = 'Final'; }
+  else if(w === currentWeek()){ pill.className = 'pill now'; pill.textContent = 'This week'; }
+  else pill.hidden = true;
+
+  const actionable = gs.some(g => !isFinal(g.i));
+  ['#btnHome','#btnRand','#btnClearWk'].forEach(id => $(id).hidden = !actionable);
+
+  const kicks = gs.map(kickOf).filter(Boolean).sort((a,b)=>a-b);
+  const parts = [];
+  if(kicks.length) parts.push(`${fmtShort(kicks[0])} – ${fmtShort(kicks[kicks.length-1])}`);
+  parts.push(allFinal ? 'All games final' : `<b>${left}</b> of ${gs.length} left to pick`);
+  const b = byeTeams[w];
+  if(b.length) parts.push(`Bye: ${b.map(t=>esc(TEAMS[t].n)).join(', ')}`);
+  $('#wkMeta').innerHTML = parts.join(' · ');
+
+  // group by kickoff day when we know the times
+  if(kicks.length === gs.length){
+    gs.sort((x,y) => kickOf(x) - kickOf(y) || x.i - y.i);
+    let day = '', html = '';
+    gs.forEach(g=>{
+      const d = fmtDay(kickOf(g));
+      if(d !== day){ html += `<div class="dayhead">${d}</div>`; day = d; }
+      html += gameCard(g);
+    });
+    $('#games').innerHTML = html;
+  }else{
+    $('#games').innerHTML = gs.map(gameCard).join('');
+  }
+}
+
+function seedRow(t, i){
   return `<div class="seedrow${i===0?' bye':''}">
-    <span class="n">${i+1}</span><span class="sw" style="background:${TEAMS[t].k}"></span>
+    <span class="n">${i+1}</span>${logo(t)}
     <span class="tm">${t}</span><span class="rc">${fmtRec(R[t].ov)}</span></div>`;
 }
 function renderSeedRail(){
@@ -1126,34 +1329,33 @@ function renderStandings(){
       const rows = VIEW.divisions[d].map((t,i)=>{
         const r = R[t];
         const si = seedIdx(t);
-        const tag = si === 0 ? '<span class="tag z">1</span>'
-                  : si > -1 && si < 4 ? `<span class="tag z">${si+1}</span>`
+        const tag = si > -1 && si < 4 ? `<span class="tag z">${si+1}</span>`
                   : si > -1 ? `<span class="tag x">${si+1}</span>` : '';
-        return `<tr class="${i===0?'lead':''}">
+        return `<tr>
           <td>${i+1}</td>
-          <td class="team"><span class="dot" style="background:${TEAMS[t].k}"></span>${t}${tag}</td>
+          <td class="team">${logo(t)}${t}${tag}</td>
           <td>${fmtRec(r.ov)}</td><td>${fmtPct(r.pct)}</td>
           <td>${fmtRec(r.div)}</td><td>${fmtRec(r.conf)}</td>
           <td>${fmtPct(r.sov)}</td><td>${fmtPct(r.sos)}</td>
         </tr>`;
       }).join('');
-      return `<table><caption>${d}</caption>
+      return `<div class="tcard"><table><caption>${d}</caption>
         <thead><tr><th></th><th>Team</th><th>W-L</th><th>Pct</th><th>Div</th><th>Conf</th><th>SOV</th><th>SOS</th></tr></thead>
-        <tbody>${rows}</tbody></table>`;
+        <tbody>${rows}</tbody></table></div>`;
     }).join('');
     const hunt = C.wilds.slice(3);
     return `<div><h3 class="conftitle">${cf}</h3>${tables}
-      <table><caption>${cf} seeding</caption>
+      <div class="tcard"><table><caption>${cf} seeding</caption>
       <thead><tr><th></th><th>Team</th><th>W-L</th><th>Pct</th><th>Conf</th><th>How</th></tr></thead><tbody>
-      ${C.seeds.map((t,i)=>`<tr class="${i<4?'lead':''}"><td>${i+1}</td>
-        <td class="team"><span class="dot" style="background:${TEAMS[t].k}"></span>${t}</td>
+      ${C.seeds.map((t,i)=>`<tr><td>${i+1}</td>
+        <td class="team">${logo(t)}${t}</td>
         <td>${fmtRec(R[t].ov)}</td><td>${fmtPct(R[t].pct)}</td><td>${fmtRec(R[t].conf)}</td>
-        <td style="text-align:right;font-size:10px;letter-spacing:.06em">${i===0?'BYE · DIV':(i<4?'DIVISION':'WILD CARD')}</td></tr>`).join('')}
-      ${hunt.map((t,i)=>`<tr><td>${i+8}</td>
-        <td class="team" style="color:var(--chalk-3)"><span class="dot" style="background:${TEAMS[t].k};opacity:.5"></span>${t}</td>
+        <td class="how">${i===0?'Bye · Division':(i<4?'Division':'Wild card')}</td></tr>`).join('')}
+      ${hunt.map((t,i)=>`<tr class="out"><td>${i+8}</td>
+        <td class="team">${logo(t)}${t}</td>
         <td>${fmtRec(R[t].ov)}</td><td>${fmtPct(R[t].pct)}</td><td>${fmtRec(R[t].conf)}</td>
-        <td style="text-align:right;font-size:10px;color:var(--chalk-3)">OUT</td></tr>`).join('')}
-      </tbody></table></div>`;
+        <td class="how">Out</td></tr>`).join('')}
+      </tbody></table></div></div>`;
   }).join('');
 
   const log = TBLOG;
@@ -1170,8 +1372,8 @@ function mrow(t, seed, picked, disabled){
   if(!t) return `<div class="mrow tbd">Winner to be decided</div>`;
   const cls = picked === t ? 'adv' : (picked ? 'out' : '');
   return `<button class="mrow ${cls}" data-po="${disabled}" data-team="${t}">
-    <span class="sd">${seed||''}</span><span class="sw" style="background:${TEAMS[t].k}"></span>
-    <span class="tm">${t}</span><span class="rc">${fmtRec(R[t].ov)}</span></button>`;
+    <span class="sd">${seed||''}</span>${logo(t)}
+    <span class="tm">${esc(TEAMS[t].n)}</span><span class="rc">${fmtRec(R[t].ov)}</span></button>`;
 }
 function matchup(id, pair, seedOf, note){
   const picked = S.po[id] && pair && pair.includes(S.po[id]) ? S.po[id] : null;
@@ -1184,9 +1386,9 @@ function matchup(id, pair, seedOf, note){
 }
 
 function renderPlayoffs(){
-  const done = GAMES.filter(g=>S.picks[g.i]).length;
-  $('#poNotice').innerHTML = done < GAMES.length
-    ? `<div class="notice"><b>${GAMES.length-done} games still unpicked.</b> Seeds below reflect the games you've decided so far and will keep moving until the board is full.</div>`
+  const left = leftToPick();
+  $('#poNotice').innerHTML = left
+    ? `<div class="notice"><b>${left} games still to pick.</b> Seeds below reflect real results plus the games you've picked so far, and will keep moving until the board is full.</div>`
     : '';
 
   const secs = ['AFC','NFC'].map(cf=>{
@@ -1196,9 +1398,9 @@ function renderPlayoffs(){
       <div class="rounds">
         <div class="round"><h5>Wild Card · Jan 16–18</h5>
           ${b.wc.map((m,i)=>matchup(b.wcIds[i], m, so, `${so(m[0])} seed hosts`)).join('')}
-          <div class="matchup"><div class="mrow adv" style="cursor:default">
-            <span class="sd">1</span><span class="sw" style="background:${TEAMS[b.seeds[0]].k}"></span>
-            <span class="tm">${b.seeds[0]}</span><span class="rc">bye</span></div></div>
+          <div class="matchup"><div class="mrow adv fixed">
+            <span class="sd">1</span>${logo(b.seeds[0])}
+            <span class="tm">${esc(TEAMS[b.seeds[0]].n)}</span><span class="rc">bye</span></div></div>
         </div>
         <div class="round"><h5>Divisional · Jan 23–24</h5>
           ${b.dv ? b.dv.map((m,i)=>matchup(b.dvIds[i], m, so, `${so(m[0])} seed hosts`)).join('')
@@ -1221,11 +1423,13 @@ function renderPlayoffs(){
       : `${mrow(null)}${mrow(null)}<div class="mnote">Conference champions pending</div>`}
   </div>`;
 
-  const champ = sb.win ? `<div class="champ"><div class="k">Your Super Bowl LXI champion</div>
+  const champ = sb.win ? `<div class="champ"><img src="${logoSrc(sb.win)}" alt="">
+    <div class="k">Your Super Bowl LXI champion</div>
     <div class="v">${esc(TEAMS[sb.win].c)} ${esc(TEAMS[sb.win].n)}</div></div>` : '';
 
   $('#poBody').innerHTML = secs + sbHtml + champ;
 }
+
 
 /* ==========================================================
    EVENTS
@@ -1234,15 +1438,21 @@ document.querySelectorAll('.tab').forEach(b=>{
   b.addEventListener('click', ()=>{
     document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected', x===b));
     document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on', p.id==='panel-'+b.dataset.tab));
+    window.scrollTo({top:0});
   });
 });
+function goWeek(w){
+  S.week = Math.max(1, Math.min(WEEKS, w)); userMovedWeek = true;
+  renderRail(); renderWeek(); store.write();
+}
 $('#rail').addEventListener('click', e=>{
   const n = e.target.closest('.notch'); if(!n) return;
-  S.week = +n.dataset.w; renderRail(); renderWeek(); store.write();
+  goWeek(+n.dataset.w);
 });
 $('#games').addEventListener('click', e=>{
   const b = e.target.closest('[data-g]'); if(!b) return;
   const gi = +b.dataset.g, p = b.dataset.p;
+  if(isFinal(gi)) return;   // real result, locked
   S.picks[gi] = (S.picks[gi] === p) ? undefined : p;
   if(!S.picks[gi]) delete S.picks[gi];
   render();
@@ -1263,23 +1473,30 @@ $('#tblog').addEventListener('click', e=>{
   S.flips[key] = ids[(idx+1) % ids.length];
   render();
 });
-$('#btnHome').addEventListener('click', ()=>{ byWeek[S.week].forEach(g=>S.picks[g.i]='h'); render(); });
-$('#btnRand').addEventListener('click', ()=>{ byWeek[S.week].forEach(g=>S.picks[g.i]=Math.random()<0.5?'a':'h'); render(); });
-$('#btnClearWk').addEventListener('click', ()=>{ byWeek[S.week].forEach(g=>delete S.picks[g.i]); render(); });
+// week shortcuts only touch games that haven't been played yet
+const openGames = () => byWeek[S.week].filter(g => !isFinal(g.i));
+$('#btnHome').addEventListener('click', ()=>{ openGames().forEach(g=>S.picks[g.i]='h'); render(); });
+$('#btnRand').addEventListener('click', ()=>{ openGames().forEach(g=>S.picks[g.i]=Math.random()<0.5?'a':'h'); render(); });
+$('#btnClearWk').addEventListener('click', ()=>{ openGames().forEach(g=>delete S.picks[g.i]); render(); });
+// close the Board menu after choosing, or when clicking elsewhere
+document.addEventListener('click', e=>{
+  const m = $('#menu');
+  if(m.open && (!m.contains(e.target) || e.target.closest('.pop button'))) m.open = false;
+});
 $('#btnReset').addEventListener('click', async ()=>{
   const done = GAMES.filter(g=>S.picks[g.i]).length;
   const ok = await ask({
     title:'Clear the whole board?',
     body: done
       ? `This removes all ${done} game picks, every playoff result and any coin tosses you set. It can't be undone — save a file first if you want to keep this board.`
-      : `Nothing is picked yet, so there's nothing to lose. Clearing resets the board to Week 1.`,
+      : `Nothing is picked yet, so there's nothing to lose. Real results stay either way.`,
     yes:'Clear everything', no:'Keep my picks'
   });
   if(!ok) return;
-  S = {picks:{}, po:{}, flips:{}, week:1};
+  S = {picks:{}, po:{}, flips:{}, week:currentWeek()};
   try{ localStorage.removeItem(KEY); }catch(e){}
   render();
-  toast('Board cleared — 272 games back on the table.');
+  toast(`Picks cleared — ${leftToPick()} games back on the table.`);
 });
 $('#btnExport').addEventListener('click', ()=>{
   const blob = new Blob([JSON.stringify(S,null,1)], {type:'application/json'});
@@ -1296,7 +1513,7 @@ $('#fileIn').addEventListener('change', e=>{
     try{
       const v = JSON.parse(fr.result);
       if(!v || typeof v.picks !== 'object') throw 0;
-      S = {picks:v.picks||{}, po:v.po||{}, flips:v.flips||{}, week:v.week||1};
+      S = {picks:v.picks||{}, po:v.po||{}, flips:v.flips||{}, week:S.week};
       render();
     }catch(err){ alert("That file isn't a saved board. Pick a nfl-2026-picks.json file."); }
   };
@@ -1339,9 +1556,25 @@ function toast(msg){
    ========================================================== */
 const IMG = {
   W:1200, PAD:52, GAP:20,
-  bg:'#0C1A14', panel:'#12241C', panel2:'#182F25', line:'#24463A',
-  chalk:'#E9F1EB', dim:'#9DB3A7', faint:'#6B8377', amber:'#F5A524', win:'#1C3A2E'
+  bg:'#FFFFFF', panel:'#FFFFFF', panel2:'#F7F8FA', line:'#E4E7EC',
+  chalk:'#101828', dim:'#475467', faint:'#8A94A6', amber:'#1D4ED8', win:'#EFF4FF'
 };
+const LOGO_IMG = {};
+function loadLogos(){
+  return Promise.all(IDS.map(t => LOGO_IMG[t] ? Promise.resolve() : new Promise(res=>{
+    const im = new Image();
+    im.onload = ()=>{ LOGO_IMG[t] = im; res(); };
+    im.onerror = ()=>res();
+    im.src = logoSrc(t);
+  })));
+}
+function drawLogo(c, t, cx, cy, size){
+  const im = LOGO_IMG[t];
+  if(!im){ c.fillStyle = TEAMS[t].k; rr(c,cx-2,cy-size/2,4,size,2); c.fill(); return; }
+  const k = Math.min(size/im.naturalWidth, size/im.naturalHeight);
+  const w = im.naturalWidth*k, h = im.naturalHeight*k;
+  c.drawImage(im, cx - w/2, cy - h/2, w, h);
+}
 function rr(c,x,y,w,h,r){
   c.beginPath();
   c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
@@ -1353,7 +1586,7 @@ function full(t){ return TEAMS[t].c + ' ' + TEAMS[t].n; }
 function imgRow(c, x, y, w, h, team, seedLabel, state){
   if(!team){
     c.fillStyle = IMG.panel2; rr(c,x,y,w,h,4); c.fill();
-    c.fillStyle = IMG.faint; c.font = 'italic 400 17px "IBM Plex Sans", sans-serif'; track(c,0);
+    c.fillStyle = IMG.faint; c.font = 'italic 400 17px Inter, sans-serif'; track(c,0);
     c.textAlign = 'left'; c.fillText('To be decided', x+22, y+h/2+6);
     return;
   }
@@ -1362,15 +1595,15 @@ function imgRow(c, x, y, w, h, team, seedLabel, state){
   if(state==='win'){ c.fillStyle = IMG.amber; c.fillRect(x,y+4,3,h-8); }
   c.globalAlpha = state==='out' ? 0.42 : 1;
   c.textAlign = 'left';
-  c.fillStyle = IMG.faint; c.font = '500 15px "IBM Plex Mono", monospace'; track(c,0);
+  c.fillStyle = IMG.faint; c.font = '500 15px Inter, sans-serif'; track(c,0);
   c.fillText(String(seedLabel||''), x+16, y+h/2+5);
-  c.fillStyle = TEAMS[team].k; rr(c,x+46,y+(h-22)/2,4,22,2); c.fill();
+  drawLogo(c, team, x+58, y+h/2, 28);
   c.fillStyle = state==='win' ? IMG.amber : IMG.chalk;
   c.font = '600 27px "Barlow Condensed", sans-serif'; track(c,0.5);
-  c.fillText(TEAMS[team].n, x+60, y+h/2+9);
+  c.fillText(TEAMS[team].n, x+82, y+h/2+9);
   c.textAlign = 'right'; track(c,0);
   c.fillStyle = state==='win' ? IMG.amber : IMG.dim;
-  c.font = '500 16px "IBM Plex Mono", monospace';
+  c.font = '500 16px Inter, sans-serif';
   c.fillText(fmtRec(R[team].ov), x+w-16, y+h/2+6);
   c.globalAlpha = 1; c.textAlign = 'left';
 }
@@ -1388,18 +1621,19 @@ function imgCard(c, x, y, w, pair, seedOf, picked, note){
     imgRow(c,x+3,y+rh+1,w-6,rh-4, null);
   }
   if(note){
-    c.fillStyle = IMG.faint; c.font = '500 11px "IBM Plex Mono", monospace'; track(c,1.2);
+    c.fillStyle = IMG.faint; c.font = '500 11px Inter, sans-serif'; track(c,1.2);
     c.textAlign='left'; c.fillText(note.toUpperCase(), x+16, y+h-7); track(c,0);
   }
   return h;
 }
 function colHead(c, x, y, w, text){
-  c.fillStyle = IMG.faint; c.font = '500 12px "IBM Plex Mono", monospace'; track(c,1.6);
+  c.fillStyle = IMG.faint; c.font = '500 12px Inter, sans-serif'; track(c,1.6);
   c.textAlign='left'; c.fillText(text.toUpperCase(), x, y); track(c,0);
 }
 
 async function buildBracketImage(){
   try{ await document.fonts.ready; }catch(e){}
+  await loadLogos();
   const W = IMG.W, P = IMG.PAD, G = IMG.GAP;
   const CW = W - P*2, col = (CW - G*2)/3;
   const cv = document.createElement('canvas');
@@ -1408,8 +1642,6 @@ async function buildBracketImage(){
   const c = cv.getContext('2d');
   c.scale(s,s);
   c.fillStyle = IMG.bg; c.fillRect(0,0,W,1800);
-  c.strokeStyle = 'rgba(233,241,235,.05)'; c.lineWidth = 1;
-  for(let x=0;x<W;x+=64){ c.beginPath(); c.moveTo(x+.5,0); c.lineTo(x+.5,1800); c.stroke(); }
   c.fillStyle = IMG.amber; c.fillRect(0,0,W,4);
 
   let y = P + 46;
@@ -1418,11 +1650,11 @@ async function buildBracketImage(){
   c.fillText("PICK ’EM ’26", P, y);
   const tw = c.measureText("PICK ’EM ’26").width;
   c.fillStyle = IMG.amber; c.fillRect(P, y+14, tw, 3);
-  c.fillStyle = IMG.dim; c.font = '500 14px "IBM Plex Mono", monospace'; track(c,2);
+  c.fillStyle = IMG.dim; c.font = '500 14px Inter, sans-serif'; track(c,2);
   c.fillText('2026 NFL SEASON — MY BRACKET', P, y+42);
-  const done = GAMES.filter(g=>S.picks[g.i]).length;
+  const left = leftToPick();
   c.textAlign='right'; c.fillStyle = IMG.faint;
-  c.fillText(done + '/' + GAMES.length + ' GAMES PICKED', W-P, y+42);
+  c.fillText(left ? left + ' GAMES LEFT TO PICK' : 'FULL SEASON PICKED', W-P, y+42);
   track(c,0); c.textAlign='left';
   y += 84;
 
@@ -1433,14 +1665,16 @@ async function buildBracketImage(){
   rr(c,P+1,y+1,CW-2,(champ?116:70)-2,5); c.stroke();
   c.textAlign='center';
   if(champ){
-    c.fillStyle = IMG.faint; c.font = '500 13px "IBM Plex Mono", monospace'; track(c,3.4);
+    c.fillStyle = IMG.faint; c.font = '500 13px Inter, sans-serif'; track(c,3.4);
     c.fillText('SUPER BOWL LXI CHAMPION', W/2, y+34);
+    drawLogo(c, champ, P+70, y+58, 72);
+    drawLogo(c, champ, W-P-70, y+58, 72);
     c.fillStyle = IMG.amber; c.font = '700 54px "Barlow Condensed", sans-serif'; track(c,2);
     c.fillText(full(champ).toUpperCase(), W/2, y+90);
     y += 116;
   }else{
-    c.fillStyle = IMG.dim; c.font = '500 13px "IBM Plex Mono", monospace'; track(c,3);
-    c.fillText('BRACKET IN PROGRESS — ' + (GAMES.length-done) + ' GAMES LEFT TO PICK', W/2, y+42);
+    c.fillStyle = IMG.dim; c.font = '500 13px Inter, sans-serif'; track(c,3);
+    c.fillText('BRACKET IN PROGRESS — ' + left + ' GAMES LEFT TO PICK', W/2, y+42);
     y += 70;
   }
   track(c,0); c.textAlign='left';
@@ -1465,7 +1699,7 @@ async function buildBracketImage(){
     c.fillStyle = IMG.panel; rr(c,P,cy,col,50,5); c.fill();
     c.strokeStyle = IMG.line; c.lineWidth=1; rr(c,P+.5,cy+.5,col-1,49,5); c.stroke();
     imgRow(c, P+3, cy+3, col-6, 44, b.seeds[0], 1, 'win');
-    c.fillStyle = IMG.faint; c.font='500 11px "IBM Plex Mono", monospace'; track(c,1.2);
+    c.fillStyle = IMG.faint; c.font='500 11px Inter, sans-serif'; track(c,1.2);
     c.textAlign='right'; c.fillText('BYE', P+col-70, cy+30); track(c,0); c.textAlign='left';
     const wcBottom = cy + 50;
 
@@ -1507,7 +1741,7 @@ async function buildBracketImage(){
   y += 30;
   c.fillStyle = IMG.line; c.fillRect(P, y, CW, 1);
   y += 24;
-  c.fillStyle = IMG.faint; c.font = '500 12px "IBM Plex Mono", monospace'; track(c,1.4);
+  c.fillStyle = IMG.faint; c.font = '500 12px Inter, sans-serif'; track(c,1.4);
   c.textAlign='left';  c.fillText("PICK ’EM — NFL TIEBREAKERS APPLIED", P, y);
   c.textAlign='right'; c.fillText(new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}).toUpperCase(), W-P, y);
   track(c,0); c.textAlign='left';
@@ -1572,11 +1806,16 @@ document.addEventListener('keydown', e=>{
   if(!$('#modal').hidden) return;
   const t = e.target;
   if(t && typeof t.matches === 'function' && t.matches('input,textarea,select')) return;
-  if(e.key === 'ArrowRight' && S.week < WEEKS){ S.week++; renderRail(); renderWeek(); }
-  if(e.key === 'ArrowLeft' && S.week > 1){ S.week--; renderRail(); renderWeek(); }
+  if(!$('#panel-picks').classList.contains('on')) return;
+  if(e.key === 'ArrowRight' && S.week < WEEKS) goWeek(S.week + 1);
+  if(e.key === 'ArrowLeft' && S.week > 1) goWeek(S.week - 1);
 });
 
 render();
+loadResults();
+// keep scores fresh while the page is open
+setInterval(()=>{ if(!document.hidden) loadResults(); }, 5*60*1000);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) loadResults(); });
 </script>
 </body>
 </html>
