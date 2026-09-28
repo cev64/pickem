@@ -123,8 +123,8 @@ go out in your bracket, ties broken by strength of schedule.
 the middle. Nothing is picked until you click a team to advance it. **Share**
 (top right, and again under the champion) makes an image of the bracket and
 opens the phone's share sheet (it downloads the image where sharing files isn't
-supported). **Clear** resets just the bracket; *Clear* on the Games tab asks
-whether to clear just that week (or team) or all picks, and resets the bracket
+supported). **Clear** resets just the bracket; *Clear* on the Games tab opens a
+small menu: clear just that week (or team), or all picks — and resets the bracket
 either way, since changing picks reshuffles the seeds.
 
 **Rules** — the tiebreaker ladder as implemented.
