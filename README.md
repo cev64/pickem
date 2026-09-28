@@ -105,8 +105,9 @@ The old caches get deleted on the next visit and the new files load.
 
 **Games** — click a team to pick it. **Share** makes an image of the week (or,
 in *By team*, that team's season) and opens the phone's share sheet. *Tie* sets a drawn game. Arrow keys move
-between weeks. *Favorites* and *Random* fill the unplayed games of a week in
-one go. Finished games show the final score and can't be changed.
+between weeks. *Favorites* (or *Home teams*, for weeks
+whose betting lines aren't out yet) and *Random* fill the unplayed games of a
+week in one go. Finished games show the final score and can't be changed.
 
 **Games → By team** — pick one team's whole season at once, with *Win out* /
 *Lose out* shortcuts.
@@ -122,8 +123,9 @@ go out in your bracket, ties broken by strength of schedule.
 the middle. Nothing is picked until you click a team to advance it. **Share**
 (top right, and again under the champion) makes an image of the bracket and
 opens the phone's share sheet (it downloads the image where sharing files isn't
-supported). **Clear** resets just the bracket; *Clear* on the Games tab also
-resets the bracket, since changing picks reshuffles the seeds.
+supported). **Clear** resets just the bracket; *Clear* on the Games tab asks
+whether to clear just that week (or team) or all picks, and resets the bracket
+either way, since changing picks reshuffles the seeds.
 
 **Rules** — the tiebreaker ladder as implemented.
 
