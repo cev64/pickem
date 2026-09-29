@@ -1,12 +1,13 @@
 /* Bracketeer — service worker.
    Bump VERSION whenever you change index.html so installed apps update. */
-const VERSION = 'v2.9.2';
+const VERSION = 'v2.9.3';
 const SHELL   = 'bracketeer-shell-'   + VERSION;
 const RUNTIME = 'bracketeer-runtime-' + VERSION;
 
 const ASSETS = [
   './',
   './index.html',
+  './privacy.html',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
