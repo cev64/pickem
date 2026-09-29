@@ -203,6 +203,9 @@ Until AdSense is configured the slots show dashed placeholders
 2. Get approved in AdSense, then create two *Display* ad units with fixed
    sizes: 160×600 (rail) and 300×250 (inline).
 3. In `index.html`, fill in `ADSENSE.client` (`ca-pub-…`) and the two slot IDs.
-4. Add an `ads.txt` file at the site root with the line AdSense gives you.
+   For AdSense's site check, also uncomment the verification `<script>` in the
+   `<head>` and put your publisher ID in it.
+4. In `ads.txt` (site root), uncomment the line and put your publisher ID in it.
+   `privacy.html` is the privacy policy AdSense requires; it's linked from the footer.
 5. Leave AdSense **Auto ads off** — they inject ads into the content and cause
    the jank this layout is designed to avoid.

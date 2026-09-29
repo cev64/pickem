@@ -1,0 +1,3 @@
+# Replace the line below with the one AdSense gives you (Sites -> ads.txt),
+# i.e. your publisher ID without the "ca-" prefix. Remove the leading "#".
+# google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
