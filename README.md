@@ -8,7 +8,7 @@ seeding. Installable on Android as a PWA, works offline once installed.
 
 ```
 index.html              the whole app — markup, styles, schedule, engine
-cloud.js                accounts, synced picks, saved brackets, pick'em groups (Supabase)
+cloud.js                accounts, profiles, synced board, pick'em, saved brackets, groups (Supabase)
 manifest.webmanifest    PWA metadata (name, icons, colours, start URL)
 sw.js                   service worker: offline cache for the app shell
 icons/                  app icons, including maskable versions for Android
@@ -152,25 +152,34 @@ Supabase SDK can't load (offline), so the board works exactly as before for
 anyone who never signs in.
 
 - **Accounts** — email + password, or an emailed sign-in link. The header's
-  **Sign in** button turns into your avatar once you're in.
-- **Synced picks** — signed in, the board mirrors to the account: game picks
-  in `picks`, playoff picks and coin flips in `boards`. The first sign-in on a
-  device merges (the account's picks win where both have one); after that,
-  changes made offline or on another device merge on the next visit.
-- **Picks lock at kickoff** once you're signed in, in the app and in the
-  database (row-level security rejects a write to a game that's started), so
-  group picks can't be changed after the fact.
-- **Saved brackets** — *Save* / *Saved* on the Playoffs tab keep named
-  snapshots of the whole board (`brackets`). Opening one restores its bracket
-  and its picks for games that haven't kicked off.
+  **Sign in** button turns into your photo (or initial) and opens your profile.
+- **Profile page** (`#profile`) — photo (any image, square-cropped to 320px and
+  stored in the `avatars` bucket), display name, a unique `@username` (checked
+  as you type), your pick'em record, win rate, best week, a week-by-week chart,
+  your groups with your rank in each, saved brackets, password and sign-out.
+- **The board is just for fun.** Picks, playoff picks and coin flips sync to
+  the account (`boards`) so they follow you between devices, but they never
+  count anywhere and never lock. The first sign-in on a device merges (the
+  account wins where both have a pick); after that, edits made offline or on
+  another device merge per pick on the next visit.
+- **Pick'em is separate and opt-in, a week at a time.** Signed in, a bar above
+  the week's games offers **Add Week N to pick'em**: it copies that week's board
+  picks for games that haven't kicked off into your pick'em entry (`picks`).
+  Each game card then shows your entry (`Pick'em: DAL`); it turns amber when
+  your board says something different, and the bar offers **Update pick'em**
+  or **Remove**. Entries lock at kickoff, in the app and in the database
+  (row-level security rejects a write to a game that's started).
+- **Saved brackets** — *Save* / *Saved* on the Playoffs tab, and the profile
+  page, keep named snapshots of the whole board (`brackets`). Opening one
+  restores the board and bracket; pick'em entries don't change.
 - **Groups** — the Groups tab creates a group and gives an invite link,
   `https://bracketeersports.com/?join=CODE`. Opening it shows who invited you
   and asks you to sign in or create an account, then join. The group page has
-  the leaderboard (one point per correct pick, by week and season), the invite
-  link, and owner tools (rename, reset link, remove members). Each member's
-  picks count in every group they're in.
-- **Group picks while you pick** — with a group selected on the Games tab, each
-  game shows a bar of how the group picked it; tap it to see who picked whom.
+  the leaderboard (pick'em entries only: one point per correct pick, by week
+  and season), the invite link, and owner tools (rename, reset link, remove
+  members). Your pick'em entries count in every group you're in.
+- **Group picks while you pick** — with a group selected in the pick'em bar,
+  each game shows how the group entered it; tap it to see who picked whom.
 
 ### Backend
 
@@ -180,16 +189,20 @@ every table is what protects the data:
 
 | table | who can read | who can write |
 |---|---|---|
-| `profiles` | you, and people in a group with you | you (your name) |
+| `profiles` | you, and people in a group with you | you (name, `@username`, photo) |
 | `games` | everyone | the sync function only |
-| `picks` | you, and people in a group with you | you, until kickoff |
-| `boards`, `brackets` | you | you |
+| `picks` (pick'em entries) | you, and people in a group with you | you, until kickoff |
+| `boards` (the for-fun board), `brackets` | you | you |
+| storage `avatars` | everyone (public photos) | you, in your own folder |
 | `groups`, `group_members` | members | through the group functions only |
 
 Group changes go through functions (`create_group`, `join_group`,
 `leave_group`, `remove_group_member`, `rename_group`, `reset_group_invite`)
-and the leaderboard and pick stats through `group_leaderboard` and
-`group_week_picks`, which check membership themselves.
+and the leaderboard and pick stats through `group_standings` and
+`group_week_picks`, which check membership themselves. (`group_leaderboard` is
+the older version, kept so copies of the app cached before the profile update
+keep working; it can be dropped later.) `username_available` backs the
+username check.
 
 Game ids on the server are `2026000 + index` into `SCHEDULE`. Kickoffs and
 results reach the database through the `sync-results` edge function, which
@@ -198,6 +211,9 @@ reads `https://bracketeersports.com/data/results.json` and is run every hour
 secrets.
 
 The schema lives in `supabase/migrations/` (already applied to the project).
+`cloud.js` is loaded as `cloud.js?v=…` so a new `index.html` never runs with
+an old cached script: bump that version, the matching entry in `sw.js`'s
+`ASSETS`, and `VERSION` together.
 For a fresh project, apply them in order and deploy
 `supabase/functions/sync-results`, then update the project URL and keys in
 `cloud.js` and in the cron migration.
