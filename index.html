@@ -531,25 +531,45 @@ tr.out .logo{opacity:.5}
 
 /* ---------- accounts, groups, saved brackets (cloud.js) ---------- */
 #modal{z-index:55}   /* confirmations open on top of the form sheet */
-.pickbtn.locked{cursor:default}
 #btnAccount{display:inline-flex;align-items:center;gap:7px;max-width:180px}
-#btnAccount .av{width:22px;height:22px;margin:-3px 0 -3px -5px}
+#btnAccount .av{width:24px;height:24px;margin:-4px 0 -4px -6px;font-size:11px}
 #btnAccount .nm{overflow:hidden;text-overflow:ellipsis}
-@media(max-width:480px){#btnAccount.in .nm{display:none}#btnAccount.in{padding:6px}#btnAccount.in .av{margin:-3px}}
+@media(max-width:480px){#btnAccount.in .nm{display:none}#btnAccount.in{padding:4px;border-radius:50%}#btnAccount.in .av{margin:0;width:26px;height:26px}}
 .av{display:inline-flex;align-items:center;justify-content:center;flex:none;width:28px;height:28px;border-radius:50%;
   font-size:12px;font-weight:700;color:#fff;background:var(--c,var(--ink));text-transform:uppercase;line-height:1}
+img.av{object-fit:cover;background:var(--surface-2)}
+.av.xs{width:16px;height:16px;font-size:9px}
+.av.xl{width:96px;height:96px;font-size:38px}
 
-/* group bar above the week's games */
-.grpbar{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;margin:2px 0 12px;padding:9px 12px;border:1px solid var(--line);
-  border-radius:var(--radius);background:var(--surface);font-size:13px;color:var(--ink-2)}
-.grpbar b{color:var(--ink);font-weight:600}
-.grpbar select{font:inherit;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line-2);border-radius:var(--radius-sm);
-  padding:5px 26px 5px 9px;max-width:220px;appearance:none;-webkit-appearance:none;cursor:pointer;
+/* pick'em bar above the week's games */
+.pkbar{margin:2px 0 12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);font-size:13px;color:var(--ink-2);overflow:hidden}
+.pk-main{display:flex;align-items:center;gap:10px 12px;padding:11px 12px;flex-wrap:wrap}
+.pk-ic{flex:none;width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:#fff;color:var(--accent);border:1px solid var(--line)}
+.pk-txt{display:flex;flex-direction:column;min-width:0;flex:1 1 220px;line-height:1.35}
+.pk-txt b{color:var(--ink);font-weight:600;font-size:13.5px}
+.pk-txt span{font-size:12.5px;color:var(--ink-3)}
+.pk-acts{display:flex;gap:6px;align-items:center;margin-left:auto}
+.pk-acts .btn{padding:6px 12px}
+.pkbar.in .pk-ic{background:#E7F6EC;border-color:#BFE3CB;color:var(--good)}
+.pkbar.warn .pk-ic{background:#FFF6E5;border-color:#F5D9A8;color:#B45309}
+.pkbar.warn .pk-txt span{color:#B45309}
+.pkbar.closed .pk-ic{color:var(--ink-3)}
+.pkbar.cta{background:var(--accent-soft);border-color:#CFE0FF}
+.pk-grp{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;padding:8px 12px;border-top:1px solid var(--line);background:#fff}
+.pk-grp b{color:var(--ink);font-weight:600}
+.pk-grp select{font:inherit;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line-2);border-radius:var(--radius-sm);
+  padding:4px 26px 4px 9px;max-width:220px;appearance:none;-webkit-appearance:none;cursor:pointer;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23475467' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 8px center}
-.grpbar .sp{margin-left:auto;display:flex;gap:6px;align-items:center}
-.grpbar .btn{padding:5px 10px}
-.grpbar.cta{background:var(--accent-soft);border-color:#CFE0FF;color:var(--ink)}
+.pk-grp .linkbtn{margin-left:auto}
+/* your pick'em pick in a game card's top line */
+.game .meta .pkm{font-weight:600;font-size:11.5px;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent-ink);white-space:nowrap}
+.game .meta .pkm.off{background:#FFF6E5;color:#B45309}
+.game .meta .pkm.ok{background:#E7F6EC;color:var(--good)}
+.game .meta .pkm.bad{background:#FEF2F2;color:var(--bad)}
+.game .meta .pkm{margin-left:auto}
+.game .meta .pkm + .line{margin-left:6px}
+nav.tabs.none .seg-ind{opacity:0}
 .linkbtn{background:none;border:none;padding:0;font:inherit;font-weight:600;color:var(--accent-ink);cursor:pointer}
 @media(hover:hover){.linkbtn:hover{text-decoration:underline}}
 
@@ -567,9 +587,9 @@ tr.out .logo{opacity:.5}
 .gwho div{display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start}
 .gwho div.r{justify-content:flex-end}
 .gwho .tie{grid-column:1/-1;justify-content:center}
-.gwho span{background:var(--surface-2);color:var(--ink-2);border-radius:99px;padding:2px 8px;white-space:nowrap}
-.gwho span.me{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
-.gwho span.ok{background:#E7F6EC;color:var(--good)}
+.gwho>div>span{display:inline-flex;align-items:center;gap:5px;background:var(--surface-2);color:var(--ink-2);border-radius:99px;padding:2px 8px 2px 3px;white-space:nowrap}
+.gwho>div>span.me{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.gwho>div>span.ok{background:#E7F6EC;color:var(--good)}
 .gwho em{font-style:normal;color:var(--ink-3)}
 
 /* Groups tab */
@@ -604,15 +624,16 @@ tr.out .logo{opacity:.5}
 .lb td.rk{width:30px;color:var(--ink-3);font-weight:600}
 .lb td.nm{text-align:left;width:100%;max-width:0}
 .lb td.nm div{display:flex;align-items:center;gap:8px;overflow:hidden}
-.lb td.nm .who{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:3em}
-.lb td.nm small{color:var(--ink-3);font-size:11.5px;flex:none}
-.lb td.nm .av{width:24px;height:24px;font-size:11px}
+.lb td.nm .who{display:flex;flex-direction:column;min-width:3em;overflow:hidden;line-height:1.25}
+.lb td.nm .who>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb td.nm small{color:var(--ink-3);font-size:11.5px}
+.lb td.nm .av{width:30px;height:30px;font-size:12px}
 @media(max-width:480px){
   .lb th,.lb td{padding:8px 5px}
-  .lb th:last-child,.lb td:last-child,.lb td.nm small{display:none}
+  .lb th:last-child,.lb td:last-child{display:none}
 }
 .lb tr.me td{background:var(--accent-soft)}
-.lb tr.me td.nm .who{font-weight:600;color:var(--accent-ink)}
+.lb tr.me td.nm .who>span{font-weight:600;color:var(--accent-ink)}
 .lb .rm{border:none;background:none;color:var(--ink-3);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;margin-left:auto}
 @media(hover:hover){.lb .rm:hover{color:var(--bad)}}
 .lb .wkcol{color:var(--ink-2)}
@@ -622,12 +643,70 @@ tr.out .logo{opacity:.5}
 .muted{color:var(--ink-3)}
 .gfoot{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 
+/* Profile page */
+.profile{max-width:860px}
+.pf-hero{display:flex;align-items:center;gap:20px;padding:22px;background:linear-gradient(135deg,var(--accent-soft),#fff 65%)}
+.pf-photo{position:relative;flex:none}
+.pf-photo .av.xl{box-shadow:0 0 0 4px #fff,0 6px 18px rgba(8,32,79,.14)}
+.pf-cam{position:absolute;right:-2px;bottom:-2px;width:34px;height:34px;border-radius:50%;border:3px solid #fff;background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .18s var(--ease),background-color .2s var(--ease)}
+@media(hover:hover){.pf-cam:hover{background:var(--accent-ink)}}
+.pf-cam:active{transform:scale(.94)}
+.pf-id{min-width:0}
+.pf-id h2{font-family:var(--display);font-weight:700;font-size:34px;letter-spacing:.02em;text-transform:uppercase;margin:0;line-height:1.05;overflow-wrap:anywhere}
+.pf-id p{margin:4px 0 12px;color:var(--ink-2)}
+.pf-acts{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:520px){.pf-hero{flex-direction:column;text-align:center}.pf-acts{justify-content:center}}
+.pf-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+@media(max-width:640px){.pf-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pf-tile{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px 14px;display:flex;flex-direction:column;min-width:0}
+.pf-tile b{font-size:22px;font-weight:700;line-height:1.15;color:var(--ink)}
+.pf-tile span{font-size:12px;color:var(--ink-2);font-weight:600}
+.pf-tile small{font-size:11.5px;color:var(--ink-3)}
+.pf-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.pf-head h3{margin:0}
+.pf-head .muted{font-size:12px}
+.pf-head .btn{margin-left:auto;padding:4px 10px}
+.pf-groups{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.pf-groups button{width:100%;display:flex;align-items:center;gap:10px;background:none;border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:9px 12px;font:inherit;color:inherit;cursor:pointer;text-align:left;transition:background-color .2s var(--ease)}
+@media(hover:hover){.pf-groups button:hover{background:var(--surface)}}
+.pf-groups .gi,.pf-groups .rk{display:flex;flex-direction:column;min-width:0}
+.pf-groups .gi{flex:1}
+.pf-groups .gi b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf-groups .gi span,.pf-groups .rk span{font-size:12px;color:var(--ink-3)}
+.pf-groups .rk{align-items:flex-end;flex:none}
+.pf-groups .rk b{font-size:16px;color:var(--accent-ink)}
+.profile .blist{margin:0}
+/* pick'em accuracy by week: one bar per week, height = share right */
+.wchart{position:relative;height:150px;padding:0 0 20px 34px}
+.wc-grid{position:absolute;inset:0 0 20px 34px;pointer-events:none}
+.wc-grid i{position:absolute;left:0;right:0;bottom:calc(var(--y) * 100%);border-top:1px solid var(--line);font-style:normal}
+.wc-grid i{font-size:10.5px;color:var(--ink-3);text-indent:-34px;line-height:0}
+.wc-cols{position:relative;display:grid;grid-template-columns:repeat(18,minmax(0,1fr));gap:2px;height:100%}
+.wc-col{position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;cursor:default}
+.wc-bar{width:min(70%,18px);height:calc(var(--h) * 100%);background:var(--accent);border-radius:4px 4px 0 0;transition:height .5s var(--ease),filter .15s}
+.wc-bar.none{height:2px;background:var(--line-2);border-radius:1px}
+.wc-bar.wait{height:2px;background:var(--accent);opacity:.45;border-radius:1px}
+@media(hover:hover){.wc-col:hover .wc-bar{filter:brightness(.85)}}
+.wc-col span{position:absolute;bottom:-18px;font-size:10.5px;color:var(--ink-3)}
+.wc-col.now span{color:var(--accent-ink);font-weight:700}
+@media(max-width:480px){.wc-col:nth-child(even) span{display:none}}
+
 /* form sheets */
 .sheet form{display:flex;flex-direction:column;gap:10px;margin:0 0 4px}
 .sheet label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
 .sheet input[type=text],.sheet input[type=email],.sheet input[type=password]{font:inherit;font-size:15px;font-weight:400;color:var(--ink);
   border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:9px 11px;background:#fff;width:100%}
 .sheet input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+.sheet .uname{position:relative;display:block}
+.sheet .uname i{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-style:normal;font-weight:400;font-size:15px;color:var(--ink-3)}
+.sheet .uname input{padding-left:27px}
+.sheet .hint{font-weight:400;font-size:12px;color:var(--ink-3)}
+.sheet .hint.ok{color:var(--good)}
+.sheet .hint.err{color:var(--bad)}
+.pf-preview{display:flex;justify-content:center;margin:6px 0 14px}
+.pf-preview img{width:160px;height:160px;border-radius:50%;object-fit:cover;box-shadow:0 6px 18px rgba(8,32,79,.16)}
 .sheet .seg2{display:flex;background:var(--surface-2);border-radius:10px;padding:3px;margin:0 0 14px}
 .sheet .seg2 button{flex:1;border:none;background:none;font:inherit;font-weight:600;font-size:13.5px;color:var(--ink-2);padding:7px;border-radius:8px;cursor:pointer}
 .sheet .seg2 button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(16,24,40,.12)}
@@ -936,7 +1015,7 @@ button.phteam{background:none;border:none;font-family:inherit;padding:0;cursor:p
         <span class="pill" id="wkPill"></span>
       </div>
       <p class="wkmeta" id="wkMeta"></p>
-      <div class="grpbar" id="grpBar" hidden></div>
+      <div class="pkbar" id="grpBar" hidden></div>
       <div class="games" id="games"></div>
       <div class="adinline" id="adPicks"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
       <div class="games" id="games2"></div>
@@ -992,6 +1071,10 @@ button.phteam{background:none;border:none;font-family:inherit;padding:0;cursor:p
 
 <section class="panel" id="panel-groups">
   <div class="groups" id="groupsBody"></div>
+</section>
+
+<section class="panel" id="panel-profile">
+  <div class="profile" id="profileBody"></div>
 </section>
 
 <section class="panel" id="panel-rules">
@@ -1057,8 +1140,9 @@ button.phteam{background:none;border:none;font-family:inherit;padding:0;cursor:p
     <h3>Saving</h3>
     <p>Your picks save automatically in this browser, so they’re here when you come back on the same device. Sign in and they follow you to every device, and you can save named copies of your bracket from the Playoffs tab.</p>
 
-    <h3>Pick’em groups</h3>
-    <p>Create a group on the Groups tab and send your friends the invite link. Everyone’s weekly picks count toward the group leaderboard: one point for every game picked right (a tie counts only if you picked the tie). While you pick, each game shows how the rest of your group picked it. Once you’re signed in, a game’s pick locks at kickoff.</p>
+    <h3>Pick’em and groups</h3>
+    <p>Your board is just for fun: play out the season as many ways as you like and nothing counts. When you’re ready to make a week official, sign in and tap <b>Add Week N to pick’em</b> above the games. That copies your board’s picks for the games that haven’t kicked off into your pick’em entry. Change your mind? Change the board and tap <b>Update pick’em</b>. Each pick’em pick locks at kickoff, and a game card shows your entry (amber when your board says something different).</p>
+    <p>Create a group on the Groups tab and send your friends the invite link. Group leaderboards score pick’em entries only: one point for every game picked right (a tie counts only if you picked the tie). While you pick, each game shows how the rest of your group entered it.</p>
   </div>
 </section>
 
@@ -1441,13 +1525,15 @@ for(let w=1;w<=WEEKS;w++){
 const KEY = 'nfl2026.board.v1';
 let S = { picks:{}, po:{}, flips:{}, week:1 };
 
-/* Accounts, synced picks and pick'em groups live in cloud.js and plug in
-   through these hooks; the defaults keep the board working on its own. */
+/* Accounts, the synced board, pick'em and groups live in cloud.js and plug
+   in through these hooks; the defaults keep the board working on its own.
+   The board here is always just for fun: pick'em entries are separate and
+   are added a week at a time (see cloud.js). */
 const HOOKS = {
-  changed(){},             // the board was saved (push it to the account)
-  gameExtra(){ return ''; },   // extra HTML under a game card (group pick stats)
-  weekShown(){},           // a week's games were drawn
-  lockStarted: false       // signed in: games lock at kickoff, like the server does
+  changed(){},                 // the board was saved (push it to the account)
+  gameMeta(){ return ''; },    // extra HTML in a game card's top line (your pick'em pick)
+  gameExtra(){ return ''; },   // extra HTML under a game card (how your group picked)
+  weekShown(){}                // a week's games were drawn (null: By team view)
 };
 
 const store = {
@@ -1489,9 +1575,8 @@ function applyResults(data){
 }
 const isFinal = gi => !!(RES[gi] && RES[gi].st === 'post' && RES[gi].win);
 const isLive  = gi => !!(RES[gi] && RES[gi].st === 'in');
-const hasStarted = gi => isLive(gi) || !!(RES[gi] && RES[gi].kick && Date.parse(RES[gi].kick) <= Date.now());
-/* can't be picked: played, or (signed in, picks count for groups) kicked off */
-const isLocked = gi => isFinal(gi) || (HOOKS.lockStarted && hasStarted(gi));
+/* kicked off (pick'em entries lock then; the board never does) */
+const hasStarted = gi => isLive(gi) || isFinal(gi) || !!(RES[gi] && RES[gi].kick && Date.parse(RES[gi].kick) <= Date.now());
 /* the result that counts: the real one if the game is over, otherwise your pick */
 const outcome = gi => isFinal(gi) ? RES[gi].win : S.picks[gi];
 
@@ -2054,8 +2139,6 @@ function chip(g, side, picked){
     return `<div class="pickbtn ${cls}">${teamLabel(t)}${score}</div>`;
   }
   let cls = picked === side ? 'win' : (picked ? 'lose' : '');
-  if(isLocked(g.i))
-    return `<div class="pickbtn ${cls} locked" title="Picks lock at kickoff">${teamLabel(t)}${score || `<span class="ck">${CHECK}</span>`}</div>`;
   if(JUST.has(g.i)) cls += picked === side ? ' pop' : (picked ? ' fade' : '');
   return `<button class="pickbtn ${cls}" data-g="${g.i}" data-p="${side}" aria-pressed="${picked===side}"
       aria-label="Pick ${esc(TEAMS[t].c + ' ' + TEAMS[t].n)}">
@@ -2071,7 +2154,7 @@ const kickOf = g => RES[g.i] && RES[g.i].kick ? new Date(RES[g.i].kick) : null;
 const fmtWhen = d => d.toLocaleString(undefined, {weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
 
 function gameCard(g, withWeek){
-  const res = RES[g.i], fin = isFinal(g.i), live = isLive(g.i), locked = isLocked(g.i);
+  const res = RES[g.i], fin = isFinal(g.i), live = isLive(g.i);
   const p = fin ? null : S.picks[g.i];
   const k = kickOf(g);
 
@@ -2096,13 +2179,12 @@ function gameCard(g, withWeek){
   const site = g.site ? `<span>${esc(g.site)}</span>` : '';
 
   return `<div class="game${fin ? ' final' : ''}${live ? ' live' : ''}">
-    <div class="meta">${st}${st && site ? '<span>·</span>' : ''}${site}${badge}</div>
+    <div class="meta">${st}${st && site ? '<span>·</span>' : ''}${site}${HOOKS.gameMeta(g)}${badge}</div>
     <div class="row">
       ${chip(g, 'a', p)}
       <div class="mid">
         <span class="vs">${g.site ? 'vs' : '@'}</span>
         ${fin ? (res.win === 't' ? '<span class="vs">Tie</span>' : '')
-              : locked ? (p === 't' ? '<span class="tiebtn on">Tie</span>' : '')
               : `<button class="tiebtn${p==='t'?' on':''}${p==='t' && JUST.has(g.i)?' pop':''}" data-g="${g.i}" data-p="t" aria-pressed="${p==='t'}">Tie</button>`}
       </div>
       <div class="right" style="display:contents">${chip(g, 'h', p)}</div>
@@ -2199,7 +2281,7 @@ function renderWeek(){
   else if(w === currentWeek()){ pill.className = 'pill now'; pill.textContent = 'This week'; }
   else pill.hidden = true;
 
-  const actionable = gs.some(g => !isLocked(g.i));
+  const actionable = gs.some(g => !isFinal(g.i));
   ['#btnHome','#btnRand','#btnClearWk'].forEach(id => $(id).hidden = !actionable);
 
   const b = byeTeams[w];
@@ -2555,6 +2637,7 @@ function showTab(name, push){
   if(!document.getElementById('panel-' + name)) name = 'picks';
   if(name !== curTab) tabScroll[curTab] = window.scrollY;
   document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected', x.dataset.tab === name));
+  $('nav.tabs').classList.toggle('none', !document.querySelector(`.tab[data-tab="${name}"]`));   // Profile has no tab
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on', p.id === 'panel-' + name));
   if(push) history.replaceState(null, '', name === 'picks' ? location.pathname + location.search : '#' + name);
   curTab = name;
@@ -2705,7 +2788,7 @@ if(FINE.addEventListener) FINE.addEventListener('change', relayoutRail);
 const onGameClick = e=>{
   const b = e.target.closest('[data-g]'); if(!b) return;
   const gi = +b.dataset.g, p = b.dataset.p;
-  if(isLocked(gi)){ if(!isFinal(gi)) toast('Picks lock at kickoff.'); return; }
+  if(isFinal(gi)) return;   // real result, locked
   S.picks[gi] = (S.picks[gi] === p) ? undefined : p;
   if(!S.picks[gi]) delete S.picks[gi];
   haptic(S.picks[gi] ? 'pick' : 'tap');
@@ -2740,7 +2823,7 @@ $('#tblog').addEventListener('click', e=>{
 // shortcuts only touch games that haven't been played yet
 const openGames = () => (S.mode === 'team'
   ? GAMES.filter(g => g.a === S.team || g.h === S.team)
-  : byWeek[S.week]).filter(g => !isLocked(g.i));
+  : byWeek[S.week]).filter(g => !isFinal(g.i));
 const sideOf = (g, t) => g.a === t ? 'a' : 'h';
 $('#btnHome').addEventListener('click', ()=>{
   const favOf = g => (RES[g.i] && RES[g.i].line && RES[g.i].line.fav) || 'h';
@@ -2840,8 +2923,7 @@ clearMenu.addEventListener('click', e=>{
     render();
     toast(`${team ? TEAMS[S.team].n + ' picks' : 'Week ' + S.week} cleared.`);
   }else{
-    for(const gi in S.picks) if(!isLocked(+gi)) delete S.picks[gi];
-    S.po = {}; S.flips = {};
+    S.picks = {}; S.po = {}; S.flips = {};
     render();
     toast('All picks cleared.');
   }
@@ -3394,6 +3476,6 @@ loadAds();
 setInterval(()=>{ if(!document.hidden) loadResults(); }, 5*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) loadResults(); });
 </script>
-<script src="cloud.js" defer></script>
+<script src="cloud.js?v=2.11.0" defer></script>
 </body>
 </html>
