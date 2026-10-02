@@ -529,6 +529,123 @@ tr.out .logo{opacity:.5}
 .rules code{font-size:12.5px;background:var(--surface-2);padding:1px 5px;border-radius:4px;color:var(--ink)}
 .dead{color:var(--ink-3)}
 
+/* ---------- accounts, groups, saved brackets (cloud.js) ---------- */
+#modal{z-index:55}   /* confirmations open on top of the form sheet */
+.pickbtn.locked{cursor:default}
+#btnAccount{display:inline-flex;align-items:center;gap:7px;max-width:180px}
+#btnAccount .av{width:22px;height:22px;margin:-3px 0 -3px -5px}
+#btnAccount .nm{overflow:hidden;text-overflow:ellipsis}
+@media(max-width:480px){#btnAccount.in .nm{display:none}#btnAccount.in{padding:6px}#btnAccount.in .av{margin:-3px}}
+.av{display:inline-flex;align-items:center;justify-content:center;flex:none;width:28px;height:28px;border-radius:50%;
+  font-size:12px;font-weight:700;color:#fff;background:var(--c,var(--ink));text-transform:uppercase;line-height:1}
+
+/* group bar above the week's games */
+.grpbar{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;margin:2px 0 12px;padding:9px 12px;border:1px solid var(--line);
+  border-radius:var(--radius);background:var(--surface);font-size:13px;color:var(--ink-2)}
+.grpbar b{color:var(--ink);font-weight:600}
+.grpbar select{font:inherit;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line-2);border-radius:var(--radius-sm);
+  padding:5px 26px 5px 9px;max-width:220px;appearance:none;-webkit-appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23475467' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center}
+.grpbar .sp{margin-left:auto;display:flex;gap:6px;align-items:center}
+.grpbar .btn{padding:5px 10px}
+.grpbar.cta{background:var(--accent-soft);border-color:#CFE0FF;color:var(--ink)}
+.linkbtn{background:none;border:none;padding:0;font:inherit;font-weight:600;color:var(--accent-ink);cursor:pointer}
+@media(hover:hover){.linkbtn:hover{text-decoration:underline}}
+
+/* how the group picked a game */
+.gpk{margin:9px 2px 0;padding-top:9px;border-top:1px dashed var(--line);font-size:12px;color:var(--ink-3)}
+.gpk>button{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;
+  background:none;border:none;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.gpk .n{font-weight:600;color:var(--ink-2);white-space:nowrap}
+.gpk .n.r{text-align:right}
+.gbar{display:flex;height:8px;border-radius:99px;overflow:hidden;background:var(--surface-2);gap:2px}
+.gbar i{display:block;min-width:4px;transition:flex-grow .45s var(--ease)}
+.gbar i.t{background:var(--ink-3)}
+.gwho{display:none;grid-template-columns:1fr 1fr;gap:4px 12px;margin-top:8px}
+.gpk.open .gwho{display:grid}
+.gwho div{display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start}
+.gwho div.r{justify-content:flex-end}
+.gwho .tie{grid-column:1/-1;justify-content:center}
+.gwho span{background:var(--surface-2);color:var(--ink-2);border-radius:99px;padding:2px 8px;white-space:nowrap}
+.gwho span.me{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.gwho span.ok{background:#E7F6EC;color:var(--good)}
+.gwho em{font-style:normal;color:var(--ink-3)}
+
+/* Groups tab */
+.groups{max-width:860px}
+.ghead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 14px}
+.ghead h2{font-family:var(--display);font-weight:700;font-size:32px;letter-spacing:.02em;text-transform:uppercase;margin:0;line-height:1}
+.ghead .acts{margin-left:auto;display:flex;gap:6px}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px;margin-bottom:14px}
+.card h3{font-size:15px;font-weight:700;margin:0 0 4px}
+.card p{margin:0 0 12px;color:var(--ink-2)}
+.card p:last-child{margin-bottom:0}
+.hero{padding:26px 24px;background:linear-gradient(135deg,var(--accent-soft),#fff 70%)}
+.hero h3{font-family:var(--display);font-size:28px;text-transform:uppercase;letter-spacing:.02em;margin-bottom:8px}
+.hero ul{margin:0 0 18px;padding-left:18px;color:var(--ink-2)}
+.hero li{margin-bottom:4px}
+.glist{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.glist button{display:flex;flex-direction:column;align-items:flex-start;gap:1px;background:#fff;border:1px solid var(--line-2);border-radius:var(--radius);
+  padding:9px 14px;cursor:pointer;font:inherit;color:var(--ink);min-width:140px;text-align:left;transition:border-color .2s var(--ease),background-color .2s var(--ease)}
+.glist button b{font-weight:600;font-size:14px}
+.glist button span{font-size:12px;color:var(--ink-3)}
+.glist button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.glist button[aria-pressed="true"] b{color:var(--accent-ink)}
+.gtitle{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.gtitle h3{font-size:20px;margin:0;font-weight:700}
+.gtitle .acts{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.invite{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.invite input{flex:1 1 240px;min-width:0;font:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:7px 10px}
+.lb{width:100%;border-collapse:collapse;font-size:13.5px}
+.lb th{font-size:11.5px;font-weight:600;color:var(--ink-3);text-align:right;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.lb th:nth-child(2){text-align:left}
+.lb td{padding:8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.lb td.rk{width:30px;color:var(--ink-3);font-weight:600}
+.lb td.nm{text-align:left;width:100%;max-width:0}
+.lb td.nm div{display:flex;align-items:center;gap:8px;overflow:hidden}
+.lb td.nm .who{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:3em}
+.lb td.nm small{color:var(--ink-3);font-size:11.5px;flex:none}
+.lb td.nm .av{width:24px;height:24px;font-size:11px}
+@media(max-width:480px){
+  .lb th,.lb td{padding:8px 5px}
+  .lb th:last-child,.lb td:last-child,.lb td.nm small{display:none}
+}
+.lb tr.me td{background:var(--accent-soft)}
+.lb tr.me td.nm .who{font-weight:600;color:var(--accent-ink)}
+.lb .rm{border:none;background:none;color:var(--ink-3);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;margin-left:auto}
+@media(hover:hover){.lb .rm:hover{color:var(--bad)}}
+.lb .wkcol{color:var(--ink-2)}
+.wkstep{display:inline-flex;align-items:center;gap:2px}
+.wkstep button{border:none;background:none;color:var(--ink-3);cursor:pointer;padding:0 3px;font:inherit;font-weight:700}
+.wkstep button:disabled{opacity:.3;cursor:default}
+.muted{color:var(--ink-3)}
+.gfoot{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+
+/* form sheets */
+.sheet form{display:flex;flex-direction:column;gap:10px;margin:0 0 4px}
+.sheet label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.sheet input[type=text],.sheet input[type=email],.sheet input[type=password]{font:inherit;font-size:15px;font-weight:400;color:var(--ink);
+  border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:9px 11px;background:#fff;width:100%}
+.sheet input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+.sheet .seg2{display:flex;background:var(--surface-2);border-radius:10px;padding:3px;margin:0 0 14px}
+.sheet .seg2 button{flex:1;border:none;background:none;font:inherit;font-weight:600;font-size:13.5px;color:var(--ink-2);padding:7px;border-radius:8px;cursor:pointer}
+.sheet .seg2 button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(16,24,40,.12)}
+.sheet .msg{font-size:13px;color:var(--ink-2);margin:0;min-height:0}
+.sheet .msg.err{color:var(--bad)}
+.sheet .msg.ok{color:var(--good)}
+.sheet .alt{font-size:13px;color:var(--ink-3);margin:12px 0 0;text-align:center}
+.sheet .x{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;border:none;background:var(--surface-2);color:var(--ink-2);
+  cursor:pointer;font-size:17px;line-height:1;display:flex;align-items:center;justify-content:center}
+#s2Sheet{position:relative;max-height:calc(100vh - 40px);overflow:auto}
+.blist{display:flex;flex-direction:column;gap:8px;margin:0 0 16px;padding:0;list-style:none}
+.blist li{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px 10px}
+.blist .bi{display:flex;flex-direction:column;min-width:0;flex:1}
+.blist .bi b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.blist .bi span{font-size:12px;color:var(--ink-3)}
+.blist .btn{padding:5px 10px}
+.blist .logo{width:28px;height:28px}
+
 /* ---------- footer ---------- */
 .credits{margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-3);line-height:1.6}
 .credits a{color:var(--ink-2)}
@@ -745,10 +862,12 @@ button.phteam{background:none;border:none;font-family:inherit;padding:0;cursor:p
       <button class="tab" role="tab" data-tab="picks" aria-selected="true">Games</button>
       <button class="tab" role="tab" data-tab="standings" aria-selected="false">Standings</button>
       <button class="tab" role="tab" data-tab="playoffs" aria-selected="false">Playoffs</button>
+      <button class="tab" role="tab" data-tab="groups" aria-selected="false">Groups</button>
       <button class="tab" role="tab" data-tab="rules" aria-selected="false">Rules</button>
     </nav>
     <div class="headmeta">
       <button class="btn primary" id="btnInstall" hidden>Install</button>
+      <button class="btn" id="btnAccount" hidden>Sign in</button>
     </div>
   </div>
 </header>
@@ -817,6 +936,7 @@ button.phteam{background:none;border:none;font-family:inherit;padding:0;cursor:p
         <span class="pill" id="wkPill"></span>
       </div>
       <p class="wkmeta" id="wkMeta"></p>
+      <div class="grpbar" id="grpBar" hidden></div>
       <div class="games" id="games"></div>
       <div class="adinline" id="adPicks"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
       <div class="games" id="games2"></div>
@@ -854,6 +974,8 @@ button.phteam{background:none;border:none;font-family:inherit;padding:0;cursor:p
     <h2>Playoff Bracket</h2>
     <div class="acts">
       <button class="btn ghost" id="btnClearPo" title="Clear your bracket picks" hidden>Clear</button>
+      <button class="btn ghost" id="btnBrackets" title="Your saved brackets" hidden>Saved</button>
+      <button class="btn ghost" id="btnSavePo" title="Save this bracket to your account" hidden>Save</button>
       <button class="btn ghost share" id="btnSharePo" title="Share an image of your bracket">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
         <span>Share</span></button>
@@ -866,6 +988,10 @@ button.phteam{background:none;border:none;font-family:inherit;padding:0;cursor:p
     <div class="conf nfc" id="bkNFC"></div>
   </div></div>
   <div class="adinline" id="adPlayoffs"><span class="adlabel">Advertisement</span><div class="adslot box" data-kind="inline"><span>Advertisement</span></div></div>
+</section>
+
+<section class="panel" id="panel-groups">
+  <div class="groups" id="groupsBody"></div>
 </section>
 
 <section class="panel" id="panel-rules">
@@ -929,7 +1055,10 @@ button.phteam{background:none;border:none;font-family:inherit;padding:0;cursor:p
     <p>Upcoming games show the betting point spread and over/under (from nflverse), refreshed every morning at 8 AM Eastern — a quick read on who's favoured. <b>Favorites</b> picks the favoured side of every game left in the week (the home team when a line is a pick ’em). Weeks whose lines aren’t out yet show <b>Home teams</b> instead. Lines are for reference only.</p>
 
     <h3>Saving</h3>
-    <p>Your picks save automatically in this browser, so they’re here when you come back on the same device.</p>
+    <p>Your picks save automatically in this browser, so they’re here when you come back on the same device. Sign in and they follow you to every device, and you can save named copies of your bracket from the Playoffs tab.</p>
+
+    <h3>Pick’em groups</h3>
+    <p>Create a group on the Groups tab and send your friends the invite link. Everyone’s weekly picks count toward the group leaderboard: one point for every game picked right (a tie counts only if you picked the tie). While you pick, each game shows how the rest of your group picked it. Once you’re signed in, a game’s pick locks at kickoff.</p>
   </div>
 </section>
 
@@ -952,6 +1081,9 @@ button.phteam{background:none;border:none;font-family:inherit;padding:0;cursor:p
       <button class="btn danger" id="mYes"></button>
     </div>
   </div>
+</div>
+<div class="modal" id="sheet2" hidden role="dialog" aria-modal="true" aria-labelledby="s2Title">
+  <div class="sheet" id="s2Sheet"></div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -1309,6 +1441,15 @@ for(let w=1;w<=WEEKS;w++){
 const KEY = 'nfl2026.board.v1';
 let S = { picks:{}, po:{}, flips:{}, week:1 };
 
+/* Accounts, synced picks and pick'em groups live in cloud.js and plug in
+   through these hooks; the defaults keep the board working on its own. */
+const HOOKS = {
+  changed(){},             // the board was saved (push it to the account)
+  gameExtra(){ return ''; },   // extra HTML under a game card (group pick stats)
+  weekShown(){},           // a week's games were drawn
+  lockStarted: false       // signed in: games lock at kickoff, like the server does
+};
+
 const store = {
   read(){
     try{ const v = localStorage.getItem(KEY); if(v) return JSON.parse(v); }catch(e){}
@@ -1316,6 +1457,7 @@ const store = {
   },
   write(){
     try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){}
+    HOOKS.changed();
   }
 };
 (function load(){
@@ -1347,6 +1489,9 @@ function applyResults(data){
 }
 const isFinal = gi => !!(RES[gi] && RES[gi].st === 'post' && RES[gi].win);
 const isLive  = gi => !!(RES[gi] && RES[gi].st === 'in');
+const hasStarted = gi => isLive(gi) || !!(RES[gi] && RES[gi].kick && Date.parse(RES[gi].kick) <= Date.now());
+/* can't be picked: played, or (signed in, picks count for groups) kicked off */
+const isLocked = gi => isFinal(gi) || (HOOKS.lockStarted && hasStarted(gi));
 /* the result that counts: the real one if the game is over, otherwise your pick */
 const outcome = gi => isFinal(gi) ? RES[gi].win : S.picks[gi];
 
@@ -1909,6 +2054,8 @@ function chip(g, side, picked){
     return `<div class="pickbtn ${cls}">${teamLabel(t)}${score}</div>`;
   }
   let cls = picked === side ? 'win' : (picked ? 'lose' : '');
+  if(isLocked(g.i))
+    return `<div class="pickbtn ${cls} locked" title="Picks lock at kickoff">${teamLabel(t)}${score || `<span class="ck">${CHECK}</span>`}</div>`;
   if(JUST.has(g.i)) cls += picked === side ? ' pop' : (picked ? ' fade' : '');
   return `<button class="pickbtn ${cls}" data-g="${g.i}" data-p="${side}" aria-pressed="${picked===side}"
       aria-label="Pick ${esc(TEAMS[t].c + ' ' + TEAMS[t].n)}">
@@ -1924,7 +2071,7 @@ const kickOf = g => RES[g.i] && RES[g.i].kick ? new Date(RES[g.i].kick) : null;
 const fmtWhen = d => d.toLocaleString(undefined, {weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
 
 function gameCard(g, withWeek){
-  const res = RES[g.i], fin = isFinal(g.i), live = isLive(g.i);
+  const res = RES[g.i], fin = isFinal(g.i), live = isLive(g.i), locked = isLocked(g.i);
   const p = fin ? null : S.picks[g.i];
   const k = kickOf(g);
 
@@ -1955,10 +2102,11 @@ function gameCard(g, withWeek){
       <div class="mid">
         <span class="vs">${g.site ? 'vs' : '@'}</span>
         ${fin ? (res.win === 't' ? '<span class="vs">Tie</span>' : '')
+              : locked ? (p === 't' ? '<span class="tiebtn on">Tie</span>' : '')
               : `<button class="tiebtn${p==='t'?' on':''}${p==='t' && JUST.has(g.i)?' pop':''}" data-g="${g.i}" data-p="t" aria-pressed="${p==='t'}">Tie</button>`}
       </div>
       <div class="right" style="display:contents">${chip(g, 'h', p)}</div>
-    </div>
+    </div>${HOOKS.gameExtra(g)}
   </div>`;
 }
 
@@ -2035,7 +2183,7 @@ function renderWeek(){
   $('#btnHome').title = team ? 'Pick this team to win every game left'
     : hasLines ? 'Pick the favourite in every game left this week' : 'Pick the home team in every game left this week';
   $('#btnRand').title = team ? 'Pick this team to lose every game left' : 'Coin flip every game left this week';
-  if(team) return renderTeam();
+  if(team){ HOOKS.weekShown(null); return renderTeam(); }
   $('#wkLogo').innerHTML = '';
 
   const w = S.week, gs = byWeek[w].slice();
@@ -2051,7 +2199,7 @@ function renderWeek(){
   else if(w === currentWeek()){ pill.className = 'pill now'; pill.textContent = 'This week'; }
   else pill.hidden = true;
 
-  const actionable = gs.some(g => !isFinal(g.i));
+  const actionable = gs.some(g => !isLocked(g.i));
   ['#btnHome','#btnRand','#btnClearWk'].forEach(id => $(id).hidden = !actionable);
 
   const b = byeTeams[w];
@@ -2065,6 +2213,7 @@ function renderWeek(){
   }else{
     putGames(gs.map(g => ({html: gameCard(g)})));
   }
+  HOOKS.weekShown(w);
 }
 
 function renderTeamPicker(){
@@ -2556,7 +2705,7 @@ if(FINE.addEventListener) FINE.addEventListener('change', relayoutRail);
 const onGameClick = e=>{
   const b = e.target.closest('[data-g]'); if(!b) return;
   const gi = +b.dataset.g, p = b.dataset.p;
-  if(isFinal(gi)) return;   // real result, locked
+  if(isLocked(gi)){ if(!isFinal(gi)) toast('Picks lock at kickoff.'); return; }
   S.picks[gi] = (S.picks[gi] === p) ? undefined : p;
   if(!S.picks[gi]) delete S.picks[gi];
   haptic(S.picks[gi] ? 'pick' : 'tap');
@@ -2591,7 +2740,7 @@ $('#tblog').addEventListener('click', e=>{
 // shortcuts only touch games that haven't been played yet
 const openGames = () => (S.mode === 'team'
   ? GAMES.filter(g => g.a === S.team || g.h === S.team)
-  : byWeek[S.week]).filter(g => !isFinal(g.i));
+  : byWeek[S.week]).filter(g => !isLocked(g.i));
 const sideOf = (g, t) => g.a === t ? 'a' : 'h';
 $('#btnHome').addEventListener('click', ()=>{
   const favOf = g => (RES[g.i] && RES[g.i].line && RES[g.i].line.fav) || 'h';
@@ -2691,7 +2840,8 @@ clearMenu.addEventListener('click', e=>{
     render();
     toast(`${team ? TEAMS[S.team].n + ' picks' : 'Week ' + S.week} cleared.`);
   }else{
-    S.picks = {}; S.po = {}; S.flips = {};
+    for(const gi in S.picks) if(!isLocked(+gi)) delete S.picks[gi];
+    S.po = {}; S.flips = {};
     render();
     toast('All picks cleared.');
   }
@@ -3166,7 +3316,7 @@ document.addEventListener('keydown', e=>{
   // Escape first, so it works from anywhere including a focused field
   if(e.key === 'Escape' && clearMenu.classList.contains('open')){ closeClearMenu(); $('#btnClearWk').focus(); return; }
   if(e.key === 'Escape' && !$('#modal').hidden){ closeAsk(false); return; }
-  if(!$('#modal').hidden) return;
+  if(!$('#modal').hidden || !$('#sheet2').hidden) return;
   const t = e.target;
   if(t && typeof t.matches === 'function' && t.matches('input,textarea,select')) return;
   if(!$('#panel-picks').classList.contains('on') || S.mode === 'team') return;
@@ -3244,5 +3394,6 @@ loadAds();
 setInterval(()=>{ if(!document.hidden) loadResults(); }, 5*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) loadResults(); });
 </script>
+<script src="cloud.js" defer></script>
 </body>
 </html>

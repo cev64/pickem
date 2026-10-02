@@ -8,12 +8,15 @@ seeding. Installable on Android as a PWA, works offline once installed.
 
 ```
 index.html              the whole app — markup, styles, schedule, engine
+cloud.js                accounts, synced picks, saved brackets, pick'em groups (Supabase)
 manifest.webmanifest    PWA metadata (name, icons, colours, start URL)
 sw.js                   service worker: offline cache for the app shell
 icons/                  app icons, including maskable versions for Android
 logos/                  team logos (off by default — see Team logos)
 data/results.json       real scores and finals, refreshed automatically
 scripts/update_results.py   pulls scores and spreads from the nflverse data set
+supabase/migrations/    database schema, security rules and the 2026 schedule
+supabase/functions/     sync-results edge function (results.json -> database)
 .github/workflows/update-results.yml   runs that script on a schedule
 ```
 
@@ -137,9 +140,77 @@ either way, since changing picks reshuffles the seeds.
 ## Saving
 
 Picks save to `localStorage` automatically, so they're there when you come back
-on the same device and browser. There's no file export or cross-device sync for
-now — that's planned to come back with accounts/login. *Clear* on the Games tab
-resets a week (and the bracket); *Clear* on the Playoffs tab resets the bracket.
+on the same device and browser. Signed in, they also sync to the account (see
+below). *Clear* on the Games tab resets a week (and the bracket); *Clear* on the
+Playoffs tab resets the bracket.
+
+## Accounts and pick'em groups (Supabase)
+
+Everything account-related is in `cloud.js`, loaded after the main script. It
+plugs into the board through `HOOKS` in `index.html` and does nothing if the
+Supabase SDK can't load (offline), so the board works exactly as before for
+anyone who never signs in.
+
+- **Accounts** — email + password, or an emailed sign-in link. The header's
+  **Sign in** button turns into your avatar once you're in.
+- **Synced picks** — signed in, the board mirrors to the account: game picks
+  in `picks`, playoff picks and coin flips in `boards`. The first sign-in on a
+  device merges (the account's picks win where both have one); after that,
+  changes made offline or on another device merge on the next visit.
+- **Picks lock at kickoff** once you're signed in, in the app and in the
+  database (row-level security rejects a write to a game that's started), so
+  group picks can't be changed after the fact.
+- **Saved brackets** — *Save* / *Saved* on the Playoffs tab keep named
+  snapshots of the whole board (`brackets`). Opening one restores its bracket
+  and its picks for games that haven't kicked off.
+- **Groups** — the Groups tab creates a group and gives an invite link,
+  `https://bracketeersports.com/?join=CODE`. Opening it shows who invited you
+  and asks you to sign in or create an account, then join. The group page has
+  the leaderboard (one point per correct pick, by week and season), the invite
+  link, and owner tools (rename, reset link, remove members). Each member's
+  picks count in every group they're in.
+- **Group picks while you pick** — with a group selected on the Games tab, each
+  game shows a bar of how the group picked it; tap it to see who picked whom.
+
+### Backend
+
+Supabase project **Bracketeer** (`zvsldzvialssswvvmkgk`, us-east-1). The URL
+and publishable key in `cloud.js` are public by design; row-level security on
+every table is what protects the data:
+
+| table | who can read | who can write |
+|---|---|---|
+| `profiles` | you, and people in a group with you | you (your name) |
+| `games` | everyone | the sync function only |
+| `picks` | you, and people in a group with you | you, until kickoff |
+| `boards`, `brackets` | you | you |
+| `groups`, `group_members` | members | through the group functions only |
+
+Group changes go through functions (`create_group`, `join_group`,
+`leave_group`, `remove_group_member`, `rename_group`, `reset_group_invite`)
+and the leaderboard and pick stats through `group_leaderboard` and
+`group_week_picks`, which check membership themselves.
+
+Game ids on the server are `2026000 + index` into `SCHEDULE`. Kickoffs and
+results reach the database through the `sync-results` edge function, which
+reads `https://bracketeersports.com/data/results.json` and is run every hour
+(at :07) by `pg_cron`, so it follows the daily results Action with no extra
+secrets.
+
+The schema lives in `supabase/migrations/` (already applied to the project).
+For a fresh project, apply them in order and deploy
+`supabase/functions/sync-results`, then update the project URL and keys in
+`cloud.js` and in the cron migration.
+
+### Auth settings (Supabase dashboard)
+
+- **Authentication → URL Configuration**: Site URL
+  `https://bracketeersports.com`, and add `https://bracketeersports.com/**` to
+  Redirect URLs (plus `http://localhost:*/**` for local testing). Confirmation
+  and sign-in links point back here.
+- **Email**: Supabase's built-in mailer only sends a few emails an hour.
+  Before launch, set up custom SMTP (Authentication → Emails → SMTP), or turn off
+  *Confirm email* to let people in without confirming.
 
 ## Known limitation
 
